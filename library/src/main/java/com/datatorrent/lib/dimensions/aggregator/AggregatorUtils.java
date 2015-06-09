@@ -94,10 +94,12 @@ public final class AggregatorUtils
   }
 
   /**
-   *
-   * @param inputFieldsDescriptor
-   * @param otfAggregator
-   * @return
+   * This is a utility method which creates an output {@link FieldsDescriptor} using the field names
+   * from the given {@link FieldsDescriptor} and the output type of the given {@link OTFAggregator}.
+   * @param inputFieldsDescriptor The {@link FieldsDescriptor} from which to derive the field names used
+   * for the output fields descriptor.
+   * @param otfAggregator The {@link OTFAggregator} to use for creating the output {@link FieldsDescriptor}.
+   * @return The output {@link FieldsDescriptor}.
    */
   public static FieldsDescriptor getOutputFieldsDescriptor(FieldsDescriptor inputFieldsDescriptor,
                                                            OTFAggregator otfAggregator)
@@ -115,10 +117,11 @@ public final class AggregatorUtils
   }
 
   /**
-   *
-   * @param fields
-   * @param otfAggregator
-   * @return
+   * This is a utility method which creates an output {@link FieldsDescriptor} from the
+   * given field names and the given {@link OTFAggregator}.
+   * @param fields The names of the fields to be included in the output {@link FieldsDescriptor}.
+   * @param otfAggregator The {@link OTFAggregator} to use when creating the output {@link FieldsDescriptor}.
+   * @return The output {@link FieldsDescriptor}.
    */
   public static FieldsDescriptor getOutputFieldsDescriptor(Fields fields,
                                                            OTFAggregator otfAggregator)
