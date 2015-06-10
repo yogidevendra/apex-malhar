@@ -89,11 +89,6 @@ public class QueryManagerAsynchronous<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT, RES
   public void beginWindow(long windowID)
   {
     inWindowSemaphore.release();
-
-    //Wait until the processing thread for the window starts
-    while(inWindowSemaphore.availablePermits() > 0) {
-      Thread.yield();
-    }
   }
 
   public void endWindow()
@@ -138,6 +133,7 @@ public class QueryManagerAsynchronous<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT, RES
 
         //We are done processing the query allow the operator to continue to the next window if it
         //wants to
+
         inWindowSemaphore.release();
       }
     }

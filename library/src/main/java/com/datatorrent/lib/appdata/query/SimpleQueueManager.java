@@ -16,6 +16,7 @@
 package com.datatorrent.lib.appdata.query;
 
 import com.datatorrent.api.Context.OperatorContext;
+import com.datatorrent.lib.appdata.query.QueueUtils.ConditionBarrier;
 
 import java.util.LinkedList;
 import java.util.concurrent.Semaphore;
@@ -34,6 +35,7 @@ public class SimpleQueueManager<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT>
   new LinkedList<QueryBundle<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT>>();
 
   private final Semaphore semaphore = new Semaphore(0);
+  private final ConditionBarrier conditionBarrier = new ConditionBarrier();
 
   public SimpleQueueManager()
   {
@@ -42,6 +44,8 @@ public class SimpleQueueManager<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT>
   @Override
   public boolean enqueue(QUERY_TYPE query, META_QUERY metaQuery, QUEUE_CONTEXT queueContext)
   {
+    conditionBarrier.gate();
+
     QueryBundle<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT> qq =
     new QueryBundle<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT>(query, metaQuery, queueContext);
 
@@ -90,5 +94,23 @@ public class SimpleQueueManager<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT>
   @Override
   public void teardown()
   {
+  }
+
+  @Override
+  public int getNumLeft()
+  {
+    return queue.size();
+  }
+
+  @Override
+  public void haltEnqueue()
+  {
+    conditionBarrier.lock();
+  }
+
+  @Override
+  public void resumeEnqueue()
+  {
+    conditionBarrier.unlock();
   }
 }

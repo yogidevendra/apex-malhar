@@ -17,7 +17,7 @@ package com.datatorrent.lib.appdata.query;
 
 import com.datatorrent.api.Context.OperatorContext;
 import com.datatorrent.lib.appdata.query.QueueList.QueueListNode;
-import com.google.common.annotations.VisibleForTesting;
+import com.datatorrent.lib.appdata.query.QueueUtils.ConditionBarrier;
 import com.google.common.base.Preconditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,7 +59,9 @@ public abstract class AbstractWindowEndQueueManager<QUERY_TYPE, META_QUERY, QUEU
    */
   private final Object lock = new Object();
 
-  private Semaphore semaphore = new Semaphore(0);
+  private final Semaphore semaphore = new Semaphore(0);
+  private final ConditionBarrier conditionBarrier = new ConditionBarrier();
+  private int numLeft = 0;
 
   /**
    * Creates a new QueueManager.
@@ -72,6 +74,8 @@ public abstract class AbstractWindowEndQueueManager<QUERY_TYPE, META_QUERY, QUEU
   public boolean enqueue(QUERY_TYPE query, META_QUERY metaQuery, QUEUE_CONTEXT context)
   {
     Preconditions.checkNotNull(query);
+
+    conditionBarrier.gate();
 
     synchronized(lock) {
       return enqueueHelper(query, metaQuery, context);
@@ -94,7 +98,7 @@ public abstract class AbstractWindowEndQueueManager<QUERY_TYPE, META_QUERY, QUEU
 
     if(addingFilter(queryQueueable)) {
       queryQueue.enqueue(node);
-      semaphore.release();
+      numLeft++;
       addedNode(node);
     }
 
@@ -112,6 +116,10 @@ public abstract class AbstractWindowEndQueueManager<QUERY_TYPE, META_QUERY, QUEU
   @Override
   public QueryBundle<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT> dequeueBlock()
   {
+    if(numLeft > semaphore.availablePermits()) {
+      semaphore.release(numLeft - semaphore.availablePermits());
+    }
+
     synchronized(lock) {
       return dequeueHelper(true);
     }
@@ -124,6 +132,17 @@ public abstract class AbstractWindowEndQueueManager<QUERY_TYPE, META_QUERY, QUEU
   private QueryBundle<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT> dequeueHelper(boolean block)
   {
     QueryBundle<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT> qq = null;
+
+    boolean first = true;
+
+    if(block) {
+      try {
+        semaphore.acquire();
+      }
+      catch(InterruptedException ex) {
+        throw new RuntimeException(ex);
+      }
+    }
 
     if(currentNode == null) {
       currentNode = queryQueue.getHead();
@@ -150,9 +169,9 @@ public abstract class AbstractWindowEndQueueManager<QUERY_TYPE, META_QUERY, QUEU
     while(true)
     {
       QueryBundle<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT> queryQueueable = currentNode.getPayload();
-      QueueListNode<QueryBundle<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT>> nextNode = currentNode.getNext();
 
-      if(block) {
+      numLeft--;
+      if(block && !first) {
         try {
           semaphore.acquire();
         }
@@ -160,6 +179,10 @@ public abstract class AbstractWindowEndQueueManager<QUERY_TYPE, META_QUERY, QUEU
           throw new RuntimeException(ex);
         }
       }
+
+      first = false;
+
+      QueueListNode<QueryBundle<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT>> nextNode = currentNode.getNext();
 
       if(removeBundle(queryQueueable)) {
         queryQueue.removeNode(currentNode);
@@ -221,6 +244,7 @@ public abstract class AbstractWindowEndQueueManager<QUERY_TYPE, META_QUERY, QUEU
     currentNode = queryQueue.getHead();
     readCurrent = false;
 
+    numLeft = queryQueue.getSize();
     semaphore.drainPermits();
     semaphore.release(queryQueue.getSize());
   }
@@ -235,14 +259,22 @@ public abstract class AbstractWindowEndQueueManager<QUERY_TYPE, META_QUERY, QUEU
   {
   }
 
-  /**
-   * This returns the number of semaphore permits for the operator.
-   * @return
-   */
-  @VisibleForTesting
-  int getNumPermits()
+  @Override
+  public int getNumLeft()
   {
-    return semaphore.availablePermits();
+    return numLeft;
+  }
+
+  @Override
+  public void haltEnqueue()
+  {
+    conditionBarrier.lock();
+  }
+
+  @Override
+  public void resumeEnqueue()
+  {
+    conditionBarrier.unlock();
   }
 
   private static final Logger LOG = LoggerFactory.getLogger(AbstractWindowEndQueueManager.class);

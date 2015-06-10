@@ -73,4 +73,9 @@ public interface QueueManager<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT> extends Com
    * @return The next {@link QueryBundle} in the queue.
    */
   public QueryBundle<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT> dequeueBlock();
+
+  public int getNumLeft();
+
+  public void haltEnqueue();
+  public void resumeEnqueue();
 }
