@@ -83,12 +83,12 @@
   <!-- TwitterTrendingDemo -->
 
   <property>
-    <name>dt.application.TwitterTrendingDemo-Customer.operator.Query.topic</name>
-    <value>TwitterHashtagQuery</value>
+    <name>dt.application.TwitterTrendingDemo.operator.Query.topic</name>
+    <value>TwitterHashtagQueryDemo</value>
   </property>
   <property>
-    <name>dt.application.TwitterTrendingDemo-Customer.operator.QueryResult.topic</name>
-    <value>TwitterHashtagQueryResult</value>
+    <name>dt.application.TwitterTrendingDemo.operator.QueryResult.topic</name>
+    <value>TwitterHashtagQueryResultDemo</value>
   </property>
   <property>
     <name>dt.application.TwitterTrendingDemo-Customer.operator.QueryResult.numRetries</name>
