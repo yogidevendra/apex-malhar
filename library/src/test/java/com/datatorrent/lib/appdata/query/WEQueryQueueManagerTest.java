@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.datatorrent.lib.appdata.qr.processor;
+package com.datatorrent.lib.appdata.query;
 
 import com.datatorrent.lib.appdata.schemas.Query;
 import com.datatorrent.lib.appdata.query.QueryBundle;

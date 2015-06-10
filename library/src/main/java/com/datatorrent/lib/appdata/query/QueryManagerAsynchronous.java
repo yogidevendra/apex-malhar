@@ -19,26 +19,33 @@ package com.datatorrent.lib.appdata.query;
 import com.datatorrent.api.Component;
 import com.datatorrent.api.Context.OperatorContext;
 import com.datatorrent.api.DefaultOutputPort;
+import com.datatorrent.lib.appdata.query.serde.MessageSerializerFactory;
+import com.datatorrent.lib.appdata.schemas.Result;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 
 import java.util.concurrent.Semaphore;
 
-public class QueryManagerAsynchronous<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT, RESULT> implements Component<OperatorContext>{
+public class QueryManagerAsynchronous<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT, RESULT extends Result> implements Component<OperatorContext>{
   private DefaultOutputPort<String> resultPort = null;
 
-  private transient boolean inWindow = false;
   private transient Semaphore inWindowSemaphore = new Semaphore(0);
 
   private QueueManager<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT> queueManager;
   private QueryExecutor<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT, RESULT> queryExecutor;
+  private MessageSerializerFactory messageSerializerFactory;
+  @VisibleForTesting
+  protected transient Thread processingThread;
 
   public QueryManagerAsynchronous(DefaultOutputPort<String> resultPort,
                                   QueueManager<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT> queueManager,
-                                  QueryExecutor<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT, RESULT> queryExecutor)
+                                  QueryExecutor<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT, RESULT> queryExecutor,
+                                  MessageSerializerFactory messageSerializerFactory)
   {
     setResultPort(resultPort);
     setQueueManager(queueManager);
     setQueryExecutor(queryExecutor);
+    setMessageSerializerFactory(messageSerializerFactory);
   }
 
   private void setResultPort(DefaultOutputPort<String> resultPort)
@@ -51,19 +58,42 @@ public class QueryManagerAsynchronous<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT, RES
     this.queueManager = Preconditions.checkNotNull(queueManager);
   }
 
+  public QueueManager<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT> getQueueManager()
+  {
+    return queueManager;
+  }
+
   private void setQueryExecutor(QueryExecutor<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT, RESULT> queryExecutor)
   {
     this.queryExecutor = Preconditions.checkNotNull(queryExecutor);
   }
 
+  public QueryExecutor<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT, RESULT> getQueryExecutor()
+  {
+    return queryExecutor;
+  }
+
+  private void setMessageSerializerFactory(MessageSerializerFactory messageSerializerFactory)
+  {
+    this.messageSerializerFactory = Preconditions.checkNotNull(messageSerializerFactory);
+  }
+
   @Override
   public void setup(OperatorContext context)
   {
+    processingThread = new Thread(new ProcessingThread());
+    processingThread.start();
   }
 
+  @SuppressWarnings("CallToThreadYield")
   public void beginWindow(long windowID)
   {
     inWindowSemaphore.release();
+
+    //Wait until the processing thread for the window starts
+    while(inWindowSemaphore.availablePermits() > 0) {
+      Thread.yield();
+    }
   }
 
   public void endWindow()
@@ -99,8 +129,12 @@ public class QueryManagerAsynchronous<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT, RES
         }
 
         //We are gauranteed to be in the operator's window now.
-
-        
+        Result result = queryExecutor.executeQuery(queryBundle.getQuery(),
+                                                   queryBundle.getMetaQuery(),
+                                                   queryBundle.getQueueContext());
+        if(result != null) {
+          resultPort.emit(messageSerializerFactory.serialize(result));
+        }
 
         //We are done processing the query allow the operator to continue to the next window if it
         //wants to

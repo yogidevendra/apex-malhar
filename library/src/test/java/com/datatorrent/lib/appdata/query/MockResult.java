@@ -14,13 +14,19 @@
  * limitations under the License.
  */
 
-package com.datatorrent.lib.appdata.qr.processor;
+package com.datatorrent.lib.appdata.query;
 
+import com.datatorrent.lib.appdata.query.serde.MessageSerializerInfo;
+import com.datatorrent.lib.appdata.query.serde.MessageType;
 import com.datatorrent.lib.appdata.schemas.Query;
 import com.datatorrent.lib.appdata.schemas.Result;
 
+@MessageType(type=MockResult.TYPE)
+@MessageSerializerInfo(clazz=MockResultSerializer.class)
 public class MockResult extends Result
 {
+  public static final String TYPE = "dataResult";
+
   public MockResult(Query query)
   {
     super(query);

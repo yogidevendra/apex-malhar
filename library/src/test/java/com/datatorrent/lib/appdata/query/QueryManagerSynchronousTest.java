@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.datatorrent.lib.appdata.qr.processor;
+package com.datatorrent.lib.appdata.query;
 
 import com.datatorrent.lib.appdata.query.QueryExecutor;
 import com.datatorrent.lib.appdata.query.QueryManagerSynchronous;
@@ -29,7 +29,7 @@ import com.google.common.collect.Lists;
 import com.datatorrent.lib.appdata.schemas.Query;
 import com.datatorrent.lib.appdata.schemas.Result;
 
-public class QueryManagerTest
+public class QueryManagerSynchronousTest
 {
   @Test
   public void simpleTest()

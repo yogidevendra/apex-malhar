@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.datatorrent.lib.appdata.qr.processor;
+package com.datatorrent.lib.appdata.query;
 
 import com.datatorrent.lib.appdata.schemas.Query;
 import com.datatorrent.lib.appdata.query.QueryBundle;
@@ -43,9 +43,33 @@ public class SimpleDoneQueryQueueManagerTest
     sdqqm.beginWindow(1);
 
     qb = sdqqm.dequeue();
+
     Assert.assertEquals("Should return back null.", null, qb);
     qb = sdqqm.dequeue();
     Assert.assertEquals("Should return back null.", null, qb);
+
+    sdqqm.endWindow();
+    sdqqm.teardown();
+  }
+
+  @Test
+  public void simpleEnqueueDequeueBlock()
+  {
+    SimpleDoneQueueManager<Query, Void> sdqqm = new SimpleDoneQueueManager<Query, Void>();
+
+    sdqqm.setup(null);
+    sdqqm.beginWindow(0);
+
+    Query query = new MockQuery("1");
+    sdqqm.enqueue(query, null, new MutableBoolean(false));
+
+    Assert.assertEquals(1, sdqqm.getNumPermits());
+
+    QueryBundle<Query, Void, MutableBoolean> qb = sdqqm.dequeueBlock();
+
+    Assert.assertEquals(0, sdqqm.getNumPermits());
+
+    Assert.assertEquals("Should return same query.", query, qb.getQuery());
 
     sdqqm.endWindow();
     sdqqm.teardown();

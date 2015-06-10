@@ -235,8 +235,12 @@ public abstract class AbstractWindowEndQueueManager<QUERY_TYPE, META_QUERY, QUEU
   {
   }
 
+  /**
+   * This returns the number of semaphore permits for the operator.
+   * @return
+   */
   @VisibleForTesting
-  protected int getNumPermits()
+  int getNumPermits()
   {
     return semaphore.availablePermits();
   }

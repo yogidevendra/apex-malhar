@@ -40,8 +40,13 @@ public interface QueueManager<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT> extends Com
    */
   public boolean enqueue(QUERY_TYPE query, META_QUERY metaQuery, QUEUE_CONTEXT queueContext);
   /**
+   * <p>
    * This method dequeues a query, and returns a {@link QueryBundle} which includes the query,
    * any additional query meta data, and the queue context for the query.
+   * </p>
+   * <p>
+   * <b>Note:</b> Calls to {@link #dequeue} should not be mixed with calls to {@link #dequeueBlock}.
+   * </p>
    * @return The query bundle for a query.
    */
   public QueryBundle<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT> dequeue();
@@ -58,8 +63,13 @@ public interface QueueManager<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT> extends Com
   public void endWindow();
 
   /**
+   * <p>
    * Returns the next {@link QueryBundle} in the queue. If there is no new {@link QueryBundle} in the queue, then this method
    * blocks until there is one.
+   * </p>
+   * <p>
+   * <b>Note:</b> Calls to {@link #dequeueBlock} should not be mixed with calls to {@link #dequeue}.
+   * </p>
    * @return The next {@link QueryBundle} in the queue.
    */
   public QueryBundle<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT> dequeueBlock();

@@ -59,17 +59,4 @@ AbstractWindowEndQueueManager<QUERY_TYPE, META_QUERY, MutableBoolean>
   {
     return true;
   }
-
-  @Override
-  public QueryBundle<QUERY_TYPE, META_QUERY, MutableBoolean> dequeueBlock()
-  {
-    try {
-      semaphore.acquire();
-    }
-    catch(InterruptedException ex) {
-      throw new RuntimeException(ex);
-    }
-
-    return this.dequeue();
-  }
 }
