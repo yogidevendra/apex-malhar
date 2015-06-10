@@ -18,19 +18,22 @@ package com.datatorrent.lib.appdata.query;
 import com.datatorrent.api.Context.OperatorContext;
 
 import java.util.LinkedList;
+import java.util.concurrent.Semaphore;
 
 /**
  * This {@link QueueManager} functions like a standard {@link QueueManager}. Queries can be enqueued and when they are dequeued they are
  * completely removed from the queue.
- * @param <QUERY_TYPE>
- * @param <META_QUERY>
- * @param <QUEUE_CONTEXT>
+ * @param <QUERY_TYPE> The type of the query to be enqueued in the queue.
+ * @param <META_QUERY> The type of the meta data to be enqueued with the query.
+ * @param <QUEUE_CONTEXT> The type of the queue context data.
  */
 public class SimpleQueueManager<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT>
                       implements QueueManager<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT>
 {
   private LinkedList<QueryBundle<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT>> queue =
   new LinkedList<QueryBundle<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT>>();
+
+  private final Semaphore semaphore = new Semaphore(0);
 
   public SimpleQueueManager()
   {
@@ -41,12 +44,31 @@ public class SimpleQueueManager<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT>
   {
     QueryBundle<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT> qq =
     new QueryBundle<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT>(query, metaQuery, queueContext);
-    return queue.offer(qq);
+
+    if(queue.offer(qq)) {
+      semaphore.release();
+      return true;
+    }
+
+    return false;
   }
 
   @Override
   public QueryBundle<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT> dequeue()
   {
+    return queue.poll();
+  }
+
+  @Override
+  public QueryBundle<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT> dequeueBlock()
+  {
+    try {
+      semaphore.acquire();
+    }
+    catch(InterruptedException ex) {
+      throw new RuntimeException(ex);
+    }
+
     return queue.poll();
   }
 

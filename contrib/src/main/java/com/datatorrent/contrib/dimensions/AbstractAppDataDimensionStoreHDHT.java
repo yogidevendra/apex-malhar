@@ -9,7 +9,7 @@ import com.datatorrent.api.Context;
 import com.datatorrent.api.DefaultInputPort;
 import com.datatorrent.api.DefaultOutputPort;
 import com.datatorrent.api.annotation.InputPortFieldAnnotation;
-import com.datatorrent.lib.appdata.query.QueryManager;
+import com.datatorrent.lib.appdata.query.QueryManagerSynchronous;
 import com.datatorrent.lib.appdata.query.serde.MessageDeserializerFactory;
 import com.datatorrent.lib.appdata.query.serde.MessageSerializerFactory;
 import com.datatorrent.lib.appdata.schemas.Message;
@@ -19,7 +19,6 @@ import com.datatorrent.lib.appdata.schemas.ResultFormatter;
 import com.datatorrent.lib.appdata.schemas.SchemaQuery;
 import com.datatorrent.lib.appdata.schemas.SchemaRegistry;
 import com.datatorrent.lib.dimensions.aggregator.AggregatorRegistry;
-import com.datatorrent.lib.dimensions.aggregator.AggregatorUtils;
 import com.datatorrent.lib.dimensions.aggregator.IncrementalAggregator;
 import com.google.common.annotations.VisibleForTesting;
 import java.io.IOException;
@@ -35,8 +34,7 @@ public abstract class AbstractAppDataDimensionStoreHDHT extends DimensionsStoreH
   @NotNull
   protected AggregatorRegistry aggregatorRegistry = AggregatorRegistry.DEFAULT_AGGREGATOR_REGISTRY;
 
-  //Query Processing - Start
-  protected transient QueryManager<DataQueryDimensional, QueryMeta, MutableLong, Result> queryProcessor;
+  protected transient QueryManagerSynchronous<DataQueryDimensional, QueryMeta, MutableLong, Result> queryProcessor;
   protected final transient MessageDeserializerFactory queryDeserializerFactory;
 
   @VisibleForTesting
@@ -89,7 +87,7 @@ public abstract class AbstractAppDataDimensionStoreHDHT extends DimensionsStoreH
     schemaRegistry = getSchemaRegistry();
 
     //setup query processor
-    queryProcessor = QueryManager.newInstance(new DimensionsQueryExecutor(this, schemaRegistry),
+    queryProcessor = QueryManagerSynchronous.newInstance(new DimensionsQueryExecutor(this, schemaRegistry),
       new DimensionsQueueManager(this, schemaRegistry));
     queryProcessor.setup(context);
 

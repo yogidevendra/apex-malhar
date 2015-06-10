@@ -42,7 +42,7 @@ import com.datatorrent.api.Operator;
 import com.datatorrent.lib.appdata.gpo.GPOMutable;
 import com.datatorrent.lib.appdata.query.AppDataWindowEndQueueManager;
 import com.datatorrent.lib.appdata.query.QueryExecutor;
-import com.datatorrent.lib.appdata.query.QueryManager;
+import com.datatorrent.lib.appdata.query.QueryManagerSynchronous;
 import com.datatorrent.lib.appdata.schemas.*;
 
 /**
@@ -55,9 +55,9 @@ import com.datatorrent.lib.appdata.schemas.*;
 public abstract class AbstractAppDataTabularServer<INPUT_EVENT> implements Operator
 {
   /**
-   * The {@link QueryManager} for the operator.
+   * The {@link QueryManagerSynchronous} for the operator.
    */
-  private transient QueryManager<Query, Void, MutableLong, Result> queryProcessor;
+  private transient QueryManagerSynchronous<Query, Void, MutableLong, Result> queryProcessor;
   /**
    * The {@link MessageDeserializerFactory} for the operator.
    */
@@ -153,7 +153,7 @@ public abstract class AbstractAppDataTabularServer<INPUT_EVENT> implements Opera
     schema = new TabularSchema(tabularSchemaJSON);
     schemaRegistry = new SchemaRegistrySingle(schema);
     //Setup for query processing
-    queryProcessor = QueryManager.newInstance(new TabularComputer(), new AppDataWindowEndQueueManager<Query, Void>());
+    queryProcessor = QueryManagerSynchronous.newInstance(new TabularComputer(), new AppDataWindowEndQueueManager<Query, Void>());
 
     queryDeserializerFactory = new MessageDeserializerFactory(SchemaQuery.class,
                                                            DataQueryTabular.class);

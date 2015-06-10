@@ -24,6 +24,11 @@ import com.google.common.base.Preconditions;
 public class QueueList<T>
 {
   /**
+   * The number of nodes in the {@link QueueList}.
+   */
+  private int size = 0;
+
+  /**
    * The head of the queue.
    */
   private QueueListNode<T> head;
@@ -47,6 +52,7 @@ public class QueueList<T>
   public void enqueue(QueueListNode<T> node)
   {
     Preconditions.checkNotNull(node);
+    size++;
 
     if(head == null) {
       head = node;
@@ -77,7 +83,9 @@ public class QueueList<T>
    */
   public void removeNode(QueueListNode<T> node)
   {
-      //Handle the case when adding to the end of list and
+    size--;
+
+    //Handle the case when adding to the end of list and
     //removing a node in parallel
     if(head == node) {
       if(tail == node) {
@@ -99,6 +107,15 @@ public class QueueList<T>
         node.getNext().setPrev(node.getPrev());
       }
     }
+  }
+
+  /**
+   * Returns the size of the {@link QueueList}.
+   * @return The size of the {@link QueueList}.
+   */
+  public int getSize()
+  {
+    return size;
   }
 
   /**

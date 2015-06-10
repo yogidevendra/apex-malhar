@@ -18,6 +18,7 @@ package com.datatorrent.lib.appdata.query;
 import com.datatorrent.api.Component;
 import com.datatorrent.api.Context.OperatorContext;
 
+
 /**
  * This is an interface for a manager which manages the queueing of AppData queries.
  * @param <QUERY_TYPE> The type of the queries being queued.
@@ -55,4 +56,11 @@ public interface QueueManager<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT> extends Com
    * internal state for managing queries.
    */
   public void endWindow();
+
+  /**
+   * Returns the next {@link QueryBundle} in the queue. If there is no new {@link QueryBundle} in the queue, then this method
+   * blocks until there is one.
+   * @return The next {@link QueryBundle} in the queue.
+   */
+  public QueryBundle<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT> dequeueBlock();
 }

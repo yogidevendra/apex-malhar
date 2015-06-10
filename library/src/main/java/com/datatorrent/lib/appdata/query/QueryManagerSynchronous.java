@@ -20,19 +20,19 @@ import com.datatorrent.api.Context.OperatorContext;
 import com.google.common.base.Preconditions;
 
 /**
- * The QueryManager is a simple container for a {@link QueryExecutor} and a {@link QueueManager}.
- * It encapsulates the functionality of enqueueing a query and returning a result.
+ * The QueryManagerSynchronous is a simple container for a {@link QueryExecutor} and a {@link QueueManager}.
+ * It encapsulates the functionality of enqueueing a query and returning a result synchronously.
  * <br/>
  * <br/>
  * <b>Note:</b> Use {@link #newInstance} to create an instance of query processor.
  * It reduces the boilerplate code with respect to generics.
  *
- * @param <QUERY_TYPE>
- * @param <META_QUERY>
- * @param <QUEUE_CONTEXT>
- * @param <RESULT>
+ * @param <QUERY_TYPE> The type of the query.
+ * @param <META_QUERY> The type of any query meta data.
+ * @param <QUEUE_CONTEXT> The type of any context information used by the queue.
+ * @param <RESULT> The type of the result returned by the {@link QueryExecutor}.
  */
-public class QueryManager<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT, RESULT> implements Component<OperatorContext>
+public class QueryManagerSynchronous<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT, RESULT> implements Component<OperatorContext>
 {
   /**
    * The {@link QueryExecutor} used to execute queries.
@@ -47,14 +47,14 @@ public class QueryManager<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT, RESULT> impleme
    *
    * @param queryComputer
    */
-  private QueryManager(QueryExecutor<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT, RESULT> queryComputer)
+  private QueryManagerSynchronous(QueryExecutor<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT, RESULT> queryComputer)
   {
     setQueryExecutor(queryComputer);
     queryQueueManager = new SimpleQueueManager<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT>();
   }
 
-  private QueryManager(QueryExecutor<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT, RESULT> queryComputer,
-                        QueueManager<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT> queryQueueManager)
+  private QueryManagerSynchronous(QueryExecutor<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT, RESULT> queryComputer,
+                                  QueueManager<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT> queryQueueManager)
   {
     setQueryExecutor(queryComputer);
     setQueryQueueManager(queryQueueManager);
@@ -62,7 +62,7 @@ public class QueryManager<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT, RESULT> impleme
 
   /**
    * A helper method to set a {@link QueryExecutor}.
-   * @param queryExecutor The {@link QueryExecutor} to set on the {@link QueryManager}.
+   * @param queryExecutor The {@link QueryExecutor} to set on the {@link QueryManagerSynchronous}.
    */
   private void setQueryExecutor(QueryExecutor<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT, RESULT> queryExecutor)
   {
@@ -71,7 +71,7 @@ public class QueryManager<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT, RESULT> impleme
 
   /**
    * A helper method to set a {@link QueueManager}.
-   * @param queryQueueManager The {@link QueueManager} to set on the {@link QueryManager}.
+   * @param queryQueueManager The {@link QueueManager} to set on the {@link QueryManagerSynchronous}.
    */
   private void setQueryQueueManager(QueueManager<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT> queryQueueManager)
   {
@@ -117,7 +117,7 @@ public class QueryManager<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT, RESULT> impleme
 
   /**
    * This method should be called from the {@link com.datatorrent.api.Operator#setup} method so that the
-   * QueryManager can correctly initialize its internal state.
+ QueryManagerSynchronous can correctly initialize its internal state.
    * @param context The operator context.
    */
   @Override
@@ -128,7 +128,7 @@ public class QueryManager<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT, RESULT> impleme
 
   /**
    * This method should be called from the {@link com.datatorrent.api.Operator#beginWindow} method so that the
-   * QueryManager can correctly initialize/reset its internal state at the beginning of each window.
+ QueryManagerSynchronous can correctly initialize/reset its internal state at the beginning of each window.
    * @param windowId The windowId of the current window.
    */
   public void beginWindow(long windowId)
@@ -138,7 +138,7 @@ public class QueryManager<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT, RESULT> impleme
 
   /**
    * This method should be called from the {@link com.datatorrent.api.Operator#endWindow} method so that the
-   * QueryManager can correctly initialize/reset its internal state at the end of each window.
+ QueryManagerSynchronous can correctly initialize/reset its internal state at the end of each window.
    */
   public void endWindow()
   {
@@ -147,7 +147,7 @@ public class QueryManager<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT, RESULT> impleme
 
   /**
    * This method should be called from the {@link com.datatorrent.api.Operator#teardown} method so that the
-   * QueryManager can correctly initialize its internal state.
+ QueryManagerSynchronous can correctly initialize its internal state.
    */
   @Override
   public void teardown()
@@ -156,37 +156,37 @@ public class QueryManager<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT, RESULT> impleme
   }
 
   /**
-   * Creates a new instance of a QueryManager.
+   * Creates a new instance of a QueryManagerSynchronous.
    * @param <QUERY_TYPE> The type of the query.
    * @param <META_QUERY> The type of any meta data associated with the query.
    * @param <QUEUE_CONTEXT> The type of any additional meta data required to manage queueing the query.
    * @param <RESULT> The type of any query results.
    * @param queryExecutor The {@link QueryExecutor} the queryExecutor used to execute queries.
-   * @return A new instance of QueryManager.
+   * @return A new instance of QueryManagerSynchronous.
    */
   public static <QUERY_TYPE, META_QUERY, QUEUE_CONTEXT, RESULT>
-  QueryManager<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT, RESULT>
+  QueryManagerSynchronous<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT, RESULT>
   newInstance(QueryExecutor<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT, RESULT> queryExecutor)
   {
-    return new QueryManager<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT, RESULT>(queryExecutor);
+    return new QueryManagerSynchronous<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT, RESULT>(queryExecutor);
   }
 
   /**
-   * Creates a new instance of a QueryManager.
+   * Creates a new instance of a QueryManagerSynchronous.
    * @param <QUERY_TYPE> The type of the query.
    * @param <META_QUERY> The type of any meta data associated with the query.
    * @param <QUEUE_CONTEXT> The type of any additional meta data required to manage queueing the query.
    * @param <RESULT> The type of any query results.
    * @param queryExecutor The {@link QueryExecutor} used to execute queries.
    * @param queryQueueManager The {@link QueueManager} used to queue queries.
-   * @return A new instance of QueryManager.
+   * @return A new instance of QueryManagerSynchronous.
    */
   public static <QUERY_TYPE, META_QUERY, QUEUE_CONTEXT, RESULT>
-  QueryManager<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT, RESULT>
+  QueryManagerSynchronous<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT, RESULT>
   newInstance(QueryExecutor<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT, RESULT> queryExecutor,
               QueueManager<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT> queryQueueManager)
   {
-    return new QueryManager<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT, RESULT>(queryExecutor,
+    return new QueryManagerSynchronous<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT, RESULT>(queryExecutor,
       queryQueueManager);
   }
 }

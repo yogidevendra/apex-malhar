@@ -17,9 +17,12 @@ package com.datatorrent.lib.appdata.query;
 
 import com.datatorrent.api.Context.OperatorContext;
 import com.datatorrent.lib.appdata.query.QueueList.QueueListNode;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.Semaphore;
 
 /**
  * This is an abstract implementation of a QueueManager which works in the following way.
@@ -56,6 +59,8 @@ public abstract class AbstractWindowEndQueueManager<QUERY_TYPE, META_QUERY, QUEU
    */
   private final Object lock = new Object();
 
+  private Semaphore semaphore = new Semaphore(0);
+
   /**
    * Creates a new QueueManager.
    */
@@ -89,6 +94,7 @@ public abstract class AbstractWindowEndQueueManager<QUERY_TYPE, META_QUERY, QUEU
 
     if(addingFilter(queryQueueable)) {
       queryQueue.enqueue(node);
+      semaphore.release();
       addedNode(node);
     }
 
@@ -99,7 +105,15 @@ public abstract class AbstractWindowEndQueueManager<QUERY_TYPE, META_QUERY, QUEU
   public QueryBundle<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT> dequeue()
   {
     synchronized(lock) {
-      return dequeueHelper();
+      return dequeueHelper(false);
+    }
+  }
+
+  @Override
+  public QueryBundle<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT> dequeueBlock()
+  {
+    synchronized(lock) {
+      return dequeueHelper(true);
     }
   }
 
@@ -107,7 +121,7 @@ public abstract class AbstractWindowEndQueueManager<QUERY_TYPE, META_QUERY, QUEU
    * This is a helper method for dequeueing queries.
    * @return {@link QueryBundle} containing the dequeued query and its associated metadata.
    */
-  private QueryBundle<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT> dequeueHelper()
+  private QueryBundle<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT> dequeueHelper(boolean block)
   {
     QueryBundle<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT> qq = null;
 
@@ -138,6 +152,15 @@ public abstract class AbstractWindowEndQueueManager<QUERY_TYPE, META_QUERY, QUEU
       QueryBundle<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT> queryQueueable = currentNode.getPayload();
       QueueListNode<QueryBundle<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT>> nextNode = currentNode.getNext();
 
+      if(block) {
+        try {
+          semaphore.acquire();
+        }
+        catch(InterruptedException ex) {
+          throw new RuntimeException(ex);
+        }
+      }
+
       if(removeBundle(queryQueueable)) {
         queryQueue.removeNode(currentNode);
         removedNode(currentNode);
@@ -162,9 +185,9 @@ public abstract class AbstractWindowEndQueueManager<QUERY_TYPE, META_QUERY, QUEU
   }
 
   /**
-   *
-   * @param queryBundle
-   * @return
+   * This filter is used to determine whether or not the given {@link QueryBundle} should be added to the queue or not.
+   * @param queryBundle The {@link QueryBundle} to determine whether or not to add to the queue.
+   * @return True if the given {@link QueryBundle} should be added to the queue. False otherwise.
    */
   public abstract boolean addingFilter(QueryBundle<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT> queryBundle);
 
@@ -197,6 +220,9 @@ public abstract class AbstractWindowEndQueueManager<QUERY_TYPE, META_QUERY, QUEU
   {
     currentNode = queryQueue.getHead();
     readCurrent = false;
+
+    semaphore.drainPermits();
+    semaphore.release(queryQueue.getSize());
   }
 
   @Override
@@ -207,6 +233,12 @@ public abstract class AbstractWindowEndQueueManager<QUERY_TYPE, META_QUERY, QUEU
   @Override
   public void teardown()
   {
+  }
+
+  @VisibleForTesting
+  protected int getNumPermits()
+  {
+    return semaphore.availablePermits();
   }
 
   private static final Logger LOG = LoggerFactory.getLogger(AbstractWindowEndQueueManager.class);

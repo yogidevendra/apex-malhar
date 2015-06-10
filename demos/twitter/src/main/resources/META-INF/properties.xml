@@ -60,6 +60,10 @@
     <name>dt.application.RollingTopWordsDemo.operator.QueryResult.topic</name>
     <value>TwitterWordsQueryResult</value>
   </property>
+  <property>
+    <name>dt.application.RollingTopWordsDemo.operator.QueryResult.numRetries</name>
+    <value>2147483647</name>
+  </property>
 
   <!-- TwitterDemo -->
 
@@ -71,6 +75,10 @@
     <name>dt.application.TwitterDemo.operator.QueryResult.topic</name>
     <value>TwitterURLQueryResult</value>
   </property>
+  <property>
+    <name>dt.application.TwitterDemo.operator.QueryResult.numRetries</name>
+    <value>2147483647</name>
+  </property>
 
   <!-- TwitterTrendingDemo -->
 
@@ -81,6 +89,10 @@
   <property>
     <name>dt.application.TwitterTrendingDemo-Customer.operator.QueryResult.topic</name>
     <value>TwitterHashtagQueryResult</value>
+  </property>
+  <property>
+    <name>dt.application.TwitterTrendingDemo-Customer.operator.QueryResult.numRetries</name>
+    <value>2147483647</name>
   </property>
 
 </configuration>

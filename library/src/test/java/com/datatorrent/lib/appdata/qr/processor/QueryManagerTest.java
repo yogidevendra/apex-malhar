@@ -17,7 +17,7 @@
 package com.datatorrent.lib.appdata.qr.processor;
 
 import com.datatorrent.lib.appdata.query.QueryExecutor;
-import com.datatorrent.lib.appdata.query.QueryManager;
+import com.datatorrent.lib.appdata.query.QueryManagerSynchronous;
 
 import java.util.List;
 
@@ -36,7 +36,7 @@ public class QueryManagerTest
   {
     final int numQueries = 3;
 
-    QueryManager<Query, Void, Void, Result> queryProcessor = QueryManager.newInstance(new SimpleQueryComputer());
+    QueryManagerSynchronous<Query, Void, Void, Result> queryProcessor = QueryManagerSynchronous.newInstance(new SimpleQueryComputer());
 
     queryProcessor.setup(null);
     queryProcessor.beginWindow(0);
