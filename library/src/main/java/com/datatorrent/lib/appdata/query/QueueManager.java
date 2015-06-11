@@ -45,7 +45,7 @@ public interface QueueManager<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT> extends Com
    * any additional query meta data, and the queue context for the query.
    * </p>
    * <p>
-   * <b>Note:</b> Calls to {@link #dequeue} should not be mixed with calls to {@link #dequeueBlock}.
+   * <b>Note:</b> Calls to {@link #dequeue} can be mixed with calls to {@link #dequeueBlock}.
    * </p>
    * @return The query bundle for a query.
    */
@@ -68,7 +68,7 @@ public interface QueueManager<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT> extends Com
    * blocks until there is one.
    * </p>
    * <p>
-   * <b>Note:</b> Calls to {@link #dequeueBlock} should not be mixed with calls to {@link #dequeue}.
+   * <b>Note:</b> Calls to {@link #dequeueBlock} can be mixed with calls to {@link #dequeue}.
    * </p>
    * @return The next {@link QueryBundle} in the queue.
    */

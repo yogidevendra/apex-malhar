@@ -23,6 +23,8 @@ import jline.internal.Preconditions;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.junit.Assert;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SimpleDoneQueryQueueManagerTest
 {
@@ -65,10 +67,12 @@ public class SimpleDoneQueryQueueManagerTest
     sdqqm.enqueue(query, null, new MutableBoolean(false));
 
     Assert.assertEquals(1, sdqqm.getNumLeft());
+    Assert.assertEquals(sdqqm.getNumPermits(), sdqqm.getNumLeft());
 
     QueryBundle<Query, Void, MutableBoolean> qb = sdqqm.dequeueBlock();
 
     Assert.assertEquals(0, sdqqm.getNumLeft());
+    Assert.assertEquals(sdqqm.getNumPermits(), sdqqm.getNumLeft());
 
     Assert.assertEquals("Should return same query.", query, qb.getQuery());
 
@@ -131,10 +135,12 @@ public class SimpleDoneQueryQueueManagerTest
     sdqqm.enqueue(query, null, new MutableBoolean(false));
 
     Assert.assertEquals(1, sdqqm.getNumLeft());
+    Assert.assertEquals(sdqqm.getNumPermits(), sdqqm.getNumLeft());
 
     QueryBundle<Query, Void, MutableBoolean> qb = sdqqm.dequeueBlock();
 
     Assert.assertEquals(0, sdqqm.getNumLeft());
+    Assert.assertEquals(sdqqm.getNumPermits(), sdqqm.getNumLeft());
 
     testBlocking(sdqqm);
 
@@ -183,20 +189,24 @@ public class SimpleDoneQueryQueueManagerTest
     sdqqm.enqueue(query, null, new MutableBoolean(false));
 
     Assert.assertEquals(1, sdqqm.getNumLeft());
+    Assert.assertEquals(sdqqm.getNumPermits(), sdqqm.getNumLeft());
 
     QueryBundle<Query, Void, MutableBoolean> qb = sdqqm.dequeueBlock();
 
     Assert.assertEquals(0, sdqqm.getNumLeft());
+    Assert.assertEquals(sdqqm.getNumPermits(), sdqqm.getNumLeft());
 
     sdqqm.endWindow();
 
     sdqqm.beginWindow(1);
 
     Assert.assertEquals(1, sdqqm.getNumLeft());
+    Assert.assertEquals(sdqqm.getNumPermits(), sdqqm.getNumLeft());
 
     qb = sdqqm.dequeueBlock();
 
     Assert.assertEquals(0, sdqqm.getNumLeft());
+    Assert.assertEquals(sdqqm.getNumPermits(), sdqqm.getNumLeft());
 
     testBlocking(sdqqm);
 
@@ -216,22 +226,70 @@ public class SimpleDoneQueryQueueManagerTest
     sdqqm.enqueue(query, null, queueContext);
 
     Assert.assertEquals(1, sdqqm.getNumLeft());
+    Assert.assertEquals(sdqqm.getNumPermits(), sdqqm.getNumLeft());
     QueryBundle<Query, Void, MutableBoolean> qb = sdqqm.dequeueBlock();
     Assert.assertEquals(0, sdqqm.getNumLeft());
+    Assert.assertEquals(sdqqm.getNumPermits(), sdqqm.getNumLeft());
 
     sdqqm.endWindow();
 
     sdqqm.beginWindow(1);
 
     Assert.assertEquals(1, sdqqm.getNumLeft());
+    Assert.assertEquals(sdqqm.getNumPermits(), sdqqm.getNumLeft());
 
     queueContext.setValue(true);
     testBlocking(sdqqm);
 
     Assert.assertEquals(0, sdqqm.getNumLeft());
+    Assert.assertEquals(sdqqm.getNumPermits(), sdqqm.getNumLeft());
 
     sdqqm.endWindow();
     sdqqm.teardown();
+  }
+
+  @Test
+  public void expiredTestBlockingExpiredFirstValidLast() throws Exception
+  {
+    SimpleDoneQueueManager<Query, Void> sdqqm = new SimpleDoneQueueManager<Query, Void>();
+
+    sdqqm.setup(null);
+    sdqqm.beginWindow(0);
+
+    Query query = new MockQuery("1");
+    MutableBoolean queueContext = new MutableBoolean(false);
+    sdqqm.enqueue(query, null, queueContext);
+
+    Query query1 = new MockQuery("2");
+    MutableBoolean queueContext1 = new MutableBoolean(false);
+    sdqqm.enqueue(query1, null, queueContext1);
+
+    Assert.assertEquals(2, sdqqm.getNumLeft());
+    Assert.assertEquals(sdqqm.getNumPermits(), sdqqm.getNumLeft());
+    QueryBundle<Query, Void, MutableBoolean> qb = sdqqm.dequeueBlock();
+    Assert.assertEquals(1, sdqqm.getNumLeft());
+    Assert.assertEquals(sdqqm.getNumPermits(), sdqqm.getNumLeft());
+
+    sdqqm.endWindow();
+
+    sdqqm.beginWindow(1);
+
+    Assert.assertEquals(2, sdqqm.getNumLeft());
+    Assert.assertEquals(sdqqm.getNumPermits(), sdqqm.getNumLeft());
+
+    queueContext.setValue(true);
+    testBlocking(sdqqm);
+
+    Assert.assertEquals(0, sdqqm.getNumLeft());
+    Assert.assertEquals(sdqqm.getNumPermits(), sdqqm.getNumLeft());
+
+    sdqqm.endWindow();
+    sdqqm.teardown();
+  }
+
+  @Test
+  public void expiredTestBlockingValidFirstExpiredLast() throws Exception
+  {
   }
 
   @Test
@@ -291,7 +349,9 @@ public class SimpleDoneQueryQueueManagerTest
     @Override
     public void run()
     {
-      queueManager.dequeueBlock();
+      LOG.debug("{}", queueManager.dequeueBlock());
     }
   }
+
+  private static final Logger LOG = LoggerFactory.getLogger(SimpleDoneQueryQueueManagerTest.class);
 }
