@@ -167,7 +167,11 @@ public abstract class AbstractWindowEndQueueManager<QUERY_TYPE, META_QUERY, QUEU
     {
       if(block && !first) {
         acquire();
-        currentNode = currentNode.getNext();
+
+        if(readCurrent) {
+          currentNode = currentNode.getNext();
+          readCurrent = false;
+        }
       }
 
       numLeft--;

@@ -278,18 +278,83 @@ public class SimpleDoneQueryQueueManagerTest
     Assert.assertEquals(sdqqm.getNumPermits(), sdqqm.getNumLeft());
 
     queueContext.setValue(true);
-    testBlocking(sdqqm);
+    qb = sdqqm.dequeueBlock();
 
     Assert.assertEquals(0, sdqqm.getNumLeft());
     Assert.assertEquals(sdqqm.getNumPermits(), sdqqm.getNumLeft());
 
+    testBlocking(sdqqm);
+
     sdqqm.endWindow();
+
+    sdqqm.beginWindow(2);
+
+    Assert.assertEquals(1, sdqqm.getNumLeft());
+    Assert.assertEquals(sdqqm.getNumPermits(), sdqqm.getNumLeft());
+
+    qb = sdqqm.dequeueBlock();
+
+    testBlocking(sdqqm);
+
+    sdqqm.endWindow();
+    
     sdqqm.teardown();
   }
 
   @Test
   public void expiredTestBlockingValidFirstExpiredLast() throws Exception
   {
+    SimpleDoneQueueManager<Query, Void> sdqqm = new SimpleDoneQueueManager<Query, Void>();
+
+    sdqqm.setup(null);
+    sdqqm.beginWindow(0);
+
+    Query query = new MockQuery("1");
+    MutableBoolean queueContext = new MutableBoolean(false);
+    sdqqm.enqueue(query, null, queueContext);
+
+    Query query1 = new MockQuery("2");
+    MutableBoolean queueContext1 = new MutableBoolean(false);
+    sdqqm.enqueue(query1, null, queueContext1);
+
+    Assert.assertEquals(2, sdqqm.getNumLeft());
+    Assert.assertEquals(sdqqm.getNumPermits(), sdqqm.getNumLeft());
+    QueryBundle<Query, Void, MutableBoolean> qb = sdqqm.dequeueBlock();
+    Assert.assertEquals(1, sdqqm.getNumLeft());
+    Assert.assertEquals(sdqqm.getNumPermits(), sdqqm.getNumLeft());
+
+    sdqqm.endWindow();
+
+    sdqqm.beginWindow(1);
+
+    Assert.assertEquals(2, sdqqm.getNumLeft());
+    Assert.assertEquals(sdqqm.getNumPermits(), sdqqm.getNumLeft());
+
+    queueContext1.setValue(true);
+    qb = sdqqm.dequeueBlock();
+
+    Assert.assertEquals(1, sdqqm.getNumLeft());
+    Assert.assertEquals(sdqqm.getNumPermits(), sdqqm.getNumLeft());
+
+    testBlocking(sdqqm);
+
+    Assert.assertEquals(0, sdqqm.getNumLeft());
+    Assert.assertEquals(sdqqm.getNumPermits(), sdqqm.getNumLeft());
+
+    sdqqm.endWindow();
+
+    sdqqm.beginWindow(2);
+
+    Assert.assertEquals(1, sdqqm.getNumLeft());
+    Assert.assertEquals(sdqqm.getNumPermits(), sdqqm.getNumLeft());
+
+    qb = sdqqm.dequeueBlock();
+
+    testBlocking(sdqqm);
+
+    sdqqm.endWindow();
+
+    sdqqm.teardown();
   }
 
   @Test
