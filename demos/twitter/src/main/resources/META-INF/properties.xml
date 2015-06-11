@@ -62,7 +62,7 @@
   </property>
   <property>
     <name>dt.application.RollingTopWordsDemo.operator.QueryResult.numRetries</name>
-    <value>2147483647</name>
+    <value>2147483647</value>
   </property>
 
   <!-- TwitterDemo -->
@@ -77,7 +77,7 @@
   </property>
   <property>
     <name>dt.application.TwitterDemo.operator.QueryResult.numRetries</name>
-    <value>2147483647</name>
+    <value>2147483647</value>
   </property>
 
   <!-- TwitterTrendingDemo -->
@@ -92,7 +92,7 @@
   </property>
   <property>
     <name>dt.application.TwitterTrendingDemo-Customer.operator.QueryResult.numRetries</name>
-    <value>2147483647</name>
+    <value>2147483647</value>
   </property>
 
 </configuration>

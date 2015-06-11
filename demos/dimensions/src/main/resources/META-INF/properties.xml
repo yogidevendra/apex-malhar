@@ -99,7 +99,7 @@
   </property>
   <property>
     <name>dt.application.AdsDimensionsDemoGeneric.operator.QueryResult.numRetries</name>
-    <value>2147483647</name>
+    <value>2147483647</value>
   </property>
   <property>
     <name>dt.application.AdsDimensionsDemoGeneric.operator.DimensionsComputation.port.inputEvent.attr.PARTITION_PARALLEL</name>
@@ -138,7 +138,7 @@
   </property>
   <property>
     <name>dt.application.AdsDimensionsDemoGenericManualEntry.operator.QueryResult.numRetries</name>
-    <value>2147483647</name>
+    <value>2147483647</value>
   </property>
   <property>
     <name>dt.application.AdsDimensionsDemoGenericManualEntry.operator.DimensionsComputation.port.inputEvent.attr.PARTITION_PARALLEL</name>
@@ -177,7 +177,7 @@
   </property>
   <property>
     <name>dt.application.AdsDimensionsDemoFast.operator.QueryResult.numRetries</name>
-    <value>2147483647</name>
+    <value>2147483647</value>
   </property>
   <property>
     <name>dt.application.AdsDimensionsDemoFast.operator.DimensionsComputation.port.data.attr.PARTITION_PARALLEL</name>
@@ -221,7 +221,7 @@
   </property>
   <property>
     <name>dt.application.SalesDemo.operator.QueryResult.numRetries</name>
-    <value>2147483647</name>
+    <value>2147483647</value>
   </property>
   <property>
     <name>dt.application.SalesDemo.operator.DimensionsComputation.attr.PARTITIONER</name>
