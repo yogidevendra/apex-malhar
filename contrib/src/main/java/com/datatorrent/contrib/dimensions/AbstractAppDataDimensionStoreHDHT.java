@@ -9,12 +9,12 @@ import com.datatorrent.api.Context;
 import com.datatorrent.api.DefaultInputPort;
 import com.datatorrent.api.DefaultOutputPort;
 import com.datatorrent.api.annotation.InputPortFieldAnnotation;
-import com.datatorrent.lib.appdata.query.QueryManagerSynchronous;
+import com.datatorrent.lib.appdata.query.QueryManagerAsynchronous;
 import com.datatorrent.lib.appdata.query.serde.MessageDeserializerFactory;
 import com.datatorrent.lib.appdata.query.serde.MessageSerializerFactory;
+import com.datatorrent.lib.appdata.schemas.DataQueryDimensional;
 import com.datatorrent.lib.appdata.schemas.Message;
 import com.datatorrent.lib.appdata.schemas.Result;
-import com.datatorrent.lib.appdata.schemas.DataQueryDimensional;
 import com.datatorrent.lib.appdata.schemas.ResultFormatter;
 import com.datatorrent.lib.appdata.schemas.SchemaQuery;
 import com.datatorrent.lib.appdata.schemas.SchemaRegistry;
@@ -34,7 +34,8 @@ public abstract class AbstractAppDataDimensionStoreHDHT extends DimensionsStoreH
   @NotNull
   protected AggregatorRegistry aggregatorRegistry = AggregatorRegistry.DEFAULT_AGGREGATOR_REGISTRY;
 
-  protected transient QueryManagerSynchronous<DataQueryDimensional, QueryMeta, MutableLong, Result> queryProcessor;
+  protected transient DimensionsQueueManager queueManager;
+  protected transient QueryManagerAsynchronous<DataQueryDimensional, QueryMeta, MutableLong, Result> queryProcessor;
   protected final transient MessageDeserializerFactory queryDeserializerFactory;
 
   @VisibleForTesting
@@ -86,13 +87,18 @@ public abstract class AbstractAppDataDimensionStoreHDHT extends DimensionsStoreH
 
     schemaRegistry = getSchemaRegistry();
 
-    //setup query processor
-    queryProcessor = QueryManagerSynchronous.newInstance(new DimensionsQueryExecutor(this, schemaRegistry),
-      new DimensionsQueueManager(this, schemaRegistry));
-    queryProcessor.setup(context);
-
     resultSerializerFactory = new MessageSerializerFactory(resultFormatter);
     queryDeserializerFactory.setContext(DataQueryDimensional.class, schemaRegistry);
+
+    queueManager = new DimensionsQueueManager(this, schemaRegistry);
+
+    queryProcessor =
+    new QueryManagerAsynchronous<DataQueryDimensional, QueryMeta, MutableLong, Result>(queryResult,
+                                                                                       queueManager,
+                                                                                       new DimensionsQueryExecutor(this, schemaRegistry),
+                                                                                       resultSerializerFactory);
+
+    queryProcessor.setup(context);
     super.setup(context);
   }
 
@@ -105,20 +111,13 @@ public abstract class AbstractAppDataDimensionStoreHDHT extends DimensionsStoreH
 
   protected void processDimensionalDataQuery(DataQueryDimensional dataQueryDimensional)
   {
-    queryProcessor.enqueue(dataQueryDimensional, null, null);
+    queueManager.enqueue(dataQueryDimensional, null, null);
   }
 
   @Override
   public void endWindow()
   {
     super.endWindow();
-    Result aotr;
-
-    while ((aotr = queryProcessor.process()) != null) {
-      String result = resultSerializerFactory.serialize(aotr);
-      LOG.debug("Emitting the result: {}", result);
-      queryResult.emit(result);
-    }
     queryProcessor.endWindow();
   }
 
