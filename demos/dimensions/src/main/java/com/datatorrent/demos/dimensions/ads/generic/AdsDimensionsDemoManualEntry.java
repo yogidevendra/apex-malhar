@@ -29,9 +29,12 @@ public class AdsDimensionsDemoManualEntry extends AdsDimensionsDemo
   public static final String APP_NAME = "AdsDimensionsDemoGenericManualEntry";
   public static final String EVENT_SCHEMA_LOCATION = "adsGenericEventSchemaNoEnums.json";
 
+  public static final String PROP_EMBEDD_QUERY = "dt.application." + APP_NAME + ".embeddQuery";
+
   @Override
   public void populateDAG(DAG dag, Configuration conf)
   {
+    this.embeddQueryProp = PROP_EMBEDD_QUERY;
     this.appName = APP_NAME;
     this.eventSchemaLocation = EVENT_SCHEMA_LOCATION;
     this.advertisers = (List) Lists.newArrayList("starbucks","safeway","mcdonalds","macys","taco bell","walmart","khol's","san diego zoo","pandas","jack in the box","tomatina","ron swanson");

@@ -93,6 +93,11 @@
     <name>dt.application.AdsDimensionsDemoGeneric.operator.Query.topic</name>
     <value>AdsQueryGenericDemo</value>
   </property>
+  <!-- For running in embedded mode -->
+  <property>
+    <name>dt.application.AdsDimensionsDemoGeneric.embeddQuery</name>
+    <value>true</value>
+  </property>
   <property>
     <name>dt.application.AdsDimensionsDemoGeneric.operator.QueryResult.topic</name>
     <value>AdsQueryGenericResultDemo</value>
@@ -132,6 +137,11 @@
     <name>dt.application.AdsDimensionsDemoGenericManualEntry.operator.Query.topic</name>
     <value>AdsQueryGenericManualEntryDemo</value>
   </property>
+  <!-- For running in embedded mode -->
+  <property>
+    <name>dt.application.AdsDimensionsDemoGenericManualEntry.embeddQuery</name>
+    <value>true</value>
+  </property>
   <property>
     <name>dt.application.AdsDimensionsDemoGenericManualEntry.operator.QueryResult.topic</name>
     <value>AdsQueryGenericResultManualEntryDemo</value>
@@ -170,6 +180,11 @@
   <property>
     <name>dt.application.AdsDimensionsDemoFast.operator.Query.topic</name>
     <value>AdsQueryDemo</value>
+  </property>
+  <!-- For running in embedded mode -->
+  <property>
+    <name>dt.application.AdsDimensionsDemoFast.embeddQuery</name>
+    <value>true</value>
   </property>
   <property>
     <name>dt.application.AdsDimensionsDemoFast.operator.QueryResult.topic</name>

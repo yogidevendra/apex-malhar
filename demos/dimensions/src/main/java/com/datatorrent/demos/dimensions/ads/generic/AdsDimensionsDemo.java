@@ -42,6 +42,7 @@ import org.apache.hadoop.fs.Path;
 import java.util.List;
 import java.util.Map;
 
+
 /**
  * An AdsDimensionsDemo run with HDHT
  *
@@ -124,9 +125,12 @@ public class AdsDimensionsDemo implements StreamingApplication
   public static final String APP_NAME = "AdsDimensionsDemoGeneric";
   public static final String EVENT_SCHEMA = "adsGenericEventSchema.json";
 
+  public static final String PROP_EMBEDD_QUERY = "dt.application." + APP_NAME + ".embeddQuery";
+
   public String appName = APP_NAME;
   public String eventSchemaLocation = EVENT_SCHEMA;
   public List<Object> advertisers;
+  public String embeddQueryProp = PROP_EMBEDD_QUERY;
 
   @Override
   public void populateDAG(DAG dag, Configuration conf)
@@ -187,6 +191,14 @@ public class AdsDimensionsDemo implements StreamingApplication
     PubSubWebSocketAppDataQuery wsIn = dag.addOperator("Query", new PubSubWebSocketAppDataQuery());
     wsIn.setUri(uri);
     queryPort = wsIn.outputPort;
+
+    if(conf.getBoolean(PROP_EMBEDD_QUERY, false)) {
+      store.setEmbeddableQuery(wsIn);
+    }
+    else {
+      dag.addStream("Query", queryPort, store.query).setLocality(Locality.CONTAINER_LOCAL);
+    }
+
     PubSubWebSocketAppDataResult wsOut = dag.addOperator("QueryResult", new PubSubWebSocketAppDataResult());
     wsOut.setUri(uri);
     queryResultPort = wsOut.input;
@@ -197,7 +209,6 @@ public class AdsDimensionsDemo implements StreamingApplication
 
     dag.addStream("InputStream", input.outputPort, dimensions.inputEvent).setLocality(Locality.CONTAINER_LOCAL);
     dag.addStream("DimensionalData", dimensions.output, store.input);
-    dag.addStream("Query", queryPort, store.query);
     dag.addStream("QueryResult", store.queryResult, queryResultPort);
   }
 }

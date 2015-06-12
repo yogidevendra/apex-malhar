@@ -82,9 +82,11 @@ public class SalesDemo implements StreamingApplication
     queryPort = wsIn.outputPort;
 
     if(conf.getBoolean(PROP_EMBEDD_QUERY, false)) {
+      LOG.info("Embedding query operator.");
       store.setEmbeddableQuery(wsIn);
     }
     else {
+      LOG.info("Not embedding query operator.");
       dag.addStream("Query", queryPort, store.query).setLocality(Locality.CONTAINER_LOCAL);
     }
 
@@ -95,7 +97,6 @@ public class SalesDemo implements StreamingApplication
     dag.addStream("InputStream", input.jsonBytes, converter.input);
     dag.addStream("ConvertStream", converter.outputMap, dimensions.inputEvent);
     dag.addStream("DimensionalData", dimensions.output, store.input);
-
     dag.addStream("QueryResult", store.queryResult, queryResultPort).setLocality(Locality.CONTAINER_LOCAL);
   }
 
