@@ -55,11 +55,6 @@ public abstract class AbstractWindowEndQueueManager<QUERY_TYPE, META_QUERY, QUEU
    */
   private boolean readCurrent = false;
 
-  /**
-   * A lock which is used to make queueing and dequeueing from this {@link QueueManager} thread safe.
-   */
-  private final Object lock = new Object();
-
   private final Semaphore semaphore = new Semaphore(0);
   private final ConditionBarrier conditionBarrier = new ConditionBarrier();
   private int numLeft = 0;
@@ -79,9 +74,7 @@ public abstract class AbstractWindowEndQueueManager<QUERY_TYPE, META_QUERY, QUEU
 
     conditionBarrier.gate();
 
-    synchronized(lock) {
-      return enqueueHelper(query, metaQuery, context);
-    }
+    return enqueueHelper(query, metaQuery, context);
   }
 
   /**
@@ -112,17 +105,13 @@ public abstract class AbstractWindowEndQueueManager<QUERY_TYPE, META_QUERY, QUEU
   @Override
   public QueryBundle<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT> dequeue()
   {
-    synchronized(lock) {
-      return dequeueHelper(false);
-    }
+    return dequeueHelper(false);
   }
 
   @Override
   public QueryBundle<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT> dequeueBlock()
   {
-    synchronized(lock) {
-      return dequeueHelper(true);
-    }
+    return dequeueHelper(true);
   }
 
   /**
@@ -135,7 +124,7 @@ public abstract class AbstractWindowEndQueueManager<QUERY_TYPE, META_QUERY, QUEU
 
     boolean first = true;
 
-    LOG.debug("{}", semaphore.availablePermits());
+    LOG.debug("numLeft {} availablePermits {}", this.numLeft, semaphore.availablePermits());
 
     if(block) {
       acquire();

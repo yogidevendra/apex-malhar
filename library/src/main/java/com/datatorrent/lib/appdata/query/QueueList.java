@@ -38,6 +38,11 @@ public class QueueList<T>
   private QueueListNode<T> tail;
 
   /**
+   * A lock which is used to make queueing and dequeueing from this {@link QueueList} thread safe.
+   */
+  private final Object lock = new Object();
+
+  /**
    * Create a queue list.
    */
   public QueueList()
@@ -51,21 +56,23 @@ public class QueueList<T>
    */
   public void enqueue(QueueListNode<T> node)
   {
-    Preconditions.checkNotNull(node);
-    size++;
+    synchronized(lock) {
+      Preconditions.checkNotNull(node);
+      size++;
 
-    if(head == null) {
-      head = node;
-      tail = node;
+      if(head == null) {
+        head = node;
+        tail = node;
+        node.setNext(null);
+        node.setPrev(null);
+        return;
+      }
+
+      tail.setNext(node);
+      node.setPrev(tail);
       node.setNext(null);
-      node.setPrev(null);
-      return;
+      tail = node;
     }
-
-    tail.setNext(node);
-    node.setPrev(tail);
-    node.setNext(null);
-    tail = node;
   }
 
   /**
@@ -74,7 +81,9 @@ public class QueueList<T>
    */
   public QueueListNode<T> getHead()
   {
-    return head;
+    synchronized(lock) {
+      return head;
+    }
   }
 
   /**
@@ -83,28 +92,30 @@ public class QueueList<T>
    */
   public void removeNode(QueueListNode<T> node)
   {
-    size--;
+    synchronized(lock) {
+      size--;
 
     //Handle the case when adding to the end of list and
-    //removing a node in parallel
-    if(head == node) {
-      if(tail == node) {
-        head = null;
-        tail = null;
+      //removing a node in parallel
+      if(head == node) {
+        if(tail == node) {
+          head = null;
+          tail = null;
+        }
+        else {
+          head = node.getNext();
+          head.setPrev(null);
+        }
       }
       else {
-        head = node.getNext();
-        head.setPrev(null);
-      }
-    }
-    else {
-      if(tail == node) {
-        tail = node.getPrev();
-        tail.setNext(null);
-      }
-      else {
-        node.getPrev().setNext(node.getNext());
-        node.getNext().setPrev(node.getPrev());
+        if(tail == node) {
+          tail = node.getPrev();
+          tail.setNext(null);
+        }
+        else {
+          node.getPrev().setNext(node.getNext());
+          node.getNext().setPrev(node.getPrev());
+        }
       }
     }
   }

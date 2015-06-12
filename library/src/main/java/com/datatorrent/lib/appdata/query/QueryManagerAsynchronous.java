@@ -91,7 +91,9 @@ public class QueryManagerAsynchronous<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT, RES
   public void beginWindow(long windowID)
   {
     inWindowSemaphore.release();
+    LOG.debug("before resume enqueue before");
     queueManager.resumeEnqueue();
+    LOG.debug("before resume enqueue after");
   }
 
   public void endWindow()

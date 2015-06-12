@@ -25,6 +25,8 @@ import com.datatorrent.lib.util.TestUtils;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.junit.Assert;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class QueryManagerAsynchronousTest
 {
@@ -55,10 +57,11 @@ public class QueryManagerAsynchronousTest
 
     queryManagerAsynch.setup(null);
 
-    for(int numWindows = 0;
-        sink.collectedTuples.size() < totalTuples &&
-        ((System.currentTimeMillis() - startTime) < 5000);
-        numWindows++) {
+    int numWindows = 0;
+    for(;
+        sink.collectedTuples.size() < totalTuples
+        && ((System.currentTimeMillis() - startTime) < 5000)
+        ;numWindows++) {
       queryManagerAsynch.beginWindow(numWindows);
       Thread.sleep(100);
       queryManagerAsynch.endWindow();
@@ -66,6 +69,7 @@ public class QueryManagerAsynchronousTest
 
     queryManagerAsynch.teardown();
 
+    LOG.debug("Num windows: {}", numWindows);
     Assert.assertEquals(totalTuples, sink.collectedTuples.size());
   }
 
@@ -101,7 +105,9 @@ public class QueryManagerAsynchronousTest
       for(int tupleCounter = 0;
           tupleCounter < totalTuples;
           tupleCounter++) {
+        LOG.debug("before enqueue");
         queueManager.enqueue(new MockQuery(tupleCounter + ""), null, new MutableLong(1L));
+        LOG.debug("after enqueue");
         try {
           Thread.sleep(1);
         }
@@ -111,4 +117,6 @@ public class QueryManagerAsynchronousTest
       }
     }
   }
+
+  private static final Logger LOG = LoggerFactory.getLogger(QueryManagerAsynchronousTest.class);
 }
