@@ -23,6 +23,8 @@ import com.datatorrent.lib.appdata.query.serde.MessageSerializerFactory;
 import com.datatorrent.lib.appdata.schemas.Result;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.Semaphore;
 
@@ -89,10 +91,18 @@ public class QueryManagerAsynchronous<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT, RES
   public void beginWindow(long windowID)
   {
     inWindowSemaphore.release();
+    queueManager.resumeEnqueue();
   }
 
   public void endWindow()
   {
+    queueManager.haltEnqueue();
+
+    while(queueManager.getNumLeft() > 0) {
+      LOG.debug("Num left: {}", queueManager.getNumLeft());
+      Thread.yield();
+    }
+
     try {
       inWindowSemaphore.acquire();
     }
@@ -104,6 +114,7 @@ public class QueryManagerAsynchronous<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT, RES
   @Override
   public void teardown()
   {
+    processingThread.stop();
   }
 
   private class ProcessingThread implements Runnable
@@ -116,6 +127,8 @@ public class QueryManagerAsynchronous<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT, RES
         //Grab something from the queue as soon as it's available.
         QueryBundle<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT> queryBundle = queueManager.dequeueBlock();
 
+        LOG.debug("before acquire");
+
         try {
           inWindowSemaphore.acquire();
         }
@@ -123,12 +136,16 @@ public class QueryManagerAsynchronous<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT, RES
           throw new RuntimeException(ex);
         }
 
+        LOG.debug("after acquire");
+
         //We are gauranteed to be in the operator's window now.
         Result result = queryExecutor.executeQuery(queryBundle.getQuery(),
                                                    queryBundle.getMetaQuery(),
                                                    queryBundle.getQueueContext());
         if(result != null) {
-          resultPort.emit(messageSerializerFactory.serialize(result));
+          String serializedMessage = messageSerializerFactory.serialize(result);
+          LOG.debug("emitting message {}", serializedMessage);
+          resultPort.emit(serializedMessage);
         }
 
         //We are done processing the query allow the operator to continue to the next window if it
@@ -138,4 +155,6 @@ public class QueryManagerAsynchronous<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT, RES
       }
     }
   }
+
+  private static final Logger LOG = LoggerFactory.getLogger(QueryManagerAsynchronous.class);
 }

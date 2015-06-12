@@ -17,9 +17,7 @@
 package com.datatorrent.lib.appdata.query;
 
 import com.datatorrent.lib.appdata.schemas.Query;
-import com.datatorrent.lib.appdata.query.QueryBundle;
-import com.datatorrent.lib.appdata.query.SimpleDoneQueueManager;
-import jline.internal.Preconditions;
+import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.junit.Assert;
 import org.junit.Test;
@@ -297,7 +295,7 @@ public class SimpleDoneQueryQueueManagerTest
     testBlocking(sdqqm);
 
     sdqqm.endWindow();
-    
+
     sdqqm.teardown();
   }
 

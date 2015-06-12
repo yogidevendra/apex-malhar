@@ -16,54 +16,99 @@
 
 package com.datatorrent.lib.appdata.query;
 
-import com.datatorrent.lib.appdata.query.QueryManagerSynchronousTest.SimpleQueryComputer;
-import com.datatorrent.lib.appdata.query.QueryManagerSynchronous;
-import com.datatorrent.lib.appdata.schemas.Query;
-import com.datatorrent.lib.appdata.schemas.Result;
-import com.google.common.collect.Lists;
+import com.datatorrent.api.DefaultOutputPort;
+import com.datatorrent.lib.appdata.dimensions.DimensionsComputationCustomTest.AdInfoResult;
+import com.datatorrent.lib.appdata.query.serde.MessageSerializerFactory;
+import com.datatorrent.lib.appdata.schemas.ResultFormatter;
+import com.datatorrent.lib.testbench.CollectorTestSink;
+import com.datatorrent.lib.util.TestUtils;
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
-
-import java.util.List;
 
 public class QueryManagerAsynchronousTest
 {
-  @Ignore
   @Test
-  public void simpleAsynchronousQueryManagerTest()
+  public void stressTest() throws Exception
   {
-    final int numQueries = 3;
+    final int totalTuples = 1000;
 
-    QueryManagerSynchronous<Query, Void, Void, Result> queryProcessor = QueryManagerSynchronous.newInstance(new SimpleQueryComputer());
+    AppDataWindowEndQueueManager<MockQuery, Void> queueManager = new AppDataWindowEndQueueManager<MockQuery, Void>();
 
-    queryProcessor.setup(null);
-    queryProcessor.beginWindow(0);
+    DefaultOutputPort<String> outputPort = new DefaultOutputPort<String>();
+    CollectorTestSink<AdInfoResult> sink = new CollectorTestSink<AdInfoResult>();
+    TestUtils.setSink(outputPort, sink);
 
-    for(int qc = 0;
-        qc < numQueries;
-        qc++) {
-      Query query = new MockQuery(Integer.toString(qc));
-      queryProcessor.enqueue(query, null, null);
+    MessageSerializerFactory msf = new MessageSerializerFactory(new ResultFormatter());
+
+    QueryManagerAsynchronous<MockQuery, Void, MutableLong, MockResult> queryManagerAsynch = new
+    QueryManagerAsynchronous<MockQuery, Void, MutableLong, MockResult>(outputPort,
+                                                                       queueManager,
+                                                                       new NOPQueryExecutor(),
+                                                                       msf);
+
+    Thread producerThread = new Thread(new ProducerThread(queueManager,
+                                                          totalTuples));
+    producerThread.start();
+
+    long startTime = System.currentTimeMillis();
+
+    queryManagerAsynch.setup(null);
+
+    for(int numWindows = 0;
+        sink.collectedTuples.size() < totalTuples &&
+        ((System.currentTimeMillis() - startTime) < 5000);
+        numWindows++) {
+      queryManagerAsynch.beginWindow(numWindows);
+      Thread.sleep(100);
+      queryManagerAsynch.endWindow();
     }
 
-    Result result;
-    List<Result> results = Lists.newArrayList();
+    queryManagerAsynch.teardown();
 
-    while((result = queryProcessor.process()) != null) {
-      results.add(result);
+    Assert.assertEquals(totalTuples, sink.collectedTuples.size());
+  }
+
+  public static class NOPQueryExecutor implements QueryExecutor<MockQuery, Void, MutableLong, MockResult>
+  {
+    public NOPQueryExecutor()
+    {
     }
 
-    queryProcessor.endWindow();
-    queryProcessor.teardown();
+    @Override
+    public MockResult executeQuery(MockQuery query, Void metaQuery, MutableLong queueContext)
+    {
+      return new MockResult(query);
+    }
+  }
 
-    Assert.assertEquals("Sizes must match.", numQueries, results.size());
+  public static class ProducerThread implements Runnable
+  {
+    private final int totalTuples;
+    private AppDataWindowEndQueueManager<MockQuery, Void> queueManager;
 
-    for(int rc = 0;
-        rc < results.size();
-        rc++) {
-      result = results.get(rc);
-      Assert.assertEquals("Ids must match.", Integer.toString(rc), result.getId());
+
+    public ProducerThread(AppDataWindowEndQueueManager<MockQuery, Void> queueManager,
+                          int totalTuples)
+    {
+      this.queueManager = queueManager;
+      this.totalTuples = totalTuples;
+    }
+
+    @Override
+    public void run()
+    {
+      for(int tupleCounter = 0;
+          tupleCounter < totalTuples;
+          tupleCounter++) {
+        queueManager.enqueue(new MockQuery(tupleCounter + ""), null, new MutableLong(1L));
+        try {
+          Thread.sleep(1);
+        }
+        catch(InterruptedException ex) {
+          throw new RuntimeException(ex);
+        }
+      }
     }
   }
 }

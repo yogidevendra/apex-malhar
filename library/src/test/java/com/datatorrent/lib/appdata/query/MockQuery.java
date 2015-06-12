@@ -22,36 +22,29 @@ import java.util.Map;
 
 public class MockQuery extends Query
 {
+  public static final String TYPE = "mockQuery";
+
   public MockQuery(String id)
   {
-    super(id);
+    super(id, TYPE);
   }
 
   public MockQuery(String id,
-                   String type)
-  {
-    super(id, type);
-  }
-
-  public MockQuery(String id,
-                   String type,
                    Map<String, String> schemaKeys)
   {
-    super(id, type, schemaKeys);
+    super(id, TYPE, schemaKeys);
   }
 
   public MockQuery(String id,
-                   String type,
                    long countdown)
   {
-    super(id, type, countdown);
+    super(id, TYPE, countdown);
   }
 
   public MockQuery(String id,
-                   String type,
                    long countdown,
                    Map<String, String> schemaKeys)
   {
-    super(id, type, countdown, schemaKeys);
+    super(id, TYPE, countdown, schemaKeys);
   }
 }
