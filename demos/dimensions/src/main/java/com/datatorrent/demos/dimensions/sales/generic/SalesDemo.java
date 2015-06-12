@@ -81,6 +81,7 @@ public class SalesDemo implements StreamingApplication
     wsIn.setUri(uri);
     queryPort = wsIn.outputPort;
 
+    /*
     if(conf.getBoolean(PROP_EMBEDD_QUERY, false)) {
       LOG.info("Embedding query operator.");
       store.setEmbeddableQuery(wsIn);
@@ -89,6 +90,9 @@ public class SalesDemo implements StreamingApplication
       LOG.info("Not embedding query operator.");
       dag.addStream("Query", queryPort, store.query).setLocality(Locality.CONTAINER_LOCAL);
     }
+            */
+
+    store.setEmbeddableQuery(wsIn);
 
     PubSubWebSocketAppDataResult wsOut = dag.addOperator("QueryResult", new PubSubWebSocketAppDataResult());
     wsOut.setUri(uri);
