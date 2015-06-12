@@ -108,7 +108,12 @@ public abstract class AbstractAppDataDimensionStoreHDHT extends DimensionsStoreH
                                                                                           new SchemaQueryExecutor(),
                                                                                           resultSerializerFactory);
 
+
+    dimensionsQueueManager.setup(context);
     queryProcessor.setup(context);
+
+    schemaQueueManager.setup(context);
+    schemaProcessor.setup(context);
     super.setup(context);
   }
 
