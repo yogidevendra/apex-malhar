@@ -91,7 +91,7 @@
     <value>TwitterHashtagQueryResultDemo</value>
   </property>
   <property>
-    <name>dt.application.TwitterTrendingDemo-Customer.operator.QueryResult.numRetries</name>
+    <name>dt.application.TwitterTrendingDemo.operator.QueryResult.numRetries</name>
     <value>2147483647</value>
   </property>
 

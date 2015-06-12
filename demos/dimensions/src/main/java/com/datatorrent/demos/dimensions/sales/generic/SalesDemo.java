@@ -32,6 +32,7 @@ public class SalesDemo implements StreamingApplication
 {
   public static final String APP_NAME = "SalesDemo";
   public static final String PROP_USE_WEBSOCKETS = "dt.application." + APP_NAME + ".useWebSockets";
+  public static final String PROP_EMBEDD_QUERY = "dt.application." + APP_NAME + ".embeddQuery";
   public static final String PROP_STORE_PATH = "dt.application." + APP_NAME + ".operator.Store.fileStore.basePathPrefix";
 
   public static final String EVENT_SCHEMA = "salesGenericEventSchema.json";
@@ -79,6 +80,14 @@ public class SalesDemo implements StreamingApplication
     PubSubWebSocketAppDataQuery wsIn = dag.addOperator("Query", new PubSubWebSocketAppDataQuery());
     wsIn.setUri(uri);
     queryPort = wsIn.outputPort;
+
+    if(conf.getBoolean(PROP_EMBEDD_QUERY, false)) {
+      store.setEmbeddableQuery(wsIn);
+    }
+    else {
+      dag.addStream("Query", queryPort, store.query).setLocality(Locality.CONTAINER_LOCAL);
+    }
+
     PubSubWebSocketAppDataResult wsOut = dag.addOperator("QueryResult", new PubSubWebSocketAppDataResult());
     wsOut.setUri(uri);
     queryResultPort = wsOut.input;
@@ -87,7 +96,6 @@ public class SalesDemo implements StreamingApplication
     dag.addStream("ConvertStream", converter.outputMap, dimensions.inputEvent);
     dag.addStream("DimensionalData", dimensions.output, store.input);
 
-    dag.addStream("Query", queryPort, store.query).setLocality(Locality.CONTAINER_LOCAL);
     dag.addStream("QueryResult", store.queryResult, queryResultPort).setLocality(Locality.CONTAINER_LOCAL);
   }
 

@@ -17,7 +17,7 @@ package com.datatorrent.lib.appdata.query;
 
 import com.datatorrent.api.Context.OperatorContext;
 import com.datatorrent.lib.appdata.query.QueueList.QueueListNode;
-import com.datatorrent.lib.appdata.query.QueueUtils.ConditionBarrier;
+import com.datatorrent.lib.appdata.QueueUtils.ConditionBarrier;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import org.slf4j.Logger;

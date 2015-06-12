@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.datatorrent.lib.appdata.query;
+package com.datatorrent.lib.appdata;
 
 public class QueueUtils
 {

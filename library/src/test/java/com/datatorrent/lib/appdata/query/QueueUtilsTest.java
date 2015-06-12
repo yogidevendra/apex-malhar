@@ -16,7 +16,7 @@
 
 package com.datatorrent.lib.appdata.query;
 
-import com.datatorrent.lib.appdata.query.QueueUtils.ConditionBarrier;
+import com.datatorrent.lib.appdata.QueueUtils.ConditionBarrier;
 import com.google.common.base.Preconditions;
 import org.junit.Assert;
 import org.junit.Test;

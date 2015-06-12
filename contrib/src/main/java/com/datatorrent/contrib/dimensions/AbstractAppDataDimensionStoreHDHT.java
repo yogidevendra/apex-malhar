@@ -5,6 +5,7 @@
 package com.datatorrent.contrib.dimensions;
 
 import com.datatorrent.api.AppData;
+import com.datatorrent.api.AppData.EmbeddableQuery;
 import com.datatorrent.api.Context;
 import com.datatorrent.api.DefaultInputPort;
 import com.datatorrent.api.DefaultOutputPort;
@@ -79,6 +80,8 @@ public abstract class AbstractAppDataDimensionStoreHDHT extends DimensionsStoreH
     }
   };
 
+  private EmbeddableQuery<String> embeddableQuery;
+
   @SuppressWarnings("unchecked")
   public AbstractAppDataDimensionStoreHDHT()
   {
@@ -88,6 +91,11 @@ public abstract class AbstractAppDataDimensionStoreHDHT extends DimensionsStoreH
   @Override
   public void setup(Context.OperatorContext context)
   {
+    if(embeddableQuery != null) {
+      embeddableQuery.setInputPort(query);
+      embeddableQuery.setup(context);
+    }
+
     aggregatorRegistry.setup();
 
     schemaRegistry = getSchemaRegistry();
@@ -120,6 +128,10 @@ public abstract class AbstractAppDataDimensionStoreHDHT extends DimensionsStoreH
   @Override
   public void beginWindow(long windowId)
   {
+    if(embeddableQuery != null) {
+      embeddableQuery.beginWindow(windowId);
+    }
+
     schemaQueueManager.beginWindow(windowId);
     schemaProcessor.beginWindow(windowId);
 
@@ -137,6 +149,10 @@ public abstract class AbstractAppDataDimensionStoreHDHT extends DimensionsStoreH
   @Override
   public void endWindow()
   {
+    if(embeddableQuery != null) {
+      embeddableQuery.endWindow();
+    }
+
     super.endWindow();
 
     queryProcessor.endWindow();
@@ -149,6 +165,10 @@ public abstract class AbstractAppDataDimensionStoreHDHT extends DimensionsStoreH
   @Override
   public void teardown()
   {
+    if(embeddableQuery != null) {
+      embeddableQuery.teardown();
+    }
+
     queryProcessor.teardown();
     dimensionsQueueManager.teardown();
 
@@ -209,6 +229,22 @@ public abstract class AbstractAppDataDimensionStoreHDHT extends DimensionsStoreH
   public void setAggregatorRegistry(@NotNull AggregatorRegistry aggregatorRegistry)
   {
     this.aggregatorRegistry = aggregatorRegistry;
+  }
+
+  /**
+   * @return the embeddableQuery
+   */
+  public EmbeddableQuery<String> getEmbeddableQuery()
+  {
+    return embeddableQuery;
+  }
+
+  /**
+   * @param embeddableQuery the embeddableQuery to set
+   */
+  public void setEmbeddableQuery(EmbeddableQuery<String> embeddableQuery)
+  {
+    this.embeddableQuery = embeddableQuery;
   }
 
   public class SchemaQueryExecutor implements QueryExecutor<SchemaQuery, Void, Void, SchemaResult>

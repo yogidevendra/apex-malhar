@@ -3,7 +3,7 @@
  *  All Rights Reserved.
  */
 
-package com.datatorrent.lib.appdata;
+package com.datatorrent.lib.appdata.query.serde;
 
 import com.datatorrent.lib.appdata.query.serde.MessageType;
 import com.datatorrent.lib.appdata.schemas.Query;
@@ -14,7 +14,7 @@ import com.datatorrent.lib.appdata.query.serde.SimpleDataValidator;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class SimpleQueryValidatorTest
+public class SimpleDataValidatorTest
 {
   @Test
   public void testValidatingQuery()

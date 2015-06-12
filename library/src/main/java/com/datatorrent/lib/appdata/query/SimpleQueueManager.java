@@ -16,7 +16,7 @@
 package com.datatorrent.lib.appdata.query;
 
 import com.datatorrent.api.Context.OperatorContext;
-import com.datatorrent.lib.appdata.query.QueueUtils.ConditionBarrier;
+import com.datatorrent.lib.appdata.QueueUtils.ConditionBarrier;
 
 import java.util.LinkedList;
 import java.util.concurrent.Semaphore;

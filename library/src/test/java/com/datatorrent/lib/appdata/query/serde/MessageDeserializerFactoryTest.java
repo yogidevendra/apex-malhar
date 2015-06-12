@@ -3,7 +3,7 @@
  *  All Rights Reserved.
  */
 
-package com.datatorrent.lib.appdata;
+package com.datatorrent.lib.appdata.query.serde;
 
 import com.datatorrent.lib.appdata.schemas.Message;
 import com.datatorrent.lib.appdata.query.serde.MessageDeserializerFactory;
@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Timothy Farkas: tim@datatorrent.com
  */
-public class QueryDeserializerFactoryTest
+public class MessageDeserializerFactoryTest
 {
   @Test
   public void testMalformedQuery()
@@ -60,5 +60,5 @@ public class QueryDeserializerFactoryTest
     Assert.assertTrue("Resulting query should be null.", exception);
   }
 
-  private static final Logger LOG = LoggerFactory.getLogger(QueryDeserializerFactoryTest.class);
+  private static final Logger LOG = LoggerFactory.getLogger(MessageDeserializerFactoryTest.class);
 }

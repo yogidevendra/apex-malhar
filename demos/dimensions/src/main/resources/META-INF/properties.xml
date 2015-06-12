@@ -215,6 +215,15 @@
     <name>dt.application.SalesDemo.operator.Query.topic</name>
     <value>SalesQueryDemo</value>
   </property>
+  <!-- For running in embedded mode -->
+  <property>
+    <name>dt.application.SalesDemo.embeddQuery</name>
+    <value>true</value>
+  </property>
+  <property>
+    <name>dt.application.SalesDemo.operator.Store.embeddableQuery.topic</name>
+    <value>SalesQueryDemo</value>
+  </property>
   <property>
     <name>dt.application.SalesDemo.operator.QueryResult.topic</name>
     <value>SalesQueryResultDemo</value>
