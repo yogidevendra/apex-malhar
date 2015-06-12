@@ -90,14 +90,14 @@ public class AppDataSingleSchemaDimensionStoreHDHT extends AbstractAppDataDimens
     }
 
     if(updateEnumValues) {
-    if(seenEnumValues == null) {
-      seenEnumValues = Maps.newHashMap();
-      for(String key: eventSchema.getKeyDescriptor().getFieldList()) {
-        @SuppressWarnings("rawtypes")
-        Set<Comparable> enumValuesSet= Sets.newHashSet();
-        seenEnumValues.put(key, enumValuesSet);
+      if(seenEnumValues == null) {
+        seenEnumValues = Maps.newHashMap();
+        for(String key: eventSchema.getKeyDescriptor().getFieldList()) {
+          @SuppressWarnings("rawtypes")
+          Set<Comparable> enumValuesSet = Sets.newHashSet();
+          seenEnumValues.put(key, enumValuesSet);
+        }
       }
-    }
     }
   }
 
@@ -110,9 +110,8 @@ public class AppDataSingleSchemaDimensionStoreHDHT extends AbstractAppDataDimens
     return new SchemaRegistrySingle(dimensionalSchema);
   }
 
-
   @Override
-  protected void processSchemaQuery(SchemaQuery schemaQuery)
+  protected SchemaResult processSchemaQuery(SchemaQuery schemaQuery)
   {
     dimensionalSchema.setTo(System.currentTimeMillis());
 
@@ -120,12 +119,7 @@ public class AppDataSingleSchemaDimensionStoreHDHT extends AbstractAppDataDimens
       dimensionalSchema.setEnumsSetComparable(seenEnumValues);
     }
 
-    SchemaResult schemaResult = schemaRegistry.getSchemaResult(schemaQuery);
-
-    if (schemaResult != null) {
-      String schemaResultJSON = resultSerializerFactory.serialize(schemaResult);
-      queryResult.emit(schemaResultJSON);
-    }
+    return schemaRegistry.getSchemaResult(schemaQuery);
   }
 
   @Override

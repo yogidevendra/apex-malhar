@@ -9,7 +9,9 @@ import com.datatorrent.api.Context;
 import com.datatorrent.api.DefaultInputPort;
 import com.datatorrent.api.DefaultOutputPort;
 import com.datatorrent.api.annotation.InputPortFieldAnnotation;
+import com.datatorrent.lib.appdata.query.QueryExecutor;
 import com.datatorrent.lib.appdata.query.QueryManagerAsynchronous;
+import com.datatorrent.lib.appdata.query.SimpleQueueManager;
 import com.datatorrent.lib.appdata.query.serde.MessageDeserializerFactory;
 import com.datatorrent.lib.appdata.query.serde.MessageSerializerFactory;
 import com.datatorrent.lib.appdata.schemas.DataQueryDimensional;
@@ -18,6 +20,7 @@ import com.datatorrent.lib.appdata.schemas.Result;
 import com.datatorrent.lib.appdata.schemas.ResultFormatter;
 import com.datatorrent.lib.appdata.schemas.SchemaQuery;
 import com.datatorrent.lib.appdata.schemas.SchemaRegistry;
+import com.datatorrent.lib.appdata.schemas.SchemaResult;
 import com.datatorrent.lib.dimensions.aggregator.AggregatorRegistry;
 import com.datatorrent.lib.dimensions.aggregator.IncrementalAggregator;
 import com.google.common.annotations.VisibleForTesting;
@@ -34,7 +37,9 @@ public abstract class AbstractAppDataDimensionStoreHDHT extends DimensionsStoreH
   @NotNull
   protected AggregatorRegistry aggregatorRegistry = AggregatorRegistry.DEFAULT_AGGREGATOR_REGISTRY;
 
-  protected transient DimensionsQueueManager queueManager;
+  protected transient SimpleQueueManager<SchemaQuery, Void, Void> schemaQueueManager;
+  protected transient DimensionsQueueManager dimensionsQueueManager;
+  protected transient QueryManagerAsynchronous<SchemaQuery, Void, Void, SchemaResult> schemaProcessor;
   protected transient QueryManagerAsynchronous<DataQueryDimensional, QueryMeta, MutableLong, Result> queryProcessor;
   protected final transient MessageDeserializerFactory queryDeserializerFactory;
 
@@ -63,7 +68,7 @@ public abstract class AbstractAppDataDimensionStoreHDHT extends DimensionsStoreH
       }
 
       if (query instanceof SchemaQuery) {
-        processSchemaQuery((SchemaQuery) query);
+        schemaQueueManager.enqueue((SchemaQuery) query, null, null);
       }
       else if (query instanceof DataQueryDimensional) {
         processDimensionalDataQuery((DataQueryDimensional) query);
@@ -90,13 +95,18 @@ public abstract class AbstractAppDataDimensionStoreHDHT extends DimensionsStoreH
     resultSerializerFactory = new MessageSerializerFactory(resultFormatter);
     queryDeserializerFactory.setContext(DataQueryDimensional.class, schemaRegistry);
 
-    queueManager = new DimensionsQueueManager(this, schemaRegistry);
-
+    dimensionsQueueManager = new DimensionsQueueManager(this, schemaRegistry);
     queryProcessor =
     new QueryManagerAsynchronous<DataQueryDimensional, QueryMeta, MutableLong, Result>(queryResult,
-                                                                                       queueManager,
+                                                                                       dimensionsQueueManager,
                                                                                        new DimensionsQueryExecutor(this, schemaRegistry),
                                                                                        resultSerializerFactory);
+
+    schemaQueueManager = new SimpleQueueManager<SchemaQuery, Void, Void>();
+    schemaProcessor = new QueryManagerAsynchronous<SchemaQuery, Void, Void, SchemaResult>(queryResult,
+                                                                                          schemaQueueManager,
+                                                                                          new SchemaQueryExecutor(),
+                                                                                          resultSerializerFactory);
 
     queryProcessor.setup(context);
     super.setup(context);
@@ -105,37 +115,50 @@ public abstract class AbstractAppDataDimensionStoreHDHT extends DimensionsStoreH
   @Override
   public void beginWindow(long windowId)
   {
-    queueManager.beginWindow(windowId);
+    schemaQueueManager.beginWindow(windowId);
+    schemaProcessor.beginWindow(windowId);
+
+    dimensionsQueueManager.beginWindow(windowId);
     queryProcessor.beginWindow(windowId);
+
     super.beginWindow(windowId);
   }
 
   protected void processDimensionalDataQuery(DataQueryDimensional dataQueryDimensional)
   {
-    queueManager.enqueue(dataQueryDimensional, null, null);
+    dimensionsQueueManager.enqueue(dataQueryDimensional, null, null);
   }
 
   @Override
   public void endWindow()
   {
     super.endWindow();
+
     queryProcessor.endWindow();
-    queueManager.endWindow();
+    dimensionsQueueManager.endWindow();
+
+    schemaProcessor.endWindow();
+    schemaQueueManager.endWindow();
   }
 
   @Override
   public void teardown()
   {
     queryProcessor.teardown();
+    dimensionsQueueManager.teardown();
+
+    schemaProcessor.teardown();
+    schemaQueueManager.teardown();
+
     super.teardown();
   }
 
   /**
-   * Processes schema queries
-   *
+   * Processes schema queries.
    * @param schemaQuery a schema query
+   * @return The corresponding schema result.
    */
-  protected abstract void processSchemaQuery(SchemaQuery schemaQuery);
+  protected abstract SchemaResult processSchemaQuery(SchemaQuery schemaQuery);
 
   /**
    * @return the schema registry
@@ -181,6 +204,19 @@ public abstract class AbstractAppDataDimensionStoreHDHT extends DimensionsStoreH
   public void setAggregatorRegistry(@NotNull AggregatorRegistry aggregatorRegistry)
   {
     this.aggregatorRegistry = aggregatorRegistry;
+  }
+
+  public class SchemaQueryExecutor implements QueryExecutor<SchemaQuery, Void, Void, SchemaResult>
+  {
+    public SchemaQueryExecutor()
+    {
+    }
+
+    @Override
+    public SchemaResult executeQuery(SchemaQuery query, Void metaQuery, Void queueContext)
+    {
+      return processSchemaQuery(query);
+    }
   }
 
   private static final Logger LOG = LoggerFactory.getLogger(AbstractAppDataDimensionStoreHDHT.class);
