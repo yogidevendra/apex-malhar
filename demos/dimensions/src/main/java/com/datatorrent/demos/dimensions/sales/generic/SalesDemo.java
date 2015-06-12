@@ -77,20 +77,16 @@ public class SalesDemo implements StreamingApplication
 
     String gatewayAddress = dag.getValue(DAG.GATEWAY_CONNECT_ADDRESS);
     URI uri = URI.create("ws://" + gatewayAddress + "/pubsub");
-    PubSubWebSocketAppDataQuery wsIn = dag.addOperator("Query", new PubSubWebSocketAppDataQuery());
+    PubSubWebSocketAppDataQuery wsIn = new PubSubWebSocketAppDataQuery();
     wsIn.setUri(uri);
     queryPort = wsIn.outputPort;
 
-    /*
     if(conf.getBoolean(PROP_EMBEDD_QUERY, false)) {
-      LOG.info("Embedding query operator.");
       store.setEmbeddableQuery(wsIn);
     }
     else {
-      LOG.info("Not embedding query operator.");
       dag.addStream("Query", queryPort, store.query).setLocality(Locality.CONTAINER_LOCAL);
     }
-            */
 
     store.setEmbeddableQuery(wsIn);
 
