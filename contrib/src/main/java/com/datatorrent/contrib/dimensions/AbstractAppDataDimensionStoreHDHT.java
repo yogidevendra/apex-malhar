@@ -105,6 +105,7 @@ public abstract class AbstractAppDataDimensionStoreHDHT extends DimensionsStoreH
   @Override
   public void beginWindow(long windowId)
   {
+    queueManager.beginWindow(windowId);
     queryProcessor.beginWindow(windowId);
     super.beginWindow(windowId);
   }
@@ -119,6 +120,7 @@ public abstract class AbstractAppDataDimensionStoreHDHT extends DimensionsStoreH
   {
     super.endWindow();
     queryProcessor.endWindow();
+    queueManager.endWindow();
   }
 
   @Override
