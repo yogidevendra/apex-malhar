@@ -92,6 +92,7 @@ public abstract class AbstractAppDataTabularServer<INPUT_EVENT> implements Opera
     @Override
     public void process(String queryJSON)
     {
+      LOG.debug("query {}", queryJSON);
       Message query = null;
 
       try {
