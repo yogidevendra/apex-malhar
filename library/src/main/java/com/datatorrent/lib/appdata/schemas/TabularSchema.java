@@ -46,7 +46,7 @@ public class TabularSchema implements Schema
   /**
    * The type of the schema.
    */
-  public static final String SCHEMA_TYPE = "point";
+  public static final String SCHEMA_TYPE = "snapshot";
   /**
    * The version of the schema.
    */
