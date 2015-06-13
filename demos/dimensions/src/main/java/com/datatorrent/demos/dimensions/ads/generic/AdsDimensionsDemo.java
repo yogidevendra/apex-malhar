@@ -196,6 +196,7 @@ public class AdsDimensionsDemo implements StreamingApplication
       store.setEmbeddableQuery(wsIn);
     }
     else {
+      dag.addOperator("Query", wsIn);
       dag.addStream("Query", queryPort, store.query).setLocality(Locality.CONTAINER_LOCAL);
     }
 
