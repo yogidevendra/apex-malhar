@@ -188,7 +188,7 @@ public class AdsDimensionsDemo implements StreamingApplication
     String gatewayAddress = dag.getValue(DAG.GATEWAY_CONNECT_ADDRESS);
     URI uri = URI.create("ws://" + gatewayAddress + "/pubsub");
     //LOG.info("WebSocket with gateway at: {}", gatewayAddress);
-    PubSubWebSocketAppDataQuery wsIn = dag.addOperator("Query", new PubSubWebSocketAppDataQuery());
+    PubSubWebSocketAppDataQuery wsIn = new PubSubWebSocketAppDataQuery();
     wsIn.setUri(uri);
     queryPort = wsIn.outputPort;
 
