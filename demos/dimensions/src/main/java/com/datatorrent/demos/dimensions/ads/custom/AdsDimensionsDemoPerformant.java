@@ -50,13 +50,14 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-
 @ApplicationAnnotation(name=AdsDimensionsDemoPerformant.APP_NAME)
 public class AdsDimensionsDemoPerformant implements StreamingApplication
 {
   public static final String EVENT_SCHEMA = "adsBenchmarkSchema.json";
-  public static final String APP_NAME = "AdsDimensionsDemoSummit";
+  public static final String APP_NAME = "AdsDimensionsDemoFast";
   public static final String PROP_STORE_PATH = "dt.application." + APP_NAME + ".operator.Store.fileStore.basePathPrefix";
+
+  public static final String PROP_EMBEDD_QUERY = "dt.application." + APP_NAME + ".embeddQuery";
 
   @Override
   public void populateDAG(DAG dag, Configuration conf)
@@ -136,9 +137,18 @@ public class AdsDimensionsDemoPerformant implements StreamingApplication
     String gatewayAddress = dag.getValue(DAG.GATEWAY_CONNECT_ADDRESS);
     URI uri = URI.create("ws://" + gatewayAddress + "/pubsub");
     //LOG.info("WebSocket with gateway at: {}", gatewayAddress);
-    PubSubWebSocketAppDataQuery wsIn = dag.addOperator("Query", new PubSubWebSocketAppDataQuery());
+    PubSubWebSocketAppDataQuery wsIn = new PubSubWebSocketAppDataQuery();
     wsIn.setUri(uri);
     queryPort = wsIn.outputPort;
+
+    if(conf.getBoolean(PROP_EMBEDD_QUERY, false)) {
+      store.setEmbeddableQuery(wsIn);
+    }
+    else {
+      dag.addOperator("Query", wsIn);
+      dag.addStream("Query", queryPort, store.query).setLocality(Locality.CONTAINER_LOCAL);
+    }
+
     PubSubWebSocketAppDataResult wsOut = dag.addOperator("QueryResult", new PubSubWebSocketAppDataResult());
     wsOut.setUri(uri);
     queryResultPort = wsOut.input;
@@ -150,7 +160,6 @@ public class AdsDimensionsDemoPerformant implements StreamingApplication
     dag.addStream("InputStream", input.outputPort, dimensions.data).setLocality(Locality.CONTAINER_LOCAL);
     dag.addStream("DimensionalData", dimensions.output, adsConverter.inputPort);
     dag.addStream("Converter", adsConverter.outputPort, store.input);
-    dag.addStream("Query", queryPort, store.query);
     dag.addStream("QueryResult", store.queryResult, queryResultPort);
   }
 
