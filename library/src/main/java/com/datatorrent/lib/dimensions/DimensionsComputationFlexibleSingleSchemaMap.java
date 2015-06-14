@@ -24,10 +24,24 @@ import com.datatorrent.lib.dimensions.DimensionsEvent.InputEvent;
 
 import java.util.Map;
 
+/**
+ * This is a generic dimensions computation operator, which operates on input objects that are java
+ * {@link Map}s. The keys of the maps are strings which represent the names of fields, and the values
+ * are objects which represent the values of those fields.
+ */
 public class DimensionsComputationFlexibleSingleSchemaMap extends AbstractDimensionsComputationFlexibleSingleSchema<Map<String, Object>>
 {
+  /**
+   * This is a map which defines aliases for field names in input maps. The key of this map is the name
+   * of a field in the {@link DimensionalSchema} defined for this operator. The corresponding value in
+   * this map is the name of the field in the input map. If there is no entry in this map for a field defined
+   * in the {@link DimensionalSchema} then it is assumed that the name of the field is the same for input maps.
+   */
   private Map<String, String> fieldToMapField;
 
+  /**
+   * Create a dimensions computation operator.
+   */
   public DimensionsComputationFlexibleSingleSchemaMap()
   {
     this.unifier = new DimensionsComputationUnifierImpl<InputEvent, Aggregate>();
@@ -76,6 +90,11 @@ public class DimensionsComputationFlexibleSingleSchemaMap extends AbstractDimens
                           valueMutable);
   }
 
+  /**
+   * This is a helper method which gets the corresponding key string for a field in incoming {@link Map}s.
+   * @param field The name of a field defined in the {@link DimensionalSchema}.
+   * @return The key name of the given field in incoming input maps.
+   */
   private String getMapField(String field)
   {
     if(fieldToMapField == null) {
@@ -92,7 +111,8 @@ public class DimensionsComputationFlexibleSingleSchemaMap extends AbstractDimens
   }
 
   /**
-   * @return the fieldToMapField
+   * Returns the mapping from {@link DimensionalSchema} field names to input map names.
+   * @return The mapping from {@link DimensionalSchema} field names to input map names.
    */
   public Map<String, String> getFieldToMapField()
   {
@@ -100,7 +120,8 @@ public class DimensionsComputationFlexibleSingleSchemaMap extends AbstractDimens
   }
 
   /**
-   * @param fieldToMapField the fieldToMapField to set
+   * Sets the mapping from {@link DimensionalSchema} field names to input map names.
+   * @param fieldToMapField The mapping from {@link DimensionalSchema} field names to input map names.
    */
   public void setFieldToMapField(Map<String, String> fieldToMapField)
   {

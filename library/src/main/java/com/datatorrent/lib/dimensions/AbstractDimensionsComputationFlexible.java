@@ -35,11 +35,46 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+/**
+ * <p>
+ * This is a base class for a generic dimensions computation operator. Generic dimensions computation operators work by taking
+ * inputs
+ * applying {@link IncrementalAggregators} to inputs. Generic dimensions computation operators work
+ * in the following way:<br/>
+ * <ol>
+ * <li>An {@link AggregatorRegistry} is set on the operator. The {@link AggregatorRegistry} provides implementations of {@link IncrementalAggregator}s
+ * which can be applied to inputs.</li>
+ * <li>A raw input event is received by the operator. The operator converts the input into an {@link InputEvent} in its {@link #convertInput} method. This
+ * is done because {@link IncrementalAggregator}s only understand how to aggregate {@link InputEvent}s.</li>
+ * <li>The {@link InputEvent} is sent to an {@link IncrementalAggregator} and the {@link IncrementalAggregator} aggregates input
+ * events into {@link Aggregate}s. These {@link Aggregate}s are then emitted by the operator.</li>
+ * </ol>
+ * </p>
+ * <p>
+ * The advantages of this implementation of dimensions computation are that it is usable from App Builder,
+ * and also does not require aggregators to be reimplemented for different input types like the {@link DimensionsComputationCustom}
+ * operator does.
+ * </p>
+ * <p>
+ * The disadvantage of this operator is that it is not as performant as the {@link DimensionsComputationCustom} operator.
+ * </p>
+ * @param <INPUT> The type of input data received by the operator.
+ */
 public abstract class AbstractDimensionsComputationFlexible<INPUT> extends AbstractDimensionsComputation<InputEvent, Aggregate>
 {
+  /**
+   * The {@link AggregatorRegistry} to use for this dimensions computation operator.
+   */
   protected AggregatorRegistry aggregatorRegistry = AggregatorRegistry.DEFAULT_AGGREGATOR_REGISTRY;
+  /**
+   * This maps aggregatorIDs provided by the {@link AggregatorRegistry} to aggregate indices, which are used
+   * by the dimensions computation unifier to unify aggregates appropriately.
+   */
   protected Int2IntOpenHashMap aggregatorIdToAggregateIndex;
 
+  /**
+   * The input port which receives events to perform dimensions computation on.
+   */
   public transient final DefaultInputPort<INPUT> inputEvent = new DefaultInputPort<INPUT>() {
     @Override
     public void process(INPUT tuple)
@@ -48,13 +83,31 @@ public abstract class AbstractDimensionsComputationFlexible<INPUT> extends Abstr
     }
   };
 
+  /**
+   * Creates an operator.
+   */
   public AbstractDimensionsComputationFlexible()
   {
+    //This sets a default unifier hashing strategy which aggregates events with the same {@link EventKey} together in the
+    //unifier.
     unifierHashingStrategy = AggregateHashingStrategy.INSTANCE;
   }
 
+  /**
+   * This method is called for each input tuple when the input tuple is received.
+   * @param tuple The input tuple.
+   */
   public abstract void processInputEvent(INPUT tuple);
 
+  /**
+   * Converts the given input tuple into the appropriate {@link InputEvent} based off of the given
+   * {@link DimensionsConversionContext}. The {@link DimensionsConversionContext} defines the {@link DimensionsDescriptor}
+   * that the create {@link InputEvent} will correspond to. It also determines the schemaID and aggregator
+   * that applied to the given {@link InputEvent}.
+   * @param input The {@link InputEvent} to convert.
+   * @param conversionContext The {@link DimensionsConversionContext} to apply to the given input tuple.
+   * @return The converted tuple.
+   */
   public abstract InputEvent convertInput(INPUT input,
                                           DimensionsConversionContext conversionContext);
 
@@ -123,6 +176,11 @@ public abstract class AbstractDimensionsComputationFlexible<INPUT> extends Abstr
     return aggregators;
   }
 
+  /**
+   * This is a helper method which maps the aggregatorIDs of aggregates to a corresponding aggregateIndex.
+   * The aggregateIndex is used in the unifier and serves a similar purpose to the aggregatorID, because it
+   * also determines what {@link IncrementalAggregator} to apply to an {@link Aggregate}.
+   */
   private void computeAggregatorIdToAggregateIndex()
   {
     aggregatorRegistry.setup();
@@ -142,7 +200,8 @@ public abstract class AbstractDimensionsComputationFlexible<INPUT> extends Abstr
   }
 
   /**
-   * @return the aggregatorRegistry
+   * Returns the {@link AggregatorRegistry} set on the dimensions computation operator.
+   * @return The {@link AggregatorRegistry} set on this dimensions computation operator.
    */
   public AggregatorRegistry getAggregatorRegistry()
   {
@@ -150,25 +209,52 @@ public abstract class AbstractDimensionsComputationFlexible<INPUT> extends Abstr
   }
 
   /**
-   * @param aggregatorRegistry the aggregatorRegistry to set
+   * Sets the {@link AggregatorRegistry} to use for this operator.
+   * @param aggregatorRegistry The {@link AggregatorRegistry} to use for this operator.
    */
   public void setAggregatorRegistry(AggregatorRegistry aggregatorRegistry)
   {
     this.aggregatorRegistry = aggregatorRegistry;
   }
 
+  /**
+   * This is a context object that is passed to the {@link #convertInput} method in order to
+   * determine the type of {@link InputEvent} that the {@link #convertInput} method should
+   * produce.
+   */
   public class DimensionsConversionContext
   {
+    /**
+     * The schemaID to apply to the {@link InputEvent}.
+     */
     public int schemaID;
-    public int dimensionDescriptorID;
+    /**
+     * The aggregatorID of the aggregator to use on the {@link InputEvent}.
+     */
     public int aggregatorID;
-    public int ddID;
+    /**
+     * The dimensions descriptor id to apply to the {@link InputEvent}.
+     */
+    public int dimensionDescriptorID;
+    /**
+     * The {@link DimensionsDescriptor} corresponding to the given dimension descriptor id.
+     */
     public DimensionsDescriptor dd;
+    /**
+     * The {@link FieldsDescriptor} for the key of a new {@link InputEvent}.
+     */
     public FieldsDescriptor keyFieldsDescriptor;
+    /**
+     * The {@link FieldsDescriptor} for the aggregate of a new {@link InputEvent}.
+     */
     public FieldsDescriptor aggregateDescriptor;
 
+    /**
+     * Constructor for creating conversion context.
+     */
     public DimensionsConversionContext()
     {
+      //Do nothing.
     }
   }
 }

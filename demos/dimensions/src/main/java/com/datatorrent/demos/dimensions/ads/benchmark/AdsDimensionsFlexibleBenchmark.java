@@ -64,7 +64,7 @@ public class AdsDimensionsFlexibleBenchmark implements StreamingApplication
     dimensions.setUnifier(unifier);
     dimensions.setKeyToExpression(keyToExpression);
     dimensions.setAggregateToExpression(aggregateToExpression);
-    dimensions.setEventSchemaJSON(eventSchema);
+    dimensions.setConfigurationSchemaJSON(eventSchema);
 
     dag.addStream("InputStream", input.outputPort, dimensions.inputEvent).setLocality(Locality.CONTAINER_LOCAL);
     dag.addStream("DimensionalData", dimensions.output, devNull.data);

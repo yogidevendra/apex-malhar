@@ -22,7 +22,7 @@ package com.datatorrent.lib.dimensions;
 public interface DimensionsComputation
 {
   /**
-   * This is a marker interface that is required to satisfy the generics of the {@link Aggregator}
+   * This is a vacuous marker interface that is required to satisfy the generics of the {@link Aggregator}
    * interface.
    */
   public interface AggregateResult {}

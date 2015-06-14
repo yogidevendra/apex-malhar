@@ -149,7 +149,7 @@ public class DimensionsComputationFlexibleSingleSchemaPOJOTest
   public static DimensionsComputationFlexibleSingleSchemaPOJO createDimensionsComputationOperator(String eventSchema)
   {
     DimensionsComputationFlexibleSingleSchemaPOJO dimensions = new DimensionsComputationFlexibleSingleSchemaPOJO();
-    dimensions.setEventSchemaJSON(SchemaUtils.jarResourceFileToString(eventSchema));
+    dimensions.setConfigurationSchemaJSON(SchemaUtils.jarResourceFileToString(eventSchema));
 
     Map<String, String> fieldToExpressionKey = Maps.newHashMap();
     fieldToExpressionKey.put("publisher", "getPublisher()");

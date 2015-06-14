@@ -167,7 +167,7 @@ public class AdsDimensionsDemo implements StreamingApplication
 
     dimensions.setKeyToExpression(keyToExpression);
     dimensions.setAggregateToExpression(aggregateToExpression);
-    dimensions.setEventSchemaJSON(eventSchema);
+    dimensions.setConfigurationSchemaJSON(eventSchema);
 
     //Set store properties
     String basePath = Preconditions.checkNotNull(conf.get(propStorePath),

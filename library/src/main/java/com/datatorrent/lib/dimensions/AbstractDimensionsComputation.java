@@ -49,8 +49,8 @@ import org.slf4j.LoggerFactory;
  * is used to determine the key combination / dimensions descriptor that the {@link AggregatorMap} is responsible
  * for aggregating over.
  * </p>
- * @param <AGGREGATOR_INPUT>
- * @param <AGGREGATE>
+ * @param <AGGREGATOR_INPUT> The type of the data received by the {@link AbstractDimensionsComputation} operator.
+ * @param <AGGREGATE> The type of the data aggregated by the {@link AbstractDimensionsComputation} operator.
  */
 public abstract class AbstractDimensionsComputation<AGGREGATOR_INPUT, AGGREGATE extends UnifiableAggregate> implements Operator
 {
@@ -68,6 +68,9 @@ public abstract class AbstractDimensionsComputation<AGGREGATOR_INPUT, AGGREGATE 
    */
   protected DTHashingStrategy<AGGREGATE> unifierHashingStrategy;
 
+  /**
+   * The output port for the aggregates.
+   */
   public final transient DefaultOutputPort<AGGREGATE> output = new DefaultOutputPort<AGGREGATE>() {
     @Override
     public Unifier<AGGREGATE> getUnifier()
@@ -457,7 +460,7 @@ public abstract class AbstractDimensionsComputation<AGGREGATOR_INPUT, AGGREGATE 
    * </p>
    * <br/>
    * As can be seen above, the {@link #computeHashCode} and equals method only utilize publisher and advertiser. So the {@link AggregatorMap}
-   * only aggregates values with the
+   * only aggregates values with the the same publisher and advertiser together.
    * @param <AGGREGATOR_INPUT> The type of input values to be aggregated.
    * @param <AGGREGATE> The type of aggregate.
    */

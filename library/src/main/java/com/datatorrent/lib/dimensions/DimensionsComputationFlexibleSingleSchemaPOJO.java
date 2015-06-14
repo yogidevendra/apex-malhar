@@ -40,18 +40,59 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * <p>
+ * This is a generic dimensions computation operator, which operates on POJOs.
+ * </p>
+ * <p>
+ * <h3>Benchmark Results:</h3><br/>
+ * This operator was benchmarked with the following configuration:<br/>
+ * <ul>
+ * <li><b>Memory:</b> 8.5gb</li>
+ * <li>8 {@link DimensionDescriptors}</li>
+ * <li>1 aggregator ({@link AggregatorSum})</li>
+ * <li>3 key fields</li>
+ * <li>4 aggregate fields</li>
+ * </ul>
+ * <br/>
+ * <br/>
+ * The operator was able to process 70,000 tuples/sec.
+ * </p>
+ */
 public class DimensionsComputationFlexibleSingleSchemaPOJO extends AbstractDimensionsComputationFlexibleSingleSchema<Object>
 {
+  /**
+   * This is a map from aggregate field name to aggregate getter expressions.
+   */
   @NotNull
   private Map<String, String> aggregateToExpression;
+  /**
+   * This is a map from key field names to key getter expressions.
+   */
   @NotNull
   private Map<String, String> keyToExpression;
 
-  private transient List<Int2ObjectMap<GPOGetters>> ddIDToAggIDToGetters;
-  private transient List<GPOGetters> ddIDToKeyGetters;
-
+  /**
+   * This holds {@link GPOGetters} which contain the getters used to extract aggregates from
+   * an incoming pojo for a particular {@link DimensionsDescriptor} and aggregator combination. This
+   * is effectively a map where the first key is the dimensionsDescriptorID, and the second key is
+   * the aggregatorID.
+   */
+  private transient List<Int2ObjectMap<GPOGetters>> dimensionDescriptorIDToAggregatorIDToGetters;
+  /**
+   * This holds {@link GPOGetters} which contain the getters used to extract key fields from an
+   * incoming pojo for a particular {@link DimensionsDescriptor}. This is effectively a map where
+   * the first keys is the dimensionsDescriptorID, and the second key is the aggregatorID.
+   */
+  private transient List<GPOGetters> dimensionDescriptorIDToKeyGetters;
+  /**
+   * Flag indicating whether or not getters were built.
+   */
   private transient boolean builtGetters = false;
 
+  /**
+   * Creates the operator.
+   */
   public DimensionsComputationFlexibleSingleSchemaPOJO()
   {
     this.unifier = new DimensionsComputationUnifierImpl<InputEvent, Aggregate>();
@@ -65,12 +106,12 @@ public class DimensionsComputationFlexibleSingleSchemaPOJO extends AbstractDimen
 
     GPOMutable key = new GPOMutable(conversionContext.keyFieldsDescriptor);
     GPOGetters keyGetters =
-    ddIDToKeyGetters.get(conversionContext.ddID);
+    dimensionDescriptorIDToKeyGetters.get(conversionContext.dimensionDescriptorID);
     GPOUtils.copyPOJOToGPO(key, keyGetters, input);
 
     GPOMutable aggregates = new GPOMutable(conversionContext.aggregateDescriptor);
     GPOGetters aggregateGetters =
-    ddIDToAggIDToGetters.get(conversionContext.ddID).get(conversionContext.aggregatorID);
+    dimensionDescriptorIDToAggregatorIDToGetters.get(conversionContext.dimensionDescriptorID).get(conversionContext.aggregatorID);
     GPOUtils.copyPOJOToGPO(aggregates, aggregateGetters, input);
 
     return new InputEvent(new EventKey(conversionContext.schemaID,
@@ -81,7 +122,8 @@ public class DimensionsComputationFlexibleSingleSchemaPOJO extends AbstractDimen
   }
 
   /**
-   * @return the aggregateToExpression
+   * Returns the map from aggregate field name to aggregate field getter expression.
+   * @return The map from aggregate field name to aggregate field getter expression.
    */
   public Map<String, String> getAggregateToExpression()
   {
@@ -89,7 +131,8 @@ public class DimensionsComputationFlexibleSingleSchemaPOJO extends AbstractDimen
   }
 
   /**
-   * @param aggregateToExpression the aggregateToExpression to set
+   * Sets the map from aggregate field name to aggregate field getter expression.
+   * @param aggregateToExpression The map from aggregate field name to aggregate field getter expression.
    */
   public void setAggregateToExpression(Map<String, String> aggregateToExpression)
   {
@@ -97,7 +140,8 @@ public class DimensionsComputationFlexibleSingleSchemaPOJO extends AbstractDimen
   }
 
   /**
-   * @return the keyToExpression
+   * Returns the map from key field name to key field getter expression.
+   * @return The map from key field name to key field getter expression.
    */
   public Map<String, String> getKeyToExpression()
   {
@@ -105,13 +149,18 @@ public class DimensionsComputationFlexibleSingleSchemaPOJO extends AbstractDimen
   }
 
   /**
-   * @param keyToExpression the keyToExpression to set
+   * Sets the map from key field name to key field getter expression.
+   * @param keyToExpression The map from key field name to key field getter expression.
    */
   public void setKeyToExpression(Map<String, String> keyToExpression)
   {
     this.keyToExpression = keyToExpression;
   }
 
+  /**
+   * This is a helper method which builds the getter methods to extract values from incoming pojos.
+   * @param inputEvent An incoming pojo.
+   */
   private void buildGetters(Object inputEvent)
   {
     if(builtGetters) {
@@ -122,39 +171,50 @@ public class DimensionsComputationFlexibleSingleSchemaPOJO extends AbstractDimen
 
     Class<?> clazz = inputEvent.getClass();
 
-    ddIDToKeyGetters = Lists.newArrayList();
-    List<FieldsDescriptor> keyDescriptors = eventSchema.getDimensionsDescriptorIDToKeyDescriptor();
-    ddIDToAggIDToGetters = Lists.newArrayList();
+    dimensionDescriptorIDToKeyGetters = Lists.newArrayList();
+    List<FieldsDescriptor> keyDescriptors = configurationSchema.getDimensionsDescriptorIDToKeyDescriptor();
+    dimensionDescriptorIDToAggregatorIDToGetters = Lists.newArrayList();
 
     for(int ddID = 0;
-        ddID < eventSchema.getDimensionsDescriptorIDToKeyDescriptor().size();
+        ddID < configurationSchema.getDimensionsDescriptorIDToKeyDescriptor().size();
         ddID++) {
-      DimensionsDescriptor dd = eventSchema.getDimensionsDescriptorIDToDimensionsDescriptor().get(ddID);
+      DimensionsDescriptor dd = configurationSchema.getDimensionsDescriptorIDToDimensionsDescriptor().get(ddID);
       FieldsDescriptor keyDescriptor = keyDescriptors.get(ddID);
-      GPOGetters keyGPOGetters = buildGPOGetters(clazz, keyDescriptor, dd, keyToExpression, true);
-      ddIDToKeyGetters.add(keyGPOGetters);
-      Int2ObjectMap<FieldsDescriptor> map = eventSchema.getDimensionsDescriptorIDToAggregatorIDToInputAggregatorDescriptor().get(ddID);
-      IntArrayList aggIDList = eventSchema.getDimensionsDescriptorIDToAggregatorIDs().get(ddID);
+      GPOGetters keyGPOGetters = buildGettersForDimensionsDescriptor(clazz, keyDescriptor, dd, keyToExpression, true);
+      dimensionDescriptorIDToKeyGetters.add(keyGPOGetters);
+      Int2ObjectMap<FieldsDescriptor> map = configurationSchema.getDimensionsDescriptorIDToAggregatorIDToInputAggregatorDescriptor().get(ddID);
+      IntArrayList aggIDList = configurationSchema.getDimensionsDescriptorIDToAggregatorIDs().get(ddID);
       Int2ObjectOpenHashMap<GPOGetters> aggIDToGetters = new Int2ObjectOpenHashMap<GPOGetters>();
-      ddIDToAggIDToGetters.add(aggIDToGetters);
+      dimensionDescriptorIDToAggregatorIDToGetters.add(aggIDToGetters);
 
       for(int aggIDIndex = 0;
           aggIDIndex < aggIDList.size();
           aggIDIndex++) {
         int aggID = aggIDList.get(aggIDIndex);
         FieldsDescriptor aggFieldsDescriptor = map.get(aggID);
-        GPOGetters aggGPOGetters = buildGPOGetters(clazz, aggFieldsDescriptor, dd, aggregateToExpression, false);
+        GPOGetters aggGPOGetters = buildGettersForDimensionsDescriptor(clazz, aggFieldsDescriptor, dd, aggregateToExpression, false);
         aggIDToGetters.put(aggID, aggGPOGetters);
       }
     }
   }
 
+  /**
+   * This method builds the getters for a particular dimensions descriptor.
+   * @param clazz The {@link Class} object for the incoming POJO.
+   * @param fieldsDescriptor This is the {@link FieldsDescriptor} object describing the name of types of the fields
+   * for which to create getters.
+   * @param dd The dimensions descriptor under which these getters will be constructed.
+   * @param valueToExpression This is a map from a field's name to its corresponding getter expression.
+   * @param isKey True if the constructed getters will be used to extract key values from a pojo.
+   * False if the constructed getters will be used to extract aggregates from a pojo.
+   * @return The set of getters used to extract either keys or aggregates from the pojo.
+   */
   @SuppressWarnings({"unchecked", "rawtypes"})
-  private GPOGetters buildGPOGetters(Class<?> clazz,
-                                     FieldsDescriptor fieldsDescriptor,
-                                     DimensionsDescriptor dd,
-                                     Map<String, String> valueToExpression,
-                                     boolean isKey)
+  private GPOGetters buildGettersForDimensionsDescriptor(Class<?> clazz,
+                                                         FieldsDescriptor fieldsDescriptor,
+                                                         DimensionsDescriptor dd,
+                                                         Map<String, String> valueToExpression,
+                                                         boolean isKey)
   {
     GPOGetters gpoGetters = new GPOGetters();
 
@@ -209,6 +269,7 @@ public class DimensionsComputationFlexibleSingleSchemaPOJO extends AbstractDimen
             GetterLong tempGetterLong = PojoUtils.createGetterLong(clazz, valueToExpression.get(field));
 
             if(isKey && field.equals(DimensionsDescriptor.DIMENSION_TIME)) {
+              //Create the special getter for the timestamp
               gpoGetters.gettersLong[getterIndex] = new GetTime(tempGetterLong, dd.getTimeBucket());
             }
             else {
@@ -227,6 +288,7 @@ public class DimensionsComputationFlexibleSingleSchemaPOJO extends AbstractDimen
             String field = fields.get(getterIndex);
 
             if(isKey && field.equals(DimensionsDescriptor.DIMENSION_TIME_BUCKET)) {
+              //create the special getter for the time bucket
               gpoGetters.gettersInteger[getterIndex]
                       = new GetTimeBucket(dd.getTimeBucket());
 
@@ -269,10 +331,22 @@ public class DimensionsComputationFlexibleSingleSchemaPOJO extends AbstractDimen
     return gpoGetters;
   }
 
+  /**
+   * <p>
+   * This is a special getter to get the time bucket from an incoming POJO.
+   * </p>
+   */
   public static class GetTimeBucket implements PojoUtils.GetterInt<Object>
   {
+    /**
+     * The timeBucket to return from this getter.
+     */
     private final int timeBucket;
 
+    /**
+     * Creates a getter which returns the id of the given {@link TimeBucket}.
+     * @param timeBucket  The id of the given {@link TimeBucket}.
+     */
     public GetTimeBucket(TimeBucket timeBucket)
     {
       this.timeBucket = timeBucket.ordinal();
@@ -285,11 +359,26 @@ public class DimensionsComputationFlexibleSingleSchemaPOJO extends AbstractDimen
     }
   }
 
+  /**
+   * This is a special getter gets the correctly rounded timestamp from the
+   * given POJO.
+   */
   public static class GetTime implements PojoUtils.GetterLong<Object>
   {
+    /**
+     * The getter which retrieves the timestamp from the input pojo.
+     */
     private final GetterLong<Object> timeGetter;
+    /**
+     * The {@link TimeBucket} to use in order to round down a retrieved timestamp.
+     */
     private final TimeBucket timeBucket;
 
+    /**
+     * Creates a getter which retrieves a rounded down timestamp.
+     * @param timeGetter The getter which retrieves a timestamp from an input pojo.
+     * @param timeBucket The {@link TimeBucket} to use when rounding timestamps.
+     */
     public GetTime(GetterLong<Object> timeGetter, TimeBucket timeBucket)
     {
       this.timeGetter = Preconditions.checkNotNull(timeGetter);

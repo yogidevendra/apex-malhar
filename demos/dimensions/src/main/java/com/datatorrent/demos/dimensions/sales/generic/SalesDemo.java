@@ -63,7 +63,7 @@ public class SalesDemo implements StreamingApplication
     String eventSchema = SchemaUtils.jarResourceFileToString(EVENT_SCHEMA);
     String dimensionalSchema = SchemaUtils.jarResourceFileToString(DIMENSIONAL_SCHEMA);
 
-    dimensions.setEventSchemaJSON(eventSchema);
+    dimensions.setConfigurationSchemaJSON(eventSchema);
     Map<String, String> fieldToMapField = Maps.newHashMap();
     fieldToMapField.put("sales", "amount");
     dimensions.setFieldToMapField(fieldToMapField);

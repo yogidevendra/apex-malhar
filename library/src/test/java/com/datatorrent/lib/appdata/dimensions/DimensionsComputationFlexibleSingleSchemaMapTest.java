@@ -90,7 +90,7 @@ public class DimensionsComputationFlexibleSingleSchemaMapTest
     Aggregate expectedAE = new Aggregate(eventKey, valueGPO);
 
     DimensionsComputationFlexibleSingleSchemaMap dimensions = new DimensionsComputationFlexibleSingleSchemaMap();
-    dimensions.setEventSchemaJSON(SchemaUtils.jarResourceFileToString("adsGenericEventSimple.json"));
+    dimensions.setConfigurationSchemaJSON(SchemaUtils.jarResourceFileToString("adsGenericEventSimple.json"));
 
     CollectorTestSink<DimensionsEvent> sink = new CollectorTestSink<DimensionsEvent>();
     TestUtils.setSink(dimensions.output, sink);
