@@ -53,5 +53,4 @@ public class PubSubWebSocketOutputOperator<T> extends WebSocketOutputOperator<T>
   {
     return PubSubWebSocketClient.constructPublishMessage(topic, t, codec);
   }
-
 }

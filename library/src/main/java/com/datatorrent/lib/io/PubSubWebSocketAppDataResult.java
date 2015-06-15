@@ -80,8 +80,8 @@ public class PubSubWebSocketAppDataResult extends PubSubWebSocketOutputOperator<
       throw new RuntimeException(ex);
     }
 
-    logger.info("Output json {}", output.toString());
-    logger.info("Writing to topic: {}", topic);
+    logger.debug("Output json {}", output.toString());
+    logger.debug("Writing to topic: {}", topic);
 
     return output.toString();
   }

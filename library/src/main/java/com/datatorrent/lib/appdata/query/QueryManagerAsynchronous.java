@@ -91,7 +91,6 @@ public class QueryManagerAsynchronous<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT, RES
   public void beginWindow(long windowID)
   {
     inWindowSemaphore.release();
-    LOG.debug("before resume enqueue before {}", queueManager.getNumLeft());
     queueManager.resumeEnqueue();
   }
 
@@ -100,7 +99,6 @@ public class QueryManagerAsynchronous<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT, RES
     queueManager.haltEnqueue();
 
     while(queueManager.getNumLeft() > 0) {
-      LOG.debug("Num left: {}", queueManager.getNumLeft());
       Thread.yield();
     }
 
@@ -128,16 +126,12 @@ public class QueryManagerAsynchronous<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT, RES
         //Grab something from the queue as soon as it's available.
         QueryBundle<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT> queryBundle = queueManager.dequeueBlock();
 
-        LOG.debug("before acquire");
-
         try {
           inWindowSemaphore.acquire();
         }
         catch(InterruptedException ex) {
           throw new RuntimeException(ex);
         }
-
-        LOG.debug("after acquire");
 
         //We are gauranteed to be in the operator's window now.
         Result result = queryExecutor.executeQuery(queryBundle.getQuery(),
