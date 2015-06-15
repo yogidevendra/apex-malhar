@@ -428,13 +428,13 @@ public class DimensionalConfigurationSchema
       Set<String> otfAggregators = Sets.newHashSet();
 
       for(String aggregatorName: aggregators) {
-        if(aggregatorRegistry.isStaticAggregator(aggregatorName)) {
+        if(aggregatorRegistry.isIncrementalAggregator(aggregatorName)) {
           specificAggregatorSet.add(aggregatorName);
           allAggregatorSet.add(aggregatorName);
         }
         else {
           otfAggregators.add(aggregatorName);
-          List<String> aggregatorNames = aggregatorRegistry.getOTFAggregatorToStaticAggregators().get(aggregatorName);
+          List<String> aggregatorNames = aggregatorRegistry.getOTFAggregatorToIncrementalAggregators().get(aggregatorName);
           specificAggregatorSet.addAll(aggregatorNames);
           allAggregatorSet.addAll(aggregatorNames);
           allAggregatorSet.add(aggregatorName);
@@ -454,7 +454,7 @@ public class DimensionalConfigurationSchema
 
       for(String aggregatorName: aggregators) {
 
-        if(aggregatorRegistry.isStaticAggregator(aggregatorName)) {
+        if(aggregatorRegistry.isIncrementalAggregator(aggregatorName)) {
           IncrementalAggregator aggregator = aggregatorRegistry.getNameToIncrementalAggregator().get(aggregatorName);
 
           aggregatorToType.put(aggregatorName, aggregator.getOutputType(inputType));
@@ -503,11 +503,11 @@ public class DimensionalConfigurationSchema
                                                       + " is not valid.");
             }
 
-            if(aggregatorRegistry.isStaticAggregator(aggregatorName)) {
+            if(aggregatorRegistry.isIncrementalAggregator(aggregatorName)) {
               staticAggregatorNames.add(aggregatorName);
             }
             else {
-              staticAggregatorNames.addAll(aggregatorRegistry.getOTFAggregatorToStaticAggregators().get(aggregatorName));
+              staticAggregatorNames.addAll(aggregatorRegistry.getOTFAggregatorToIncrementalAggregators().get(aggregatorName));
               otfAggregatorNames.add(aggregatorName);
             }
           }
@@ -790,7 +790,7 @@ public class DimensionalConfigurationSchema
             throw new IllegalArgumentException(aggregatorName + " is not a valid aggregator.");
           }
 
-          if(aggregatorRegistry.isStaticAggregator(aggregatorName)) {
+          if(aggregatorRegistry.isIncrementalAggregator(aggregatorName)) {
             Set<String> aggregatorNames = allValueToAggregator.get(name);
 
             if(aggregatorNames == null) {
@@ -831,8 +831,8 @@ public class DimensionalConfigurationSchema
             }
 
             OTFAggregator aggregator = aggregatorRegistry.getNameToOTFAggregators().get(aggregatorName);
-            aggregatorNames.addAll(aggregatorRegistry.getOTFAggregatorToStaticAggregators().get(aggregatorName));
-            aggregatorSet.addAll(aggregatorRegistry.getOTFAggregatorToStaticAggregators().get(aggregatorName));
+            aggregatorNames.addAll(aggregatorRegistry.getOTFAggregatorToIncrementalAggregators().get(aggregatorName));
+            aggregatorSet.addAll(aggregatorRegistry.getOTFAggregatorToIncrementalAggregators().get(aggregatorName));
             aggregatorToType.put(aggregatorName, aggregator.getOutputType());
 
             LOG.debug("field name {} and adding aggregator names {}:", name, aggregatorNames);
@@ -957,7 +957,7 @@ public class DimensionalConfigurationSchema
             throw new IllegalArgumentException(aggregatorName + " is not a valid aggregator.");
           }
 
-          if(aggregatorRegistry.isStaticAggregator(aggregatorName)) {
+          if(aggregatorRegistry.isIncrementalAggregator(aggregatorName)) {
             Set<String> aggregatorNames = allValueToAggregator.get(valueName);
 
             if(aggregatorNames == null) {
@@ -1027,7 +1027,7 @@ public class DimensionalConfigurationSchema
                                                  + " defined in the " + FIELD_VALUES + " section.");
             }
 
-            aggregators.addAll(aggregatorRegistry.getOTFAggregatorToStaticAggregators().get(aggregatorName));
+            aggregators.addAll(aggregatorRegistry.getOTFAggregatorToIncrementalAggregators().get(aggregatorName));
           }
         }
       }

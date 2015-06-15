@@ -19,7 +19,9 @@ package com.datatorrent.lib.appdata.schemas;
 import java.util.Map;
 
 /**
- * This interface describes a SchemaRegistry.
+ * This interface describes a SchemaRegistry. A schema registry is used to store and look up
+ * schemas for App Data enabled operators which serve data from multiple schemas. {@link SchemaRegistry}s
+ * are primarily used to create responses to {@link SchemaQuery}s.
  */
 public interface SchemaRegistry
 {

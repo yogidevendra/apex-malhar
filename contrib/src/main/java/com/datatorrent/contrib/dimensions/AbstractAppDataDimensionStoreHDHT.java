@@ -31,26 +31,60 @@ import org.apache.commons.lang3.mutable.MutableLong;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This is a base class for App Data enabled Dimensions Stores. This class holds all the template code required
+ * for processing AppData queries.
+ */
 public abstract class AbstractAppDataDimensionStoreHDHT extends DimensionsStoreHDHT
 {
+  /**
+   * This is the result formatter used to format data sent as a result to an App Data query.
+   */
   @NotNull
   protected ResultFormatter resultFormatter = new ResultFormatter();
+  /**
+   * This is the {@link AggregatorRegistry} which holds the mapping from aggregator names and aggregator ids to
+   * aggregators.
+   */
   @NotNull
   protected AggregatorRegistry aggregatorRegistry = AggregatorRegistry.DEFAULT_AGGREGATOR_REGISTRY;
-
+  /**
+   * This is the queue manager for schema queries.
+   */
   protected transient SimpleQueueManager<SchemaQuery, Void, Void> schemaQueueManager;
+  /**
+   * This is the queue manager for data queries.
+   */
   protected transient DimensionsQueueManager dimensionsQueueManager;
+  /**
+   * This is the query manager for schema queries.
+   */
   protected transient QueryManagerAsynchronous<SchemaQuery, Void, Void, SchemaResult> schemaProcessor;
+  /**
+   * This is the query manager for data queries.
+   */
   protected transient QueryManagerAsynchronous<DataQueryDimensional, QueryMeta, MutableLong, Result> queryProcessor;
-  protected final transient MessageDeserializerFactory queryDeserializerFactory;
-
+  /**
+   * This is the factory used to deserializes queries.
+   */
+  protected transient MessageDeserializerFactory queryDeserializerFactory;
+  /**
+   * This is the schema registry that holds all the schema information for the operator.
+   */
   @VisibleForTesting
   public SchemaRegistry schemaRegistry;
+  /**
+   * This is the factory used to serialize results.
+   */
   protected transient MessageSerializerFactory resultSerializerFactory;
-
+  /**
+   * This is the output port that serialized query results are emitted from.
+   */
   @AppData.ResultPort
   public final transient DefaultOutputPort<String> queryResult = new DefaultOutputPort<String>();
-
+  /**
+   * This is the input port from which queries are recieved.
+   */
   @InputPortFieldAnnotation(optional = true)
   @AppData.QueryPort
   public transient final DefaultInputPort<String> query = new DefaultInputPort<String>()
@@ -59,6 +93,8 @@ public abstract class AbstractAppDataDimensionStoreHDHT extends DimensionsStoreH
     public void process(String s)
     {
       LOG.debug("Received {}", s);
+
+      //Deserialize a query
       Message query;
       try {
         query = queryDeserializerFactory.deserialize(s);
@@ -69,10 +105,12 @@ public abstract class AbstractAppDataDimensionStoreHDHT extends DimensionsStoreH
       }
 
       if (query instanceof SchemaQuery) {
+        //If the query is a {@link SchemaQuery} add it to the schemaQuery queue.
         schemaQueueManager.enqueue((SchemaQuery) query, null, null);
       }
       else if (query instanceof DataQueryDimensional) {
-        processDimensionalDataQuery((DataQueryDimensional) query);
+        //If the query is a {@link DataQueryDimensional} add it to the dataQuery queue.
+        dimensionsQueueManager.enqueue((DataQueryDimensional) query, null, null);
       }
       else {
         LOG.error("Invalid query {}", s);
@@ -82,16 +120,21 @@ public abstract class AbstractAppDataDimensionStoreHDHT extends DimensionsStoreH
 
   private EmbeddableQuery<String> embeddableQuery;
 
+  /**
+   * Constructor to create operator.
+   */
   @SuppressWarnings("unchecked")
   public AbstractAppDataDimensionStoreHDHT()
   {
-    queryDeserializerFactory = new MessageDeserializerFactory(SchemaQuery.class, DataQueryDimensional.class);
+    //Do nothing
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public void setup(Context.OperatorContext context)
   {
     if(embeddableQuery != null) {
+      //If an embeddableQuery operator is set, then enable it.
       embeddableQuery.setInputPort(query);
       embeddableQuery.setup(context);
     }
@@ -101,6 +144,8 @@ public abstract class AbstractAppDataDimensionStoreHDHT extends DimensionsStoreH
     schemaRegistry = getSchemaRegistry();
 
     resultSerializerFactory = new MessageSerializerFactory(resultFormatter);
+
+    queryDeserializerFactory = new MessageDeserializerFactory(SchemaQuery.class, DataQueryDimensional.class);
     queryDeserializerFactory.setContext(DataQueryDimensional.class, schemaRegistry);
 
     dimensionsQueueManager = new DimensionsQueueManager(this, schemaRegistry);
@@ -129,6 +174,7 @@ public abstract class AbstractAppDataDimensionStoreHDHT extends DimensionsStoreH
   public void beginWindow(long windowId)
   {
     if(embeddableQuery != null) {
+      //If embeddable query operator is set
       embeddableQuery.beginWindow(windowId);
     }
 
@@ -141,15 +187,11 @@ public abstract class AbstractAppDataDimensionStoreHDHT extends DimensionsStoreH
     super.beginWindow(windowId);
   }
 
-  protected void processDimensionalDataQuery(DataQueryDimensional dataQueryDimensional)
-  {
-    dimensionsQueueManager.enqueue(dataQueryDimensional, null, null);
-  }
-
   @Override
   public void endWindow()
   {
     if(embeddableQuery != null) {
+      //If embeddable query operator is set
       embeddableQuery.endWindow();
     }
 
@@ -166,6 +208,7 @@ public abstract class AbstractAppDataDimensionStoreHDHT extends DimensionsStoreH
   public void teardown()
   {
     if(embeddableQuery != null) {
+      //If embeddable query operator is set
       embeddableQuery.teardown();
     }
 
@@ -186,7 +229,8 @@ public abstract class AbstractAppDataDimensionStoreHDHT extends DimensionsStoreH
   protected abstract SchemaResult processSchemaQuery(SchemaQuery schemaQuery);
 
   /**
-   * @return the schema registry
+   * Gets the {@link SchemaRegistry} used by this operator.
+   * @return The {@link SchemaRegistry} used by this operator.
    */
   protected abstract SchemaRegistry getSchemaRegistry();
 
@@ -202,21 +246,28 @@ public abstract class AbstractAppDataDimensionStoreHDHT extends DimensionsStoreH
     return aggregatorRegistry.getIncrementalAggregatorNameToID().get(aggregatorName);
   }
 
-  public void setAppDataFormatter(ResultFormatter resultFormatter)
+  /**
+   * Sets the {@link ResultFormatter} to use on App Data results emitted by this operator.
+   * @param resultFormatter The {@link ResultFormatter} to use on App Data results emitted
+   * by this operator.
+   */
+  public void setResultFormatter(ResultFormatter resultFormatter)
   {
     this.resultFormatter = resultFormatter;
   }
 
   /**
-   * @return the resultFormatter
+   * Returns the {@link ResultFormatter} to use on App Data results emitted by this operator.
+   * @return The {@link ResultFormatter} to use on App Data results emitted by this operator.
    */
-  public ResultFormatter getAppDataFormatter()
+  public ResultFormatter getResultFormatter()
   {
     return resultFormatter;
   }
 
   /**
-   * @return the aggregatorRegistry
+   * Returns the {@link AggregatorRegistry} used by this operator.
+   * @return The {@link AggregatorRegistry} used by this operator.
    */
   public AggregatorRegistry getAggregatorRegistry()
   {
@@ -224,7 +275,8 @@ public abstract class AbstractAppDataDimensionStoreHDHT extends DimensionsStoreH
   }
 
   /**
-   * @param aggregatorRegistry the aggregatorRegistry to set
+   * Sets the {@link AggregatorRegistry} used by this operator.
+   * @param aggregatorRegistry The {@link AggregatorRegistry} used by this operator.
    */
   public void setAggregatorRegistry(@NotNull AggregatorRegistry aggregatorRegistry)
   {
@@ -232,7 +284,8 @@ public abstract class AbstractAppDataDimensionStoreHDHT extends DimensionsStoreH
   }
 
   /**
-   * @return the embeddableQuery
+   * Returns the {@link EmbeddableQuery} operator set on this operator.
+   * @return The {@link EmbeddableQuery} operator.
    */
   public EmbeddableQuery<String> getEmbeddableQuery()
   {
@@ -240,17 +293,25 @@ public abstract class AbstractAppDataDimensionStoreHDHT extends DimensionsStoreH
   }
 
   /**
-   * @param embeddableQuery the embeddableQuery to set
+   * Sets the {@link EmbeddableQuery} operator on this operator.
+   * @param embeddableQuery The {@link EmbeddableQuery} operator to set on this operator.
    */
   public void setEmbeddableQuery(EmbeddableQuery<String> embeddableQuery)
   {
     this.embeddableQuery = embeddableQuery;
   }
 
+  /**
+   * This is a {@link QueryExecutor} that is responsible for executing schema queries.
+   */
   public class SchemaQueryExecutor implements QueryExecutor<SchemaQuery, Void, Void, SchemaResult>
   {
+    /**
+     * Creates a {@link SchemaQueryExecutor}
+     */
     public SchemaQueryExecutor()
     {
+      //Do nothing
     }
 
     @Override

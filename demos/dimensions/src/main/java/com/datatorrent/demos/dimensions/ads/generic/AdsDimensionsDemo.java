@@ -178,8 +178,8 @@ public class AdsDimensionsDemo implements StreamingApplication
     hdsFile.setBasePath(basePath);
     System.out.println("Setting basePath " + basePath);
     store.setFileStore(hdsFile);
-    store.getAppDataFormatter().setContinuousFormatString("#.00");
-    store.setEventSchemaJSON(eventSchema);
+    store.getResultFormatter().setContinuousFormatString("#.00");
+    store.setConfigurationSchemaJSON(eventSchema);
 
     //Set pubsub properties
     Operator.OutputPort<String> queryPort;

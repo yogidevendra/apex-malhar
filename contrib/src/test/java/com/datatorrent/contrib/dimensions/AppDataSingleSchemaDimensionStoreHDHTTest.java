@@ -88,7 +88,7 @@ public class AppDataSingleSchemaDimensionStoreHDHTTest
 
     AppDataSingleSchemaDimensionStoreHDHT store = new AppDataSingleSchemaDimensionStoreHDHT();
 
-    store.setEventSchemaJSON(eventSchemaString);
+    store.setConfigurationSchemaJSON(eventSchemaString);
     store.setFileStore(hdsFile);
     store.setFlushIntervalCount(1);
     store.setFlushSize(0);
@@ -121,7 +121,7 @@ public class AppDataSingleSchemaDimensionStoreHDHTTest
 
     AppDataSingleSchemaDimensionStoreHDHT store = new AppDataSingleSchemaDimensionStoreHDHT();
 
-    store.setEventSchemaJSON(eventSchemaString);
+    store.setConfigurationSchemaJSON(eventSchemaString);
     store.setFileStore(hdsFile);
     store.setFlushIntervalCount(1);
     store.setFlushSize(0);
@@ -162,7 +162,7 @@ public class AppDataSingleSchemaDimensionStoreHDHTTest
 
     AppDataSingleSchemaDimensionStoreHDHT store = new AppDataSingleSchemaDimensionStoreHDHT();
 
-    store.setEventSchemaJSON(eventSchemaString);
+    store.setConfigurationSchemaJSON(eventSchemaString);
     store.setFileStore(hdsFile);
     store.setFlushIntervalCount(1);
     store.setFlushSize(0);
@@ -191,13 +191,13 @@ public class AppDataSingleSchemaDimensionStoreHDHTTest
 
     AppDataSingleSchemaDimensionStoreHDHT store = new AppDataSingleSchemaDimensionStoreHDHT();
 
-    store.setEventSchemaJSON(eventSchemaString);
+    store.setConfigurationSchemaJSON(eventSchemaString);
     store.setFileStore(hdsFile);
 
     store.setup(null);
 
     //Aggregate Event
-    DimensionalConfigurationSchema eventSchema = store.eventSchema;
+    DimensionalConfigurationSchema eventSchema = store.configurationSchema;
     Aggregate ae = createEvent(eventSchema,
                                     publisher,
                                     advertiser,
@@ -251,7 +251,7 @@ public class AppDataSingleSchemaDimensionStoreHDHTTest
 
     AppDataSingleSchemaDimensionStoreHDHT store = new AppDataSingleSchemaDimensionStoreHDHT();
 
-    store.setEventSchemaJSON(eventSchemaString);
+    store.setConfigurationSchemaJSON(eventSchemaString);
     store.setFileStore(hdsFile);
     store.setFlushIntervalCount(1);
     store.setFlushSize(0);
@@ -261,7 +261,7 @@ public class AppDataSingleSchemaDimensionStoreHDHTTest
     //STARTING WINDOW 0
     store.beginWindow(windowId);
 
-    DimensionalConfigurationSchema eventSchema = store.eventSchema;
+    DimensionalConfigurationSchema eventSchema = store.configurationSchema;
 
     //Aggregate Event
     Aggregate ae = createEvent(eventSchema,
@@ -331,14 +331,14 @@ public class AppDataSingleSchemaDimensionStoreHDHTTest
     AppDataSingleSchemaDimensionStoreHDHT store = new AppDataSingleSchemaDimensionStoreHDHT();
 
     store.setCacheWindowDuration(1);
-    store.setEventSchemaJSON(eventSchemaString);
+    store.setConfigurationSchemaJSON(eventSchemaString);
     store.setFileStore(hdsFile);
     store.setFlushIntervalCount(1);
     store.setFlushSize(0);
 
     store.setup(null);
 
-    DimensionalConfigurationSchema eventSchema = store.eventSchema;
+    DimensionalConfigurationSchema eventSchema = store.configurationSchema;
 
     //Aggregate Event
     Aggregate ae = createEvent(eventSchema,
@@ -388,14 +388,14 @@ public class AppDataSingleSchemaDimensionStoreHDHTTest
     AppDataSingleSchemaDimensionStoreHDHT store = new AppDataSingleSchemaDimensionStoreHDHT();
 
     store.setCacheWindowDuration(2);
-    store.setEventSchemaJSON(eventSchemaString);
+    store.setConfigurationSchemaJSON(eventSchemaString);
     store.setFileStore(hdsFile);
     store.setFlushIntervalCount(1);
     store.setFlushSize(0);
 
     store.setup(null);
 
-    DimensionalConfigurationSchema eventSchema = store.eventSchema;
+    DimensionalConfigurationSchema eventSchema = store.configurationSchema;
 
     Aggregate expectedDouble = createEvent(eventSchema,
                                                 publisher,
@@ -478,14 +478,14 @@ public class AppDataSingleSchemaDimensionStoreHDHTTest
     AppDataSingleSchemaDimensionStoreHDHT store = new AppDataSingleSchemaDimensionStoreHDHT();
 
     store.setCacheWindowDuration(2);
-    store.setEventSchemaJSON(eventSchemaString);
+    store.setConfigurationSchemaJSON(eventSchemaString);
     store.setFileStore(hdsFile);
     store.setFlushIntervalCount(1);
     store.setFlushSize(0);
 
     store.setup(null);
 
-    DimensionalConfigurationSchema eventSchema = store.eventSchema;
+    DimensionalConfigurationSchema eventSchema = store.configurationSchema;
 
     //Aggregate Event
     Aggregate ae = createEvent(eventSchema,

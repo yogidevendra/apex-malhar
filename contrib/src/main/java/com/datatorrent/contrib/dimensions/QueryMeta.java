@@ -22,16 +22,37 @@ import com.datatorrent.lib.dimensions.DimensionsEvent.EventKey;
 import java.util.List;
 import java.util.Map;
 
-public class QueryMeta {
+/**
+ * This class is used to hold meta data required to process data queries. This class is
+ * utilized by the {@link DimensionsQueryExecutor} and {@link DimensionsQueueManager} classes.
+ */
+public class QueryMeta
+{
+  /**
+   * Each entry in this list represents the {@link HDSQuery}s that are issued for a particular
+   * time bucket. Each {@link Map} for each timebucket is a map from an {@link IncrementalAggregator} name
+   * to the {@link HDSQuery} issued for that {@link IncrementalAggregator}. The {@link HDSQuery}s at a particular
+   * index in this list correspond with the {@link EventKey}s stored at the same index in the eventKeys list.
+   */
   private List<Map<String, HDSQuery>> hdsQueries;
+  /**
+   * Each entry in this list represents the {@link EventKey}s for queries issued for a particular time bucket. Each {@link Map}
+   * for each timebucket is a map from an {@link IncrementalAggregator} name to the {@link EventKey} used to issue
+   * the {@link HDSQuery} for that {@link IncrementalAggregator}.
+   */
   private List<Map<String, EventKey>> eventKeys;
 
+  /**
+   * Creates a {@link QueryMeta} object.
+   */
   public QueryMeta()
   {
+    //Do nothing.
   }
 
   /**
-   * @return the hdsQueries
+   * Returns the hdsQueries used to retrieve data for a particular data query.
+   * @return The hdsQueries used to retrieve data for a particular data query.
    */
   public List<Map<String, HDSQuery>> getHdsQueries()
   {
@@ -39,7 +60,8 @@ public class QueryMeta {
   }
 
   /**
-   * @param hdsQueries the hdsQueries to set
+   * Sets the hdsQueries used to retrieve data for a particular data query.
+   * @param hdsQueries The hdsQueries used to retrieve data for a particular data query.
    */
   public void setHdsQueries(List<Map<String, HDSQuery>> hdsQueries)
   {
@@ -47,6 +69,7 @@ public class QueryMeta {
   }
 
   /**
+   *
    * @return the event keys
    */
   public List<Map<String, EventKey>> getEventKeys()

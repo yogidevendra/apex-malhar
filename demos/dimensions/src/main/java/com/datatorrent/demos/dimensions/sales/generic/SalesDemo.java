@@ -68,8 +68,8 @@ public class SalesDemo implements StreamingApplication
     fieldToMapField.put("sales", "amount");
     dimensions.setFieldToMapField(fieldToMapField);
 
-    store.setEventSchemaJSON(eventSchema);
-    store.setDimensionalSchemaJSON(dimensionalSchema);
+    store.setConfigurationSchemaJSON(eventSchema);
+    store.setDimensionalSchemaStubJSON(dimensionalSchema);
     input.setEventSchemaJSON(eventSchema);
 
     Operator.OutputPort<String> queryPort;
