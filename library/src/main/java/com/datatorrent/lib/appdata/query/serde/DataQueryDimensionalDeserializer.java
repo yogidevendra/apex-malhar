@@ -139,7 +139,13 @@ public class DataQueryDimensionalDeserializer implements CustomMessageDeserializ
       }
 
       if(time.has(DataQueryDimensional.FIELD_BUCKET)) {
-        bucket = TimeBucket.BUCKET_TO_TYPE.get(time.getString(DataQueryDimensional.FIELD_BUCKET));
+        String timeBucketString = time.getString(DataQueryDimensional.FIELD_BUCKET);
+        bucket = TimeBucket.BUCKET_TO_TYPE.get(timeBucketString);
+
+        if(bucket == null) {
+          LOG.error("{} is not a valid time bucket", timeBucketString);
+          bucket = gsd.getDimensionalConfigurationSchema().getTimeBuckets().get(0);
+        }
       }
       else {
         bucket = gsd.getDimensionalConfigurationSchema().getTimeBuckets().get(0);

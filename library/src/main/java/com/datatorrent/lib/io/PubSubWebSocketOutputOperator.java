@@ -34,6 +34,8 @@ import com.datatorrent.lib.util.PubSubWebSocketClient;
  */
 public class PubSubWebSocketOutputOperator<T> extends WebSocketOutputOperator<T>
 {
+  private static final long serialVersionUID = 201506160822L;
+
   private String topic = null;
   protected transient PubSubMessageCodec<Object> codec = new PubSubMessageCodec<Object>(mapper);
 

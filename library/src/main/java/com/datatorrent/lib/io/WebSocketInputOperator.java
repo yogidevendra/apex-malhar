@@ -21,19 +21,17 @@ import com.ning.http.client.AsyncHttpClientConfigBean;
 import com.ning.http.client.websocket.WebSocket;
 import com.ning.http.client.websocket.WebSocketTextListener;
 import com.ning.http.client.websocket.WebSocketUpgradeHandler;
-
 import java.io.IOException;
 import java.net.URI;
-
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
-
 import javax.validation.constraints.NotNull;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -48,7 +46,10 @@ import org.slf4j.LoggerFactory;
  */
 public class WebSocketInputOperator<T> extends SimpleSinglePortInputOperator<T> implements Runnable
 {
+  private static final long serialVersionUID = 201506160829L;
+
   private static final Logger LOG = LoggerFactory.getLogger(WebSocketInputOperator.class);
+
   /**
    * Timeout interval for reading from server. 0 or negative indicates no timeout.
    */
