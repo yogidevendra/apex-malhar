@@ -9,6 +9,7 @@ import com.datatorrent.api.AppData.EmbeddableQuery;
 import com.datatorrent.api.Context;
 import com.datatorrent.api.DefaultInputPort;
 import com.datatorrent.api.DefaultOutputPort;
+import com.datatorrent.api.Operator.IdleTimeHandler;
 import com.datatorrent.api.annotation.InputPortFieldAnnotation;
 import com.datatorrent.lib.appdata.query.QueryExecutor;
 import com.datatorrent.lib.appdata.query.QueryManagerAsynchronous;
@@ -35,7 +36,7 @@ import org.slf4j.LoggerFactory;
  * This is a base class for App Data enabled Dimensions Stores. This class holds all the template code required
  * for processing AppData queries.
  */
-public abstract class AbstractAppDataDimensionStoreHDHT extends DimensionsStoreHDHT
+public abstract class AbstractAppDataDimensionStoreHDHT extends DimensionsStoreHDHT implements IdleTimeHandler
 {
   /**
    * This is the result formatter used to format data sent as a result to an App Data query.
@@ -219,6 +220,13 @@ public abstract class AbstractAppDataDimensionStoreHDHT extends DimensionsStoreH
     schemaQueueManager.teardown();
 
     super.teardown();
+  }
+
+  @Override
+  public void handleIdleTime()
+  {
+    schemaProcessor.handleIdleTime();
+    queryProcessor.handleIdleTime();
   }
 
   /**

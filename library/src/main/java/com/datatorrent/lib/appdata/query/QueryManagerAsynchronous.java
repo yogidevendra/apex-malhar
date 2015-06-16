@@ -19,6 +19,7 @@ package com.datatorrent.lib.appdata.query;
 import com.datatorrent.api.Component;
 import com.datatorrent.api.Context.OperatorContext;
 import com.datatorrent.api.DefaultOutputPort;
+import com.datatorrent.api.Operator.IdleTimeHandler;
 import com.datatorrent.lib.appdata.query.serde.MessageSerializerFactory;
 import com.datatorrent.lib.appdata.schemas.Result;
 import com.google.common.annotations.VisibleForTesting;
@@ -26,16 +27,19 @@ import com.google.common.base.Preconditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Semaphore;
 
-public class QueryManagerAsynchronous<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT, RESULT extends Result> implements Component<OperatorContext>{
+public class QueryManagerAsynchronous<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT, RESULT extends Result> implements Component<OperatorContext>, IdleTimeHandler
+{
   private DefaultOutputPort<String> resultPort = null;
 
   private transient Semaphore inWindowSemaphore = new Semaphore(0);
-
+  private ConcurrentLinkedQueue<String> queue = new ConcurrentLinkedQueue<String>();
   private QueueManager<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT> queueManager;
   private QueryExecutor<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT, RESULT> queryExecutor;
   private MessageSerializerFactory messageSerializerFactory;
+
   @VisibleForTesting
   protected transient Thread processingThread;
 
@@ -99,8 +103,15 @@ public class QueryManagerAsynchronous<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT, RES
     queueManager.haltEnqueue();
 
     while(queueManager.getNumLeft() > 0) {
-      Thread.yield();
+      if(queue.isEmpty()) {
+        Thread.yield();
+      }
+      else {
+        emptyQueue();
+      }
     }
+
+    emptyQueue();
 
     try {
       inWindowSemaphore.acquire();
@@ -110,10 +121,23 @@ public class QueryManagerAsynchronous<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT, RES
     }
   }
 
+  private void emptyQueue()
+  {
+    while(!queue.isEmpty()) {
+      resultPort.emit(queue.poll());
+    }
+  }
+
   @Override
   public void teardown()
   {
     processingThread.stop();
+  }
+
+  @Override
+  public void handleIdleTime()
+  {
+    emptyQueue();
   }
 
   private class ProcessingThread implements Runnable
@@ -140,7 +164,7 @@ public class QueryManagerAsynchronous<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT, RES
         if(result != null) {
           String serializedMessage = messageSerializerFactory.serialize(result);
           LOG.debug("emitting message {}", serializedMessage);
-          resultPort.emit(serializedMessage);
+          queue.add(serializedMessage);
         }
 
         //We are done processing the query allow the operator to continue to the next window if it
