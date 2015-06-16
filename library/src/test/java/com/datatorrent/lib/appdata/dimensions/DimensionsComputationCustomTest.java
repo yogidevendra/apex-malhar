@@ -416,6 +416,8 @@ public class DimensionsComputationCustomTest
 
   public static class AdInfoCountAggregator implements Aggregator<AdInfo, AdInfoResult>
   {
+    private static final long serialVersionUID = 201506150446L;
+
     public AdInfoCountAggregator()
     {
     }
@@ -445,6 +447,8 @@ public class DimensionsComputationCustomTest
 
   public static class AdInfoSumAggregator implements Aggregator<AdInfo, AdInfoResult>
   {
+    private static final long serialVersionUID = 201506150447L;
+
     public AdInfoSumAggregator()
     {
     }
@@ -476,6 +480,8 @@ public class DimensionsComputationCustomTest
 
   public static class AdInfoMinAggregator implements Aggregator<AdInfo, AdInfoResult>
   {
+    private static final long serialVersionUID = 201506150447L;
+
     public AdInfoMinAggregator()
     {
     }
@@ -507,6 +513,8 @@ public class DimensionsComputationCustomTest
 
   public static class AdInfoMaxAggregator implements Aggregator<AdInfo, AdInfoResult>
   {
+    private static final long serialVersionUID = 201506150447L;
+
     public AdInfoMaxAggregator()
     {
     }
