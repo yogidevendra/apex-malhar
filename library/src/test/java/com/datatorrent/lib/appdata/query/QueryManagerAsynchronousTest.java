@@ -33,7 +33,8 @@ public class QueryManagerAsynchronousTest
   @Test
   public void stressTest() throws Exception
   {
-    final int totalTuples = 1000;
+    final int totalTuples = 10000;
+    final int batchSize = 10;
 
     AppDataWindowEndQueueManager<MockQuery, Void> queueManager = new AppDataWindowEndQueueManager<MockQuery, Void>();
 
@@ -50,7 +51,8 @@ public class QueryManagerAsynchronousTest
                                                                        msf);
 
     Thread producerThread = new Thread(new ProducerThread(queueManager,
-                                                          totalTuples));
+                                                          totalTuples,
+                                                          batchSize));
     producerThread.start();
 
     long startTime = System.currentTimeMillis();
@@ -60,7 +62,7 @@ public class QueryManagerAsynchronousTest
     int numWindows = 0;
     for(;
         sink.collectedTuples.size() < totalTuples
-        && ((System.currentTimeMillis() - startTime) < 5000)
+        && ((System.currentTimeMillis() - startTime) < 20000)
         ;numWindows++) {
       queryManagerAsynch.beginWindow(numWindows);
       Thread.sleep(100);
@@ -89,25 +91,35 @@ public class QueryManagerAsynchronousTest
   public static class ProducerThread implements Runnable
   {
     private final int totalTuples;
+    private final int batchSize;
     private AppDataWindowEndQueueManager<MockQuery, Void> queueManager;
 
 
     public ProducerThread(AppDataWindowEndQueueManager<MockQuery, Void> queueManager,
-                          int totalTuples)
+                          int totalTuples,
+                          int batchSize)
     {
       this.queueManager = queueManager;
       this.totalTuples = totalTuples;
+      this.batchSize = batchSize;
     }
 
     @Override
     public void run()
     {
-      for(int tupleCounter = 0;
-          tupleCounter < totalTuples;
-          tupleCounter++) {
-        LOG.debug("before enqueue");
-        queueManager.enqueue(new MockQuery(tupleCounter + ""), null, new MutableLong(1L));
-        LOG.debug("after enqueue");
+      int numLoops = totalTuples / batchSize;
+
+      LOG.debug("{} {} {}", numLoops, totalTuples, batchSize);
+
+      for(int loopCounter = 0, tupleCounter = 0;
+          loopCounter < numLoops;
+          loopCounter++, tupleCounter++) {
+        for(int batchCounter = 0;
+            batchCounter < batchSize;
+            batchCounter++) {
+          queueManager.enqueue(new MockQuery(tupleCounter + ""), null, new MutableLong(1L));
+          //LOG.debug("{} {} {}", );
+        }
         try {
           Thread.sleep(1);
         }
