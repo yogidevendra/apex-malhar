@@ -69,8 +69,7 @@ public class AdsDimensionsDemoPerformant implements StreamingApplication
     DimensionsComputationCustom<AdInfo, AdInfo.AdInfoAggregateEvent> dimensions = dag.addOperator("DimensionsComputation", new DimensionsComputationCustom<AdInfo, AdInfo.AdInfoAggregateEvent>());
     DimensionsComputationUnifierImpl<AdInfo, AdInfo.AdInfoAggregateEvent> unifier = new DimensionsComputationUnifierImpl<AdInfo, AdInfo.AdInfoAggregateEvent>();
     dimensions.setUnifier(unifier);
-    dag.getMeta(dimensions).getMeta(dimensions.output).getUnifierMeta().getAttributes().put(OperatorContext.MEMORY_MB, 8092);
-    
+
     dag.getMeta(dimensions).getAttributes().put(Context.OperatorContext.APPLICATION_WINDOW_COUNT, 10);
     AdsConverter adsConverter = dag.addOperator("AdsConverter", new AdsConverter());
     AppDataSingleSchemaDimensionStoreHDHT store = dag.addOperator("Store", AppDataSingleSchemaDimensionStoreHDHT.class);
@@ -117,7 +116,8 @@ public class AdsDimensionsDemoPerformant implements StreamingApplication
 
     dimensions.setDimensionsCombinations(dimensionsCombinations);
     dimensions.setAggregators(dimensionsAggregators);
-
+    dag.getMeta(dimensions).getMeta(dimensions.output).getUnifierMeta().getAttributes().put(OperatorContext.MEMORY_MB, 8092);
+    
     //Configuring the converter
     adsConverter.setEventSchemaJSON(eventSchema);
     adsConverter.setDimensionSpecs(dimensionSpecs);

@@ -50,7 +50,6 @@ public class SalesDemo implements StreamingApplication
     JsonToMapConverter converter = dag.addOperator("Converter", JsonToMapConverter.class);
     DimensionsComputationFlexibleSingleSchemaMap dimensions =
     dag.addOperator("DimensionsComputation", DimensionsComputationFlexibleSingleSchemaMap.class);
-    dag.getMeta(dimensions).getMeta(dimensions.output).getUnifierMeta().getAttributes().put(OperatorContext.MEMORY_MB, 8092);
     dag.getMeta(dimensions).getAttributes().put(Context.OperatorContext.APPLICATION_WINDOW_COUNT, 4);
     AppDataSingleSchemaDimensionStoreHDHT store = dag.addOperator("Store", AppDataSingleSchemaDimensionStoreHDHT.class);
 
@@ -68,7 +67,8 @@ public class SalesDemo implements StreamingApplication
     Map<String, String> fieldToMapField = Maps.newHashMap();
     fieldToMapField.put("sales", "amount");
     dimensions.setFieldToMapField(fieldToMapField);
-
+    dag.getMeta(dimensions).getMeta(dimensions.output).getUnifierMeta().getAttributes().put(OperatorContext.MEMORY_MB, 8092);
+    
     store.setConfigurationSchemaJSON(eventSchema);
     store.setDimensionalSchemaStubJSON(dimensionalSchema);
     input.setEventSchemaJSON(eventSchema);
