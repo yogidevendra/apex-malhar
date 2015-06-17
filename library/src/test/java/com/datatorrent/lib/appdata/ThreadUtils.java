@@ -22,17 +22,30 @@ public class ThreadUtils
   {
   }
 
-  public static class ThreadUncaughtExceptionHandler implements Thread.UncaughtExceptionHandler
+  /**
+   * Exception handler used for testing threads.
+   */
+  public static class ExceptionSaverExceptionHandler implements Thread.UncaughtExceptionHandler
   {
-    
+    private Throwable caughtThrowable;
 
-    public ThreadUncaughtExceptionHandler()
+    public ExceptionSaverExceptionHandler()
     {
     }
 
     @Override
     public void uncaughtException(Thread t, Throwable e)
     {
+      caughtThrowable = e;
+    }
+
+    /**
+     * Gets the {@link Throwable} caught by this exception handler;
+     * @return The {@link Throwable} caught by this exception handler.
+     */
+    public Throwable getCaughtThrowable()
+    {
+      return caughtThrowable;
     }
   }
 }
