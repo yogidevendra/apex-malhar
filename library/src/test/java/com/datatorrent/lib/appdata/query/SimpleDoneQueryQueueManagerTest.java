@@ -24,6 +24,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
 public class SimpleDoneQueryQueueManagerTest
 {
   @Test
@@ -384,15 +385,59 @@ public class SimpleDoneQueryQueueManagerTest
     sdqqm.teardown();
   }
 
+  @Test
+  public void simpleExpireBlockThenUnblock() throws Exception
+  {
+    SimpleDoneQueueManager<Query, Void> sdqqm = new SimpleDoneQueueManager<Query, Void>();
+
+    sdqqm.setup(null);
+    sdqqm.beginWindow(0);
+
+    Query query = new MockQuery("1");
+    MutableBoolean expire = new MutableBoolean(false);
+    sdqqm.enqueue(query, null, expire);
+
+    sdqqm.endWindow();
+    sdqqm.beginWindow(1);
+
+    //Expire
+    expire.setValue(true);
+
+    Thread thread = testBlockingNoStop(sdqqm);
+
+    query = new MockQuery("2");
+    sdqqm.enqueue(query, null, new MutableBoolean(false));
+
+    Thread.sleep(1000);
+
+    LOG.debug("{}", thread.getState());
+
+    sdqqm.endWindow();
+    sdqqm.teardown();
+  }
+
   private void testBlocking(SimpleDoneQueueManager<Query, Void> sdqqm) throws InterruptedException
   {
     Thread thread = new Thread(new BlockedThread<Query, Void, MutableBoolean>(sdqqm));
+    //thread.setUncaughtExceptionHandler(new RethrowExceptionHandler(Thread.currentThread()));
     thread.start();
     Thread.sleep(100);
 
     Assert.assertEquals(Thread.State.WAITING, thread.getState());
 
     thread.stop();
+  }
+
+  private Thread testBlockingNoStop(SimpleDoneQueueManager<Query, Void> sdqqm) throws InterruptedException
+  {
+    Thread thread = new Thread(new BlockedThread<Query, Void, MutableBoolean>(sdqqm));
+    //thread.setUncaughtExceptionHandler(new RethrowExceptionHandler(Thread.currentThread()));
+    thread.start();
+    Thread.sleep(100);
+
+    Assert.assertEquals(Thread.State.WAITING, thread.getState());
+
+    return thread;
   }
 
   public static class BlockedThread<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT> implements Runnable
