@@ -6,6 +6,7 @@
 package com.datatorrent.demos.dimensions.sales.generic;
 
 import com.datatorrent.api.Context;
+import com.datatorrent.api.Context.OperatorContext;
 import com.datatorrent.api.DAG;
 import com.datatorrent.api.DAG.Locality;
 import com.datatorrent.api.Operator;
@@ -49,7 +50,7 @@ public class SalesDemo implements StreamingApplication
     JsonToMapConverter converter = dag.addOperator("Converter", JsonToMapConverter.class);
     DimensionsComputationFlexibleSingleSchemaMap dimensions =
     dag.addOperator("DimensionsComputation", DimensionsComputationFlexibleSingleSchemaMap.class);
-
+    dag.getMeta(dimensions).getMeta(dimensions.output).getUnifierMeta().getAttributes().put(OperatorContext.MEMORY_MB, 8092);
     dag.getMeta(dimensions).getAttributes().put(Context.OperatorContext.APPLICATION_WINDOW_COUNT, 4);
     AppDataSingleSchemaDimensionStoreHDHT store = dag.addOperator("Store", AppDataSingleSchemaDimensionStoreHDHT.class);
 

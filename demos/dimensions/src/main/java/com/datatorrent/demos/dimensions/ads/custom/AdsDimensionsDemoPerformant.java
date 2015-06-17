@@ -17,6 +17,7 @@
 package com.datatorrent.demos.dimensions.ads.custom;
 
 import com.datatorrent.api.Context;
+import com.datatorrent.api.Context.OperatorContext;
 import com.datatorrent.api.DAG;
 import com.datatorrent.api.DAG.Locality;
 import com.datatorrent.api.Operator;
@@ -66,6 +67,7 @@ public class AdsDimensionsDemoPerformant implements StreamingApplication
 
     InputItemGenerator input = dag.addOperator("InputGenerator", InputItemGenerator.class);
     DimensionsComputationCustom<AdInfo, AdInfo.AdInfoAggregateEvent> dimensions = dag.addOperator("DimensionsComputation", new DimensionsComputationCustom<AdInfo, AdInfo.AdInfoAggregateEvent>());
+    dag.getMeta(dimensions).getMeta(dimensions.output).getUnifierMeta().getAttributes().put(OperatorContext.MEMORY_MB, 8092);
     dag.getMeta(dimensions).getAttributes().put(Context.OperatorContext.APPLICATION_WINDOW_COUNT, 10);
     AdsConverter adsConverter = dag.addOperator("AdsConverter", new AdsConverter());
     AppDataSingleSchemaDimensionStoreHDHT store = dag.addOperator("Store", AppDataSingleSchemaDimensionStoreHDHT.class);
