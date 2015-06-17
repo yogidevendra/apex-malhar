@@ -156,9 +156,27 @@ public abstract class AbstractWindowEndQueueManager<QUERY_TYPE, META_QUERY, QUEU
       if(block && !first) {
         acquire();
 
-        if(readCurrent) {
-          currentNode = currentNode.getNext();
+        //TODO dedup this code
+        if(currentNode == null) {
+          currentNode = queryQueue.getHead();
           readCurrent = false;
+
+          if(currentNode == null) {
+            return null;
+          }
+        }
+        else {
+          if(readCurrent) {
+            QueueListNode<QueryBundle<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT>> tempNode = currentNode.getNext();
+
+            if(tempNode != null) {
+              currentNode = tempNode;
+              readCurrent = false;
+            }
+            else {
+              return null;
+            }
+          }
         }
       }
 
@@ -172,22 +190,37 @@ public abstract class AbstractWindowEndQueueManager<QUERY_TYPE, META_QUERY, QUEU
       if(removeBundle(queryQueueable)) {
         queryQueue.removeNode(currentNode);
         removedNode(currentNode);
+
+        if(block) {
+          if(nextNode == null) {
+            readCurrent = true;
+          }
+          else {
+            currentNode = nextNode;
+            readCurrent = false;
+          }
+        }
+        else {
+          if(nextNode == null) {
+            readCurrent = true;
+            break;
+          }
+          else {
+            currentNode = nextNode;
+          }
+        }
       }
       else {
         qq = currentNode.getPayload();
-      }
 
-      if(nextNode == null) {
-        readCurrent = true;
-
-        if(!block) {
-          break;
+        if(nextNode == null) {
+          readCurrent = true;
         }
-      }
+        else {
+          currentNode = nextNode;
+          readCurrent = false;
+        }
 
-      currentNode = nextNode;
-
-      if(qq != null) {
         break;
       }
     }

@@ -16,6 +16,7 @@
 
 package com.datatorrent.lib.appdata.query;
 
+import com.datatorrent.lib.appdata.ThreadUtils.ExceptionSaverExceptionHandler;
 import com.datatorrent.lib.appdata.schemas.Query;
 import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.mutable.MutableBoolean;
@@ -403,14 +404,15 @@ public class SimpleDoneQueryQueueManagerTest
     //Expire
     expire.setValue(true);
 
-    Thread thread = testBlockingNoStop(sdqqm);
+    ExceptionSaverExceptionHandler eseh = new ExceptionSaverExceptionHandler();
+    testBlockingNoStop(sdqqm, eseh);
 
     query = new MockQuery("2");
     sdqqm.enqueue(query, null, new MutableBoolean(false));
 
     Thread.sleep(1000);
 
-    LOG.debug("{}", thread.getState());
+    Assert.assertNull(eseh.getCaughtThrowable());
 
     sdqqm.endWindow();
     sdqqm.teardown();
@@ -428,10 +430,11 @@ public class SimpleDoneQueryQueueManagerTest
     thread.stop();
   }
 
-  private Thread testBlockingNoStop(SimpleDoneQueueManager<Query, Void> sdqqm) throws InterruptedException
+  private Thread testBlockingNoStop(SimpleDoneQueueManager<Query, Void> sdqqm,
+                                    ExceptionSaverExceptionHandler eseh) throws InterruptedException
   {
     Thread thread = new Thread(new BlockedThread<Query, Void, MutableBoolean>(sdqqm));
-    //thread.setUncaughtExceptionHandler(new RethrowExceptionHandler(Thread.currentThread()));
+    thread.setUncaughtExceptionHandler(eseh);
     thread.start();
     Thread.sleep(100);
 

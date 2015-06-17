@@ -16,6 +16,9 @@
 
 package com.datatorrent.lib.appdata;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class ThreadUtils
 {
   private ThreadUtils()
@@ -27,7 +30,7 @@ public class ThreadUtils
    */
   public static class ExceptionSaverExceptionHandler implements Thread.UncaughtExceptionHandler
   {
-    private Throwable caughtThrowable;
+    private volatile Throwable caughtThrowable;
 
     public ExceptionSaverExceptionHandler()
     {
@@ -36,6 +39,7 @@ public class ThreadUtils
     @Override
     public void uncaughtException(Thread t, Throwable e)
     {
+      caughtThrowable.printStackTrace();
       caughtThrowable = e;
     }
 
@@ -48,4 +52,6 @@ public class ThreadUtils
       return caughtThrowable;
     }
   }
+
+  private static final Logger LOG = LoggerFactory.getLogger(ThreadUtils.class);
 }
