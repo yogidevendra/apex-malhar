@@ -28,13 +28,16 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Random;
+
 public class QueryManagerAsynchronousTest
 {
   @Test
   public void stressTest() throws Exception
   {
-    final int totalTuples = 10000;
-    final int batchSize = 10;
+    final int totalTuples = 100000;
+    final int batchSize = 100;
+    final double waitMillisProb = .01;
 
     AppDataWindowEndQueueManager<MockQuery, Void> queueManager = new AppDataWindowEndQueueManager<MockQuery, Void>();
 
@@ -47,13 +50,15 @@ public class QueryManagerAsynchronousTest
     QueryManagerAsynchronous<MockQuery, Void, MutableLong, MockResult> queryManagerAsynch = new
     QueryManagerAsynchronous<MockQuery, Void, MutableLong, MockResult>(outputPort,
                                                                        queueManager,
-                                                                       new NOPQueryExecutor(),
+                                                                       new NOPQueryExecutor(waitMillisProb),
                                                                        msf);
 
     Thread producerThread = new Thread(new ProducerThread(queueManager,
                                                           totalTuples,
-                                                          batchSize));
+                                                          batchSize,
+                                                          waitMillisProb));
     producerThread.start();
+    producerThread.setName("Producer Thread");
 
     long startTime = System.currentTimeMillis();
 
@@ -62,7 +67,7 @@ public class QueryManagerAsynchronousTest
     int numWindows = 0;
     for(;
         sink.collectedTuples.size() < totalTuples
-        && ((System.currentTimeMillis() - startTime) < 20000)
+        && ((System.currentTimeMillis() - startTime) < 60000)
         ;numWindows++) {
       queryManagerAsynch.beginWindow(numWindows);
       Thread.sleep(100);
@@ -71,19 +76,32 @@ public class QueryManagerAsynchronousTest
 
     queryManagerAsynch.teardown();
 
-    LOG.debug("Num windows: {}", numWindows);
+    LOG.debug("Num windows: {} num tuples: {}", numWindows, sink.collectedTuples.size());
     Assert.assertEquals(totalTuples, sink.collectedTuples.size());
   }
 
   public static class NOPQueryExecutor implements QueryExecutor<MockQuery, Void, MutableLong, MockResult>
   {
-    public NOPQueryExecutor()
+    private double waitMillisProb;
+    private Random rand = new Random();
+
+    public NOPQueryExecutor(double waitMillisProb)
     {
+      this.waitMillisProb = waitMillisProb;
     }
 
     @Override
     public MockResult executeQuery(MockQuery query, Void metaQuery, MutableLong queueContext)
     {
+      if(rand.nextDouble() < waitMillisProb) {
+        try {
+          Thread.sleep(1);
+        }
+        catch(InterruptedException ex) {
+          throw new RuntimeException(ex);
+        }
+      }
+
       return new MockResult(query);
     }
   }
@@ -93,15 +111,18 @@ public class QueryManagerAsynchronousTest
     private final int totalTuples;
     private final int batchSize;
     private AppDataWindowEndQueueManager<MockQuery, Void> queueManager;
-
+    private double waitMillisProb;
+    private Random rand = new Random();
 
     public ProducerThread(AppDataWindowEndQueueManager<MockQuery, Void> queueManager,
                           int totalTuples,
-                          int batchSize)
+                          int batchSize,
+                          double waitMillisProb)
     {
       this.queueManager = queueManager;
       this.totalTuples = totalTuples;
       this.batchSize = batchSize;
+      this.waitMillisProb = waitMillisProb;
     }
 
     @Override
@@ -109,22 +130,23 @@ public class QueryManagerAsynchronousTest
     {
       int numLoops = totalTuples / batchSize;
 
-      LOG.debug("{} {} {}", numLoops, totalTuples, batchSize);
-
       for(int loopCounter = 0, tupleCounter = 0;
           loopCounter < numLoops;
           loopCounter++, tupleCounter++) {
         for(int batchCounter = 0;
             batchCounter < batchSize;
-            batchCounter++) {
+            batchCounter++,
+            tupleCounter++) {
           queueManager.enqueue(new MockQuery(tupleCounter + ""), null, new MutableLong(1L));
-          //LOG.debug("{} {} {}", );
-        }
-        try {
-          Thread.sleep(1);
-        }
-        catch(InterruptedException ex) {
-          throw new RuntimeException(ex);
+
+          if(rand.nextDouble() < waitMillisProb) {
+            try {
+              Thread.sleep(1);
+            }
+            catch(InterruptedException ex) {
+              throw new RuntimeException(ex);
+            }
+          }
         }
       }
     }

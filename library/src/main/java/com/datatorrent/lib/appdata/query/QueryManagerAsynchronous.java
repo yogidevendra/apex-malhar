@@ -88,6 +88,7 @@ public class QueryManagerAsynchronous<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT, RES
   public void setup(OperatorContext context)
   {
     processingThread = new Thread(new ProcessingThread());
+    processingThread.setName("Query Executor Thread");
     processingThread.start();
   }
 
@@ -163,7 +164,6 @@ public class QueryManagerAsynchronous<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT, RES
                                                    queryBundle.getQueueContext());
         if(result != null) {
           String serializedMessage = messageSerializerFactory.serialize(result);
-          LOG.debug("emitting message {}", serializedMessage);
           queue.add(serializedMessage);
         }
 

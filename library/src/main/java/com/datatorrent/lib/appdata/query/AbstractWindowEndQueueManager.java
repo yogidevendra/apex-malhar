@@ -16,14 +16,15 @@
 package com.datatorrent.lib.appdata.query;
 
 import com.datatorrent.api.Context.OperatorContext;
-import com.datatorrent.lib.appdata.query.QueueList.QueueListNode;
 import com.datatorrent.lib.appdata.QueueUtils.ConditionBarrier;
+import com.datatorrent.lib.appdata.query.QueueList.QueueListNode;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * This is an abstract implementation of a QueueManager which works in the following way.
@@ -57,7 +58,7 @@ public abstract class AbstractWindowEndQueueManager<QUERY_TYPE, META_QUERY, QUEU
 
   private final Semaphore semaphore = new Semaphore(0);
   private final ConditionBarrier conditionBarrier = new ConditionBarrier();
-  private int numLeft = 0;
+  private AtomicInteger numLeft = new AtomicInteger();
 
   /**
    * Creates a new QueueManager.
@@ -93,7 +94,7 @@ public abstract class AbstractWindowEndQueueManager<QUERY_TYPE, META_QUERY, QUEU
 
     if(addingFilter(queryQueueable)) {
       queryQueue.enqueue(node);
-      numLeft++;
+      numLeft.getAndIncrement();
       semaphore.release();
 
       addedNode(node);
@@ -123,8 +124,6 @@ public abstract class AbstractWindowEndQueueManager<QUERY_TYPE, META_QUERY, QUEU
     QueryBundle<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT> qq = null;
 
     boolean first = true;
-
-    LOG.debug("numLeft {} availablePermits {}", this.numLeft, semaphore.availablePermits());
 
     if(block) {
       acquire();
@@ -163,7 +162,7 @@ public abstract class AbstractWindowEndQueueManager<QUERY_TYPE, META_QUERY, QUEU
         }
       }
 
-      numLeft--;
+      numLeft.getAndDecrement();
       QueryBundle<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT> queryQueueable = currentNode.getPayload();
 
       first = false;
@@ -194,9 +193,9 @@ public abstract class AbstractWindowEndQueueManager<QUERY_TYPE, META_QUERY, QUEU
     }
 
     //Handle the case where non blocking dequeue is happening, semaphore needs to be synched up.
-    if(semaphore.availablePermits() > numLeft) {
+    if(semaphore.availablePermits() > numLeft.get()) {
       try {
-        semaphore.acquire(semaphore.availablePermits() - numLeft);
+        semaphore.acquire(semaphore.availablePermits() - numLeft.get());
       }
       catch(InterruptedException ex) {
         throw new RuntimeException(ex);
@@ -253,7 +252,7 @@ public abstract class AbstractWindowEndQueueManager<QUERY_TYPE, META_QUERY, QUEU
     currentNode = queryQueue.getHead();
     readCurrent = false;
 
-    numLeft = queryQueue.getSize();
+    numLeft.set(queryQueue.getSize());
     semaphore.drainPermits();
     semaphore.release(queryQueue.getSize());
   }
@@ -271,7 +270,7 @@ public abstract class AbstractWindowEndQueueManager<QUERY_TYPE, META_QUERY, QUEU
   @Override
   public int getNumLeft()
   {
-    return numLeft;
+    return numLeft.get();
   }
 
   @VisibleForTesting
