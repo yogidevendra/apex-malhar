@@ -222,7 +222,7 @@ public abstract class AbstractDimensionsComputationFlexible<INPUT> extends Abstr
    * determine the type of {@link InputEvent} that the {@link #convertInput} method should
    * produce.
    */
-  public class DimensionsConversionContext
+  public static class DimensionsConversionContext
   {
     /**
      * The schemaID to apply to the {@link InputEvent}.

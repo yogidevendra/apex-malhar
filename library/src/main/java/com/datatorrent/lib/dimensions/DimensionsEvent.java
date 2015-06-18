@@ -49,7 +49,7 @@ public abstract class DimensionsEvent implements Serializable, UnifiableAggregat
   /**
    * This is the aggregateIndex assigned to this event.
    */
-  private int aggregateIndex;
+  protected int aggregateIndex;
 
   /**
    * Constructor for Kryo.
@@ -624,7 +624,7 @@ public abstract class DimensionsEvent implements Serializable, UnifiableAggregat
    * that {@link DimensionsEvent}s do not. The primary purpose behind this class is to make it clear to programmers
    * implementing {@link IncrementalAggregator}s that the output of their aggregators are not the same thing as the inputs.
    */
-  public static class Aggregate extends DimensionsEvent
+  public static class Aggregate extends DimensionsEvent implements com.datatorrent.lib.statistics.DimensionsComputation.AggregateEvent
   {
     private static final long serialVersionUID = 201505181028L;
 
@@ -691,6 +691,12 @@ public abstract class DimensionsEvent implements Serializable, UnifiableAggregat
             schemaID,
             dimensionDescriptorID,
             aggregatorID);
+    }
+
+    @Override
+    public int getAggregatorIndex()
+    {
+      return this.aggregateIndex;
     }
 
     /**

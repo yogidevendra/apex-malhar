@@ -15,16 +15,16 @@
  */
 package com.datatorrent.lib.statistics;
 
-import java.util.Map;
-
-import javax.annotation.Nonnull;
-import javax.validation.constraints.NotNull;
-
-import com.google.common.collect.Maps;
-
 import com.datatorrent.api.BaseOperator;
 import com.datatorrent.api.DefaultOutputPort;
 import com.datatorrent.api.Operator;
+import com.google.common.collect.Maps;
+import javax.annotation.Nonnull;
+import javax.validation.constraints.NotNull;
+
+import java.util.Map;
+
+
 
 /**
  * A {@link Unifier} implementation for {@link DimensionsComputation}.<br/>

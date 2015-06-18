@@ -35,7 +35,7 @@ import com.datatorrent.lib.dimensions.DimensionsEvent.InputEvent;
  * </p>
  *
  */
-public interface IncrementalAggregator extends Aggregator<InputEvent, Aggregate>
+public interface IncrementalAggregator extends com.datatorrent.lib.statistics.DimensionsComputation.Aggregator<InputEvent, Aggregate>
 {
   /**
    * This method defines the type mapping for the {@link IncrementalAggregator}. The type mapping defines the relationship
