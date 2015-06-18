@@ -117,7 +117,7 @@ public class AdsDimensionsDemoPerformant implements StreamingApplication
     dimensions.setDimensionsCombinations(dimensionsCombinations);
     dimensions.setAggregators(dimensionsAggregators);
     dag.getMeta(dimensions).getMeta(dimensions.output).getUnifierMeta().getAttributes().put(OperatorContext.MEMORY_MB, 8092);
-    
+
     //Configuring the converter
     adsConverter.setEventSchemaJSON(eventSchema);
     adsConverter.setDimensionSpecs(dimensionSpecs);
