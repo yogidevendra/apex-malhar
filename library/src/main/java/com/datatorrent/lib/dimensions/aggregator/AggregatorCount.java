@@ -16,7 +16,8 @@
 package com.datatorrent.lib.dimensions.aggregator;
 
 import com.datatorrent.lib.appdata.schemas.Type;
-import com.datatorrent.lib.dimensions.Aggregate;
+import com.datatorrent.lib.dimensions.DimensionsEvent;
+import com.datatorrent.lib.dimensions.DimensionsEvent.Aggregate;
 import com.google.common.collect.Maps;
 
 import java.util.Collections;
@@ -26,7 +27,7 @@ import java.util.Map;
  * This {@link IncrementalAggregator} performs a count of the number of times an input is encountered.
  * @param <EVENT> The type of the input event.
  */
-public class AggregatorCount<EVENT> extends AbstractIncrementalAggregator<EVENT>
+public class AggregatorCount extends AbstractIncrementalAggregator<EVENT>
 {
   private static final long serialVersionUID = 20154301645L;
 
@@ -46,24 +47,21 @@ public class AggregatorCount<EVENT> extends AbstractIncrementalAggregator<EVENT>
     TYPE_CONVERSION_MAP = Collections.unmodifiableMap(typeConversionMap);
   }
 
-  /**
-   * This constructor is not exposed for singleton pattern.
-   */
-  private AggregatorCount()
+  public AggregatorCount()
   {
     //Do nothing
   }
 
   @Override
-  public Aggregate getGroup(EVENT src, int aggregatorIndex)
+  public DimensionsEvent getGroup(EVENT src, int aggregatorIndex)
   {
-    Aggregate aggregate = super.getGroup(src, aggregatorIndex);
+    DimensionsEvent aggregate = super.getGroup(src, aggregatorIndex);
     long[] longFields = aggregate.getAggregates().getFieldsLong();
 
     for(int index = 0;
         index < longFields.length;
         index++) {
-      longFields[index] = 1;
+      longFields[index] = 0;
     }
 
     return aggregate;
@@ -83,7 +81,7 @@ public class AggregatorCount<EVENT> extends AbstractIncrementalAggregator<EVENT>
   }
 
   @Override
-  public void aggregate(Aggregate destAgg, Aggregate srcAgg)
+  public void aggregate(DimensionsEvent destAgg, DimensionsEvent srcAgg)
   {
     long[] destLongs = destAgg.getAggregates().getFieldsLong();
     long[] srcLongs = srcAgg.getAggregates().getFieldsLong();

@@ -24,9 +24,9 @@ import com.datatorrent.lib.appdata.schemas.TimeBucket;
 import com.datatorrent.lib.dimensions.AbstractDimensionsComputationFlexibleSingleSchema;
 import com.datatorrent.lib.dimensions.DimensionsComputationFlexibleSingleSchemaMap;
 import com.datatorrent.lib.dimensions.DimensionsDescriptor;
-import com.datatorrent.lib.dimensions.Aggregate;
-import com.datatorrent.lib.dimensions.Aggregate.Aggregate;
-import com.datatorrent.lib.dimensions.Aggregate.EventKey;
+import com.datatorrent.lib.dimensions.DimensionsEvent;
+import com.datatorrent.lib.dimensions.DimensionsEvent.Aggregate;
+import com.datatorrent.lib.dimensions.DimensionsEvent.EventKey;
 import com.datatorrent.lib.dimensions.aggregator.AggregatorIncrementalType;
 import com.datatorrent.lib.dimensions.aggregator.AggregatorRegistry;
 import com.datatorrent.lib.testbench.CollectorTestSink;
@@ -87,12 +87,12 @@ public class DimensionsComputationFlexibleSingleSchemaMapTest
     valueGPO.setField("revenue", ((Double) ai1.get("revenue")) + ((Double) ai2.get("revenue")));
     valueGPO.setField("cost", ((Double) ai1.get("cost")) + ((Double) ai2.get("cost")));
 
-    Aggregate expectedAE = new Aggregate(eventKey, valueGPO);
+    DimensionsEvent expectedAE = new DimensionsEvent(eventKey, valueGPO);
 
     DimensionsComputationFlexibleSingleSchemaMap dimensions = new DimensionsComputationFlexibleSingleSchemaMap();
     dimensions.setConfigurationSchemaJSON(SchemaUtils.jarResourceFileToString("adsGenericEventSimple.json"));
 
-    CollectorTestSink<Aggregate> sink = new CollectorTestSink<Aggregate>();
+    CollectorTestSink<DimensionsEvent> sink = new CollectorTestSink<DimensionsEvent>();
     TestUtils.setSink(dimensions.output, sink);
 
     DimensionsComputationFlexibleSingleSchemaMap dimensionsClone =

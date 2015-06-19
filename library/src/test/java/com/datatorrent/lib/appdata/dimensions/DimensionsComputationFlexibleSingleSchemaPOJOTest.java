@@ -25,9 +25,9 @@ import com.datatorrent.lib.dimensions.AbstractDimensionsComputationFlexibleSingl
 import com.datatorrent.lib.dimensions.aggregator.AggregatorIncrementalType;
 import com.datatorrent.lib.dimensions.DimensionsComputationFlexibleSingleSchemaPOJO;
 import com.datatorrent.lib.dimensions.DimensionsDescriptor;
-import com.datatorrent.lib.dimensions.Aggregate;
-import com.datatorrent.lib.dimensions.Aggregate.Aggregate;
-import com.datatorrent.lib.dimensions.Aggregate.EventKey;
+import com.datatorrent.lib.dimensions.DimensionsEvent;
+import com.datatorrent.lib.dimensions.DimensionsEvent.Aggregate;
+import com.datatorrent.lib.dimensions.DimensionsEvent.EventKey;
 import com.datatorrent.lib.dimensions.aggregator.AggregatorRegistry;
 import com.datatorrent.lib.testbench.CollectorTestSink;
 import com.datatorrent.lib.util.TestUtils;
@@ -89,11 +89,11 @@ public class DimensionsComputationFlexibleSingleSchemaPOJOTest
     valueGPO.setField("revenue", ai.getRevenue() + ai2.getRevenue());
     valueGPO.setField("cost", ai.getCost() + ai2.getCost());
 
-    Aggregate expectedAE = new Aggregate(eventKey, valueGPO);
+    DimensionsEvent expectedAE = new DimensionsEvent(eventKey, valueGPO);
 
     DimensionsComputationFlexibleSingleSchemaPOJO dimensions = createDimensionsComputationOperator("adsGenericEventSimple.json");
 
-    CollectorTestSink<Aggregate> sink = new CollectorTestSink<Aggregate>();
+    CollectorTestSink<DimensionsEvent> sink = new CollectorTestSink<DimensionsEvent>();
     TestUtils.setSink(dimensions.output, sink);
 
     DimensionsComputationFlexibleSingleSchemaPOJO dimensionsClone =
@@ -117,7 +117,7 @@ public class DimensionsComputationFlexibleSingleSchemaPOJOTest
 
     DimensionsComputationFlexibleSingleSchemaPOJO dcss = createDimensionsComputationOperator("adsGenericEventSchemaAdditional.json");
 
-    CollectorTestSink<Aggregate> sink = new CollectorTestSink<Aggregate>();
+    CollectorTestSink<DimensionsEvent> sink = new CollectorTestSink<DimensionsEvent>();
     TestUtils.setSink(dcss.output, sink);
 
     dcss.setup(null);
@@ -135,7 +135,7 @@ public class DimensionsComputationFlexibleSingleSchemaPOJOTest
 
     DimensionsComputationFlexibleSingleSchemaPOJO dcss = createDimensionsComputationOperator("adsGenericEventSchemaAggregations.json");
 
-    CollectorTestSink<Aggregate> sink = new CollectorTestSink<Aggregate>();
+    CollectorTestSink<DimensionsEvent> sink = new CollectorTestSink<DimensionsEvent>();
     TestUtils.setSink(dcss.output, sink);
 
     dcss.setup(null);

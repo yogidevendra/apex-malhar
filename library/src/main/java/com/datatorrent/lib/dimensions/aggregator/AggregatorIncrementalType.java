@@ -25,23 +25,23 @@ import java.util.Map;
 
 public enum AggregatorIncrementalType
 {
-  SUM(AggregatorSum.INSTANCE),
-  MIN(AggregatorMin.INSTANCE),
-  MAX(AggregatorMax.INSTANCE),
-  COUNT(AggregatorCount.INSTANCE),
-  LAST(AggregatorLast.INSTANCE),
-  FIRST(AggregatorFirst.INSTANCE);
+  SUM(new AggregatorSum<Object>()),
+  MIN(new AggregatorMin<Object>()),
+  MAX(new AggregatorMax<Object>()),
+  COUNT(new AggregatorCount<Object>()),
+  LAST(new AggregatorLast<Object>()),
+  FIRST(new AggregatorFirst<Object>());
 
   private static final Logger logger = LoggerFactory.getLogger(AggregatorIncrementalType.class);
 
   public static final Map<String, Integer> NAME_TO_ORDINAL;
-  public static final Map<String, IncrementalAggregator> NAME_TO_AGGREGATOR;
+  public static final Map<String, IncrementalAggregator<Object>> NAME_TO_AGGREGATOR;
 
-  private IncrementalAggregator aggregator;
+  private IncrementalAggregator<Object> aggregator;
 
   static {
     Map<String, Integer> nameToOrdinal = Maps.newHashMap();
-    Map<String, IncrementalAggregator> nameToAggregator = Maps.newHashMap();
+    Map<String, IncrementalAggregator<Object>> nameToAggregator = Maps.newHashMap();
 
     for(AggregatorIncrementalType aggType: AggregatorIncrementalType.values()) {
       nameToOrdinal.put(aggType.name(), aggType.ordinal());
@@ -52,18 +52,18 @@ public enum AggregatorIncrementalType
     NAME_TO_AGGREGATOR = Collections.unmodifiableMap(nameToAggregator);
   }
 
-  AggregatorIncrementalType(IncrementalAggregator aggregator)
+  AggregatorIncrementalType(IncrementalAggregator<Object> aggregator)
   {
     setAggregator(aggregator);
   }
 
-  private void setAggregator(IncrementalAggregator aggregator)
+  private void setAggregator(IncrementalAggregator<Object> aggregator)
   {
     Preconditions.checkNotNull(aggregator);
     this.aggregator = aggregator;
   }
 
-  public IncrementalAggregator getAggregator()
+  public IncrementalAggregator<Object> getAggregator()
   {
     return aggregator;
   }

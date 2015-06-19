@@ -19,7 +19,7 @@ import com.datatorrent.api.Context.OperatorContext;
 import com.datatorrent.lib.appdata.schemas.*;
 
 import com.datatorrent.lib.dimensions.DimensionsDescriptor;
-import com.datatorrent.lib.dimensions.Aggregate.Aggregate;
+import com.datatorrent.lib.dimensions.DimensionsEvent.Aggregate;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;

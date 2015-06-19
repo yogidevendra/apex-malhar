@@ -18,11 +18,10 @@ package com.datatorrent.lib.dimensions;
 
 import com.datatorrent.api.Context.OperatorContext;
 import com.datatorrent.api.DefaultInputPort;
-import com.datatorrent.lib.appdata.schemas.FieldsDescriptor;
-import com.datatorrent.lib.dimensions.Aggregate.Aggregate;
-import com.datatorrent.lib.dimensions.Aggregate.Aggregate.AggregateHashingStrategy;
-import com.datatorrent.lib.dimensions.Aggregate.DimensionsEventDimensionsCombination;
-import com.datatorrent.lib.dimensions.Aggregate.InputEvent;
+import com.datatorrent.lib.dimensions.DimensionsEvent.Aggregate;
+import com.datatorrent.lib.dimensions.DimensionsEvent.Aggregate.AggregateHashingStrategy;
+import com.datatorrent.lib.dimensions.DimensionsEvent.DimensionsEventDimensionsCombination;
+import com.datatorrent.lib.dimensions.DimensionsEvent.InputEvent;
 import com.datatorrent.lib.dimensions.aggregator.Aggregator;
 import com.datatorrent.lib.dimensions.aggregator.AggregatorRegistry;
 import com.datatorrent.lib.dimensions.aggregator.IncrementalAggregator;
@@ -215,46 +214,5 @@ public abstract class AbstractDimensionsComputationFlexible<INPUT> extends Abstr
   public void setAggregatorRegistry(AggregatorRegistry aggregatorRegistry)
   {
     this.aggregatorRegistry = aggregatorRegistry;
-  }
-
-  /**
-   * This is a context object that is passed to the {@link #convertInput} method in order to
-   * determine the type of {@link InputEvent} that the {@link #convertInput} method should
-   * produce.
-   */
-  public static class DimensionsConversionContext
-  {
-    /**
-     * The schemaID to apply to the {@link InputEvent}.
-     */
-    public int schemaID;
-    /**
-     * The aggregatorID of the aggregator to use on the {@link InputEvent}.
-     */
-    public int aggregatorID;
-    /**
-     * The dimensions descriptor id to apply to the {@link InputEvent}.
-     */
-    public int dimensionDescriptorID;
-    /**
-     * The {@link DimensionsDescriptor} corresponding to the given dimension descriptor id.
-     */
-    public DimensionsDescriptor dd;
-    /**
-     * The {@link FieldsDescriptor} for the key of a new {@link InputEvent}.
-     */
-    public FieldsDescriptor keyFieldsDescriptor;
-    /**
-     * The {@link FieldsDescriptor} for the aggregate of a new {@link InputEvent}.
-     */
-    public FieldsDescriptor aggregateDescriptor;
-
-    /**
-     * Constructor for creating conversion context.
-     */
-    public DimensionsConversionContext()
-    {
-      //Do nothing.
-    }
   }
 }

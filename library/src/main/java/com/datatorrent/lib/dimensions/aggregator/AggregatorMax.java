@@ -17,55 +17,103 @@ package com.datatorrent.lib.dimensions.aggregator;
 
 import com.datatorrent.lib.appdata.gpo.GPOMutable;
 import com.datatorrent.lib.appdata.schemas.Type;
-import com.datatorrent.lib.dimensions.Aggregate;
-import com.datatorrent.lib.dimensions.Aggregate.Aggregate;
-import com.datatorrent.lib.dimensions.Aggregate.InputEvent;
+import com.datatorrent.lib.dimensions.DimensionsEvent;
+import com.datatorrent.lib.util.PojoUtils.GetterByte;
+import com.datatorrent.lib.util.PojoUtils.GetterDouble;
+import com.datatorrent.lib.util.PojoUtils.GetterFloat;
+import com.datatorrent.lib.util.PojoUtils.GetterInt;
+import com.datatorrent.lib.util.PojoUtils.GetterLong;
+import com.datatorrent.lib.util.PojoUtils.GetterShort;
 
 /**
  * This {@link IncrementalAggregator} takes the max of the fields provided in the {@link InputEvent}.
+ * @param <EVENT> The type of the input event.
  */
-public class AggregatorMax implements IncrementalAggregator
+public class AggregatorMax<EVENT> extends AbstractIncrementalAggregator<EVENT>
 {
   private static final long serialVersionUID = 201503120332L;
 
-  /**
-   * The singleton instance of this class.
-   */
-  public static final AggregatorMax INSTANCE = new AggregatorMax();
-
-  /**
-   * Singleton constructor.
-   */
-  private AggregatorMax()
+  public AggregatorMax()
   {
     //Do nothing
   }
 
   @Override
-  public Aggregate createDest(InputEvent first)
+  public DimensionsEvent getGroup(EVENT src, int aggregatorIndex)
   {
-    return new Aggregate(first.getEventKey(), first.getAggregates());
+    DimensionsEvent aggregate = super.getGroup(src, aggregatorIndex);
+
+    {
+      byte[] destByte = aggregate.getAggregates().getFieldsByte();
+      if(destByte != null) {
+        for(int index = 0;
+            index < destByte.length;
+            index++) {
+          destByte[index] = Byte.MIN_VALUE;
+        }
+      }
+    }
+
+    {
+      short[] destShort = aggregate.getAggregates().getFieldsShort();
+      if(destShort != null) {
+        for(int index = 0;
+            index < destShort.length;
+            index++) {
+          destShort[index] = Short.MIN_VALUE;
+        }
+      }
+    }
+
+    {
+      int[] destInteger = aggregate.getAggregates().getFieldsInteger();
+      if(destInteger != null) {
+        for(int index = 0;
+            index < destInteger.length;
+            index++) {
+          destInteger[index] = Integer.MIN_VALUE;
+        }
+      }
+    }
+
+    {
+      long[] destLong = aggregate.getAggregates().getFieldsLong();
+      if(destLong != null) {
+        for(int index = 0;
+            index < destLong.length;
+            index++) {
+          destLong[index] = Long.MIN_VALUE;
+        }
+      }
+    }
+
+    {
+      float[] destFloat = aggregate.getAggregates().getFieldsFloat();
+      if(destFloat != null) {
+        for(int index = 0;
+            index < destFloat.length;
+            index++) {
+          destFloat[index] = Float.NEGATIVE_INFINITY;
+        }
+      }
+    }
+
+    {
+      double[] destDouble = aggregate.getAggregates().getFieldsDouble();
+      if(destDouble != null) {
+        for(int index = 0;
+            index < destDouble.length;
+            index++) {
+          destDouble[index] = Double.NEGATIVE_INFINITY;
+        }
+      }
+    }
+
+    return aggregate;
   }
 
   @Override
-  public void aggregate(Aggregate dest, Aggregate src)
-  {
-    aggregateHelper(dest, src);
-  }
-
-  @Override
-  public void aggregate(Aggregate dest, InputEvent src)
-  {
-    aggregateHelper(dest, src);
-  }
-
-  @Override
-  public Type getOutputType(Type inputType)
-  {
-    return AggregatorUtils.IDENTITY_NUMBER_TYPE_MAP.get(inputType);
-  }
-
-  private void aggregateHelper(Aggregate dest, Aggregate src)
+  public void aggregate(DimensionsEvent dest, DimensionsEvent src)
   {
     GPOMutable destAggs = dest.getAggregates();
     GPOMutable srcAggs = src.getAggregates();
@@ -159,5 +207,113 @@ public class AggregatorMax implements IncrementalAggregator
         }
       }
     }
+  }
+
+  @Override
+  public void aggregate(DimensionsEvent dest, EVENT src)
+  {
+    GPOMutable destAggs = dest.getAggregates();
+
+    {
+      byte[] destByte = destAggs.getFieldsByte();
+      GetterByte<Object>[] gettersByte = this.getValueGetters().gettersByte;
+
+      if(destByte != null) {
+        for(int index = 0;
+            index < destByte.length;
+            index++) {
+          byte tempByte = gettersByte[index].get(src);
+          if(destByte[index] < tempByte) {
+            destByte[index] = tempByte;
+          }
+        }
+      }
+    }
+
+    {
+      short[] destShort = destAggs.getFieldsShort();
+      GetterShort<Object>[] gettersShort = this.getValueGetters().gettersShort;
+
+      if(destShort != null) {
+        for(int index = 0;
+            index < destShort.length;
+            index++) {
+          short tempShort = gettersShort[index].get(src);
+          if(destShort[index] < tempShort) {
+            destShort[index] = tempShort;
+          }
+        }
+      }
+    }
+
+    {
+      int[] destInteger = destAggs.getFieldsInteger();
+      GetterInt<Object>[] gettersInteger = this.getValueGetters().gettersInteger;
+
+      if(destInteger != null) {
+        for(int index = 0;
+            index < destInteger.length;
+            index++) {
+          int tempInt = gettersInteger[index].get(src);
+          if(destInteger[index] < tempInt) {
+            destInteger[index] = tempInt;
+          }
+        }
+      }
+    }
+
+    {
+      long[] destLong = destAggs.getFieldsLong();
+      GetterLong<Object>[] gettersLong = this.getValueGetters().gettersLong;
+
+      if(destLong != null) {
+        for(int index = 0;
+            index < destLong.length;
+            index++) {
+          long tempLong = gettersLong[index].get(src);
+          if(destLong[index] < tempLong) {
+            destLong[index] = tempLong;
+          }
+        }
+      }
+    }
+
+    {
+      float[] destFloat = destAggs.getFieldsFloat();
+      GetterFloat<Object>[] gettersFloat = this.getValueGetters().gettersFloat;
+
+      if(destFloat != null) {
+        for(int index = 0;
+            index < destFloat.length;
+            index++) {
+          float tempFloat = gettersFloat[index].get(src);
+          if(destFloat[index] < tempFloat) {
+            destFloat[index] = tempFloat;
+          }
+        }
+      }
+    }
+
+    {
+      double[] destDouble = destAggs.getFieldsDouble();
+      GetterDouble<Object>[] gettersDouble = this.getValueGetters().gettersDouble;
+
+      if(destDouble != null) {
+        for(int index = 0;
+            index < destDouble.length;
+            index++) {
+          double tempDouble = gettersDouble[index].get(src);
+          if(destDouble[index] < tempDouble) {
+            destDouble[index] = tempDouble;
+          }
+        }
+      }
+    }
+  }
+
+  @Override
+  public Type getOutputType(Type inputType)
+  {
+    return AggregatorUtils.IDENTITY_NUMBER_TYPE_MAP.get(inputType);
   }
 }

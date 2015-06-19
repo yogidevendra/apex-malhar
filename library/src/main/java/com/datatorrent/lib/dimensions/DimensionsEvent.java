@@ -25,33 +25,29 @@ import java.io.Serializable;
  * {@link AbstractDimensionsComputationFlexible} and {@link DimensionsStoreHDHT}.
  * </p>
  * <p>
- * A {@link Aggregate} is constructed from two parts: an {@link EventKey} and a {@link GPOMutable} object
+ * A {@link DimensionsEvent} is constructed from two parts: an {@link EventKey} and a {@link GPOMutable} object
  * which contains the values of aggregate fields. The {@link EventKey} is used to identify the dimension combination
  * an event belongs to, and consequently determines what input values should be aggregated together. The aggregates
  * are the actual data payload of the event which are to be aggregated.
  * </p>
  */
-public class Aggregate implements Serializable, com.datatorrent.lib.statistics.DimensionsComputation.AggregateEvent
+public class DimensionsEvent implements Serializable
 {
   private static final long serialVersionUID = 201503231204L;
 
   /**
    * This is the {@link GPOMutable} object which holds all the aggregates.
    */
-  private GPOMutable aggregates;
+  protected GPOMutable aggregates;
   /**
    * This is the event key for the event.
    */
-  private EventKey eventKey;
-  /**
-   * This is the aggregatorIndex assigned to this event.
-   */
-  protected int aggregatorIndex;
+  protected EventKey eventKey;
 
   /**
    * Constructor for Kryo.
    */
-  private Aggregate()
+  private DimensionsEvent()
   {
     //For kryo
   }
@@ -61,7 +57,7 @@ public class Aggregate implements Serializable, com.datatorrent.lib.statistics.D
    * @param eventKey The key from which to create a {@link DimensionsEvent}.
    * @param aggregates The aggregates from which to create {@link DimensionsEvent}.
    */
-  public Aggregate(EventKey eventKey,
+  public DimensionsEvent(EventKey eventKey,
                    GPOMutable aggregates)
   {
     setEventKey(eventKey);
@@ -77,7 +73,7 @@ public class Aggregate implements Serializable, com.datatorrent.lib.statistics.D
    * @param dimensionDescriptorID The dimensionsDescriptorID.
    * @param aggregatorIndex The aggregatorIndex assigned to this event by the unifier.
    */
-  public Aggregate(GPOMutable keys,
+  public DimensionsEvent(GPOMutable keys,
                    GPOMutable aggregates,
                    int bucketID,
                    int schemaID,
@@ -100,7 +96,7 @@ public class Aggregate implements Serializable, com.datatorrent.lib.statistics.D
    * @param dimensionDescriptorID The dimensionsDescriptorID.
    * @param aggregatorIndex  The aggregatorIndex assigned to this event by the unifier.
    */
-  public Aggregate(GPOMutable keys,
+  public DimensionsEvent(GPOMutable keys,
                    GPOMutable aggregates,
                    int schemaID,
                    int dimensionDescriptorID,
@@ -118,7 +114,7 @@ public class Aggregate implements Serializable, com.datatorrent.lib.statistics.D
    * be the same as the given {@link EventKey}.
    * @param eventKey The {@link EventKey} to set on this event.
    */
-  private void setEventKey(EventKey eventKey)
+  protected void setEventKey(EventKey eventKey)
   {
     this.eventKey = new EventKey(eventKey);
   }
@@ -127,7 +123,7 @@ public class Aggregate implements Serializable, com.datatorrent.lib.statistics.D
    * This is a helper method which sets the aggregates for this event.
    * @param aggregates The aggregates for this event.
    */
-  private void setAggregates(GPOMutable aggregates)
+  protected void setAggregates(GPOMutable aggregates)
   {
     Preconditions.checkNotNull(aggregates);
     this.aggregates = aggregates;
@@ -199,23 +195,12 @@ public class Aggregate implements Serializable, com.datatorrent.lib.statistics.D
     return eventKey.getBucketID();
   }
 
-  public void setAggregatorIndex(int aggregatorIndex)
-  {
-    this.aggregatorIndex = aggregatorIndex;
-  }
-
-  @Override
-  public int getAggregatorIndex()
-  {
-    return aggregatorIndex;
-  }
-
   /**
    * This is a utility method which copies the given src event to the given destination event.
    * @param aeDest The destination event.
    * @param aeSrc The source event.
    */
-  public static void copy(Aggregate aeDest, Aggregate aeSrc)
+  public static void copy(DimensionsEvent aeDest, DimensionsEvent aeSrc)
   {
     GPOMutable destAggs = aeDest.getAggregates();
     GPOMutable srcAggs = aeSrc.getAggregates();
@@ -269,7 +254,7 @@ public class Aggregate implements Serializable, com.datatorrent.lib.statistics.D
    *  <li><b>schemaID:</b> This is the id of the {@link DimensionalSchema} that this {@link EventKey} corresponds to.</li>
    *  <li><b>dimensionDescriptorID:</b> This is the id of the {@link DimensionsDescriptor} that this {@link EventKey} corresponds to.</li>
    *  <li><b>aggregatorID:</b> This is the id of the aggregator that is used to aggregate the values associated with this {@link EventKey}
-   *  in a {@link Aggregate}.</li>
+   *  in a {@link DimensionsEvent}.</li>
    * </ul>
    * </p>
    */
@@ -527,7 +512,7 @@ public class Aggregate implements Serializable, com.datatorrent.lib.statistics.D
     if(getClass() != obj.getClass()) {
       return false;
     }
-    final Aggregate other = (Aggregate)obj;
+    final DimensionsEvent other = (DimensionsEvent)obj;
     if(this.aggregates != other.aggregates && (this.aggregates == null || !this.aggregates.equals(other.aggregates))) {
       return false;
     }
@@ -535,5 +520,169 @@ public class Aggregate implements Serializable, com.datatorrent.lib.statistics.D
       return false;
     }
     return true;
+  }
+
+  public static class InputEvent extends DimensionsEvent
+  {
+    private static final long serialVersionUID = 201506190114L;
+
+    public IndexSubset indexSubset;
+
+    /**
+     * This creates a {@link DimensionsEvent} from the given event key and aggregates.
+     *
+     * @param eventKey The key from which to create a {@link DimensionsEvent}.
+     * @param aggregates The aggregates from which to create {@link DimensionsEvent}.
+     */
+    public InputEvent(EventKey eventKey,
+                      GPOMutable aggregates)
+    {
+      setEventKey(eventKey);
+      setAggregates(aggregates);
+    }
+
+    /**
+     * Creates a DimensionsEvent with the given key values, aggregates and ids.
+     *
+     * @param keys The values for fields in the key.
+     * @param aggregates The values for fields in the aggregate.
+     * @param bucketID The bucketID
+     * @param schemaID The schemaID.
+     * @param dimensionDescriptorID The dimensionsDescriptorID.
+     * @param aggregatorIndex The aggregatorIndex assigned to this event by the unifier.
+     */
+    public InputEvent(GPOMutable keys,
+                     GPOMutable aggregates,
+                     int bucketID,
+                     int schemaID,
+                     int dimensionDescriptorID,
+                     int aggregatorIndex)
+    {
+      this.eventKey = new EventKey(bucketID,
+                                   schemaID,
+                                   dimensionDescriptorID,
+                                   aggregatorIndex,
+                                   keys);
+      setAggregates(aggregates);
+    }
+
+    /**
+     * This creates an event with the given data. Note, this constructor assumes that the bucketID will be 0.
+     *
+     * @param keys The value for fields in the key.
+     * @param aggregates The value for fields in the aggregate.
+     * @param schemaID The schemaID.
+     * @param dimensionDescriptorID The dimensionsDescriptorID.
+     * @param aggregatorIndex The aggregatorIndex assigned to this event by the unifier.
+     */
+    public InputEvent(GPOMutable keys,
+                     GPOMutable aggregates,
+                     int schemaID,
+                     int dimensionDescriptorID,
+                     int aggregatorIndex)
+    {
+      this.eventKey = new EventKey(schemaID,
+                                   dimensionDescriptorID,
+                                   aggregatorIndex,
+                                   keys);
+      setAggregates(aggregates);
+    }
+
+    public static class IndexSubset
+    {
+      public int[] fieldsBooleanIndexSubset;
+      public int[] fieldsCharacterIndexSubset;
+
+      public int[] fieldsByteIndexSubset;
+      public int[] fieldsShortIndexSubset;
+      public int[] fieldsIntegerIndexSubset;
+      public int[] fieldsLongIndexSubset;
+
+      public int[] fieldsFloatIndexSubset;
+      public int[] fieldsDoubleIndexSubset;
+
+      public int[] fieldsStringIndexSubset;
+    }
+  }
+
+  public static class Aggregate extends DimensionsEvent implements com.datatorrent.lib.statistics.DimensionsComputation.AggregateEvent
+  {
+    private static final long serialVersionUID = 201506190110L;
+
+    /**
+     * This is the aggregatorIndex assigned to this event.
+     */
+    protected int aggregatorIndex;
+
+    /**
+     * This creates a {@link DimensionsEvent} from the given event key and aggregates.
+     *
+     * @param eventKey The key from which to create a {@link DimensionsEvent}.
+     * @param aggregates The aggregates from which to create {@link DimensionsEvent}.
+     */
+    public Aggregate(EventKey eventKey,
+                           GPOMutable aggregates)
+    {
+      setEventKey(eventKey);
+      setAggregates(aggregates);
+    }
+
+    /**
+     * Creates a DimensionsEvent with the given key values, aggregates and ids.
+     *
+     * @param keys The values for fields in the key.
+     * @param aggregates The values for fields in the aggregate.
+     * @param bucketID The bucketID
+     * @param schemaID The schemaID.
+     * @param dimensionDescriptorID The dimensionsDescriptorID.
+     * @param aggregatorIndex The aggregatorIndex assigned to this event by the unifier.
+     */
+    public Aggregate(GPOMutable keys,
+                     GPOMutable aggregates,
+                     int bucketID,
+                     int schemaID,
+                     int dimensionDescriptorID,
+                     int aggregatorIndex)
+    {
+      this.eventKey = new EventKey(bucketID,
+                                   schemaID,
+                                   dimensionDescriptorID,
+                                   aggregatorIndex,
+                                   keys);
+      setAggregates(aggregates);
+    }
+
+    /**
+     * This creates an event with the given data. Note, this constructor assumes that the bucketID will be 0.
+     *
+     * @param keys The value for fields in the key.
+     * @param aggregates The value for fields in the aggregate.
+     * @param schemaID The schemaID.
+     * @param dimensionDescriptorID The dimensionsDescriptorID.
+     * @param aggregatorIndex The aggregatorIndex assigned to this event by the unifier.
+     */
+    public Aggregate(GPOMutable keys,
+                     GPOMutable aggregates,
+                     int schemaID,
+                     int dimensionDescriptorID,
+                     int aggregatorIndex)
+    {
+      this.eventKey = new EventKey(schemaID,
+                                   dimensionDescriptorID,
+                                   aggregatorIndex,
+                                   keys);
+      setAggregates(aggregates);
+    }
+
+    public void setAggregatorIndex(int aggregatorIndex)
+    {
+      this.aggregatorIndex = aggregatorIndex;
+    }
+
+    @Override
+    public int getAggregatorIndex()
+    {
+      return aggregatorIndex;
+    }
   }
 }

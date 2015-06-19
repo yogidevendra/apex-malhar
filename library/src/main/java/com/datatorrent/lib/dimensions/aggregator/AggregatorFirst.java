@@ -17,7 +17,7 @@
 package com.datatorrent.lib.dimensions.aggregator;
 
 import com.datatorrent.lib.appdata.schemas.Type;
-import com.datatorrent.lib.dimensions.Aggregate;
+import com.datatorrent.lib.dimensions.DimensionsEvent;
 
 /**
  * <p>
@@ -34,10 +34,7 @@ public class AggregatorFirst<EVENT> extends AbstractIncrementalAggregator<EVENT>
 {
   private static final long serialVersionUID = 20154301646L;
 
-  /**
-   * Singleton constructor.
-   */
-  private AggregatorFirst()
+  public AggregatorFirst()
   {
     //Do nothing
   }
@@ -49,13 +46,13 @@ public class AggregatorFirst<EVENT> extends AbstractIncrementalAggregator<EVENT>
   }
 
   @Override
-  public void aggregate(Aggregate dest, EVENT src)
+  public void aggregate(DimensionsEvent dest, EVENT src)
   {
     //Ignore
   }
 
   @Override
-  public void aggregate(Aggregate dest, Aggregate src)
+  public void aggregate(DimensionsEvent dest, DimensionsEvent src)
   {
     //Ignore
   }
