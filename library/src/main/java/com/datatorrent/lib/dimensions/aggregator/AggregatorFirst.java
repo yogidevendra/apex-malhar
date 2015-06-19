@@ -17,7 +17,7 @@
 package com.datatorrent.lib.dimensions.aggregator;
 
 import com.datatorrent.lib.appdata.schemas.Type;
-import com.datatorrent.lib.dimensions.Aggregate.Aggregate;
+import com.datatorrent.lib.dimensions.Aggregate;
 import com.datatorrent.lib.dimensions.Aggregate.InputEvent;
 
 /**
@@ -30,7 +30,7 @@ import com.datatorrent.lib.dimensions.Aggregate.InputEvent;
  * one is picked arbitrarily to be the first.
  * </p>
  */
-public class AggregatorFirst implements IncrementalAggregator
+public class AggregatorFirst<EVENT> implements AbstractIncrementalAggregat<EVENT>
 {
   private static final long serialVersionUID = 20154301646L;
 
@@ -48,26 +48,26 @@ public class AggregatorFirst implements IncrementalAggregator
   }
 
   @Override
-  public Aggregate createDest(InputEvent first)
+  public Type getOutputType(Type inputType)
   {
-    return new Aggregate(first.getEventKey(), first.getAggregates());
+    return AggregatorUtils.IDENTITY_TYPE_MAP.get(inputType);
   }
 
   @Override
-  public void aggregate(Aggregate dest, InputEvent src)
+  public Aggregate getGroup(EVENT src, int aggregatorIndex)
   {
-    //Do nothing
+    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+  }
+
+  @Override
+  public void aggregate(Aggregate dest, EVENT src)
+  {
+    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
   }
 
   @Override
   public void aggregate(Aggregate dest, Aggregate src)
   {
-    //Do nothing
-  }
-
-  @Override
-  public Type getOutputType(Type inputType)
-  {
-    return AggregatorUtils.IDENTITY_TYPE_MAP.get(inputType);
+    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
   }
 }

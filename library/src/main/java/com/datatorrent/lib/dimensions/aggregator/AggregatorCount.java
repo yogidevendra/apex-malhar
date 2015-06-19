@@ -15,11 +15,8 @@
  */
 package com.datatorrent.lib.dimensions.aggregator;
 
-import com.datatorrent.lib.appdata.gpo.GPOMutable;
-import com.datatorrent.lib.appdata.schemas.FieldsDescriptor;
 import com.datatorrent.lib.appdata.schemas.Type;
-import com.datatorrent.lib.dimensions.Aggregate.Aggregate;
-import com.datatorrent.lib.dimensions.DimensAggregateEvent;
+import com.datatorrent.lib.dimensions.Aggregate;
 import com.google.common.collect.Maps;
 
 import java.util.Collections;
@@ -28,7 +25,7 @@ import java.util.Map;
 /**
  * This {@link IncrementalAggregator} performs a count of the number of times an input is encountered.
  */
-public class AggregatorCount implements IncrementalAggregator
+public class AggregatorCount<EVENT> extends AbstractIncrementalAggregator<EVENT>
 {
   private static final long serialVersionUID = 20154301645L;
 
@@ -37,11 +34,6 @@ public class AggregatorCount implements IncrementalAggregator
    * represent the corresponding output types.
    */
   public static transient final Map<Type, Type> TYPE_CONVERSION_MAP;
-
-  /**
-   * Singleton.
-   */
-  public static final AggregatorCount INSTANCE = new AggregatorCount();
 
   static {
     Map<Type, Type> typeConversionMap = Maps.newHashMap();
@@ -62,7 +54,7 @@ public class AggregatorCount implements IncrementalAggregator
   }
 
   @Override
-  public void aggregate(Aggregate dest, InputEvent src)
+  public void aggregate(Aggregate dest, EVENT src)
   {
     long[] fieldsLong = dest.getAggregates().getFieldsLong();
 
@@ -92,23 +84,5 @@ public class AggregatorCount implements IncrementalAggregator
   public Type getOutputType(Type inputType)
   {
     return TYPE_CONVERSION_MAP.get(inputType);
-  }
-
-  @Override
-  public Aggregate createDest(InputEvent first)
-  {
-    FieldsDescriptor outputFD = AggregatorUtils.getOutputFieldsDescriptor(first.getAggregates().getFieldDescriptor(),
-                                                                          this);
-    GPOMutable aggregates = new GPOMutable(outputFD);
-
-    long[] aggLongs = aggregates.getFieldsLong();
-
-    for(int index = 0;
-        index < aggLongs.length;
-        index++) {
-      aggLongs[index] = 1L;
-    }
-
-    return new Aggregate(first.getEventKey(), aggregates);
   }
 }

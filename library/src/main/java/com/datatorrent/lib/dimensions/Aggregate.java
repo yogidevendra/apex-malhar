@@ -31,7 +31,7 @@ import java.io.Serializable;
  * are the actual data payload of the event which are to be aggregated.
  * </p>
  */
-public abstract class Aggregate implements Serializable, com.datatorrent.lib.statistics.DimensionsComputation.AggregateEvent
+public class Aggregate implements Serializable, com.datatorrent.lib.statistics.DimensionsComputation.AggregateEvent
 {
   private static final long serialVersionUID = 201503231204L;
 
