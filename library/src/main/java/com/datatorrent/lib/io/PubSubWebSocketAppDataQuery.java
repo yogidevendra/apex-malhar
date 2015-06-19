@@ -16,7 +16,6 @@
 package com.datatorrent.lib.io;
 
 import com.datatorrent.api.AppData;
-import com.datatorrent.api.AppData.EmbeddableQuery;
 import com.datatorrent.api.Context.OperatorContext;
 import com.datatorrent.api.DefaultInputPort;
 import com.datatorrent.lib.appdata.PortConnector;
@@ -28,7 +27,7 @@ import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PubSubWebSocketAppDataQuery extends PubSubWebSocketInputOperator<String> implements AppData.ConnectionInfoProvider, EmbeddableQuery<String>
+public class PubSubWebSocketAppDataQuery extends PubSubWebSocketInputOperator<String> implements AppData.ConnectionInfoProvider//, EmbeddableQuery<String>
 {
   /**
    * Add optional error port
@@ -53,7 +52,7 @@ public class PubSubWebSocketAppDataQuery extends PubSubWebSocketInputOperator<St
     if(parentInputPort != null) {
       PortConnector.connect(outputPort, parentInputPort);
     }
-    
+
     logger.debug("Setting up:\nuri:{}\ntopic:{}",this.getUri(), this.getTopic());
   }
 
@@ -96,7 +95,7 @@ public class PubSubWebSocketAppDataQuery extends PubSubWebSocketInputOperator<St
     return "pubsub";
   }
 
-  @Override
+  //@Override
   public void setInputPort(DefaultInputPort<String> inputPort)
   {
     this.parentInputPort = Preconditions.checkNotNull(inputPort);

@@ -145,7 +145,7 @@ public class AdsDimensionsDemoPerformant implements StreamingApplication
     queryPort = wsIn.outputPort;
 
     if(conf.getBoolean(PROP_EMBEDD_QUERY, false)) {
-      store.setEmbeddableQuery(wsIn);
+      //store.setEmbeddableQuery(wsIn);
     }
     else {
       dag.addOperator("Query", wsIn);

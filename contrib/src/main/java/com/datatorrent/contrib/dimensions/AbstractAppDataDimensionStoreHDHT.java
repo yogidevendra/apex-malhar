@@ -5,7 +5,6 @@
 package com.datatorrent.contrib.dimensions;
 
 import com.datatorrent.api.AppData;
-import com.datatorrent.api.AppData.EmbeddableQuery;
 import com.datatorrent.api.Context;
 import com.datatorrent.api.DefaultInputPort;
 import com.datatorrent.api.DefaultOutputPort;
@@ -119,7 +118,7 @@ public abstract class AbstractAppDataDimensionStoreHDHT extends DimensionsStoreH
     }
   };
 
-  private EmbeddableQuery<String> embeddableQuery;
+  //private EmbeddableQuery<String> embeddableQuery;
 
   /**
    * Constructor to create operator.
@@ -134,11 +133,11 @@ public abstract class AbstractAppDataDimensionStoreHDHT extends DimensionsStoreH
   @Override
   public void setup(Context.OperatorContext context)
   {
-    if(embeddableQuery != null) {
+    //if(embeddableQuery != null) {
       //If an embeddableQuery operator is set, then enable it.
-      embeddableQuery.setInputPort(query);
-      embeddableQuery.setup(context);
-    }
+      //embeddableQuery.setInputPort(query);
+      //embeddableQuery.setup(context);
+    //}
 
     aggregatorRegistry.setup();
 
@@ -174,10 +173,10 @@ public abstract class AbstractAppDataDimensionStoreHDHT extends DimensionsStoreH
   @Override
   public void beginWindow(long windowId)
   {
-    if(embeddableQuery != null) {
+    //if(embeddableQuery != null) {
       //If embeddable query operator is set
-      embeddableQuery.beginWindow(windowId);
-    }
+      //embeddableQuery.beginWindow(windowId);
+    //}
 
     schemaQueueManager.beginWindow(windowId);
     schemaProcessor.beginWindow(windowId);
@@ -191,10 +190,10 @@ public abstract class AbstractAppDataDimensionStoreHDHT extends DimensionsStoreH
   @Override
   public void endWindow()
   {
-    if(embeddableQuery != null) {
+    //if(embeddableQuery != null) {
       //If embeddable query operator is set
-      embeddableQuery.endWindow();
-    }
+      //embeddableQuery.endWindow();
+    //}
 
     super.endWindow();
 
@@ -208,10 +207,10 @@ public abstract class AbstractAppDataDimensionStoreHDHT extends DimensionsStoreH
   @Override
   public void teardown()
   {
-    if(embeddableQuery != null) {
+    //if(embeddableQuery != null) {
       //If embeddable query operator is set
-      embeddableQuery.teardown();
-    }
+      //embeddableQuery.teardown();
+    //}
 
     queryProcessor.teardown();
     dimensionsQueueManager.teardown();
@@ -295,19 +294,19 @@ public abstract class AbstractAppDataDimensionStoreHDHT extends DimensionsStoreH
    * Returns the {@link EmbeddableQuery} operator set on this operator.
    * @return The {@link EmbeddableQuery} operator.
    */
-  public EmbeddableQuery<String> getEmbeddableQuery()
+  /*public EmbeddableQuery<String> getEmbeddableQuery()
   {
     return embeddableQuery;
-  }
+  }*/
 
   /**
    * Sets the {@link EmbeddableQuery} operator on this operator.
    * @param embeddableQuery The {@link EmbeddableQuery} operator to set on this operator.
    */
-  public void setEmbeddableQuery(EmbeddableQuery<String> embeddableQuery)
+  /*public void setEmbeddableQuery(EmbeddableQuery<String> embeddableQuery)
   {
     this.embeddableQuery = embeddableQuery;
-  }
+  }*/
 
   /**
    * This is a {@link QueryExecutor} that is responsible for executing schema queries.

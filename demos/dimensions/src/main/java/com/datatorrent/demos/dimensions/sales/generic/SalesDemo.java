@@ -68,7 +68,7 @@ public class SalesDemo implements StreamingApplication
     fieldToMapField.put("sales", "amount");
     dimensions.setFieldToMapField(fieldToMapField);
     dag.getMeta(dimensions).getMeta(dimensions.output).getUnifierMeta().getAttributes().put(OperatorContext.MEMORY_MB, 8092);
-    
+
     store.setConfigurationSchemaJSON(eventSchema);
     store.setDimensionalSchemaStubJSON(dimensionalSchema);
     input.setEventSchemaJSON(eventSchema);
@@ -83,14 +83,14 @@ public class SalesDemo implements StreamingApplication
     queryPort = wsIn.outputPort;
 
     if(conf.getBoolean(PROP_EMBEDD_QUERY, false)) {
-      store.setEmbeddableQuery(wsIn);
+      //store.setEmbeddableQuery(wsIn);
     }
     else {
       dag.addOperator("Query", wsIn);
       dag.addStream("Query", queryPort, store.query).setLocality(Locality.CONTAINER_LOCAL);
     }
 
-    store.setEmbeddableQuery(wsIn);
+    //store.setEmbeddableQuery(wsIn);
 
     PubSubWebSocketAppDataResult wsOut = dag.addOperator("QueryResult", new PubSubWebSocketAppDataResult());
     wsOut.setUri(uri);
