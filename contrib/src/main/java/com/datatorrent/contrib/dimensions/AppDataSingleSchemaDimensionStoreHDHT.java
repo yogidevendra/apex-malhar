@@ -86,9 +86,31 @@ public class AppDataSingleSchemaDimensionStoreHDHT extends AbstractAppDataDimens
    */
   private Map<String, Set<Comparable>> seenEnumValues;
 
+  private Long minTimestamp = null;
+  private Long maxTimestamp = null;
+
   @Override
   public void processEvent(Aggregate gae) {
     super.processEvent(gae);
+
+    if(!dimensionalSchema.isPredefinedFromTo() &&
+       gae.getKeys().getFieldDescriptor().getFields().getFields().contains(DimensionsDescriptor.DIMENSION_TIME)) {
+      //If there is no predifined from and to settings, then just use the startup time of
+      //the operator as the from time
+
+      long timestamp = gae.getEventKey().getKey().getFieldLong(DimensionsDescriptor.DIMENSION_TIME);
+      dimensionalSchema.setFrom(timestamp);
+
+      if(timestamp < minTimestamp) {
+        minTimestamp = timestamp;
+        dimensionalSchema.setFrom(minTimestamp);
+      }
+
+      if(timestamp > maxTimestamp) {
+        maxTimestamp = timestamp;
+        dimensionalSchema.setTo(minTimestamp);
+      }
+    }
 
     if(updateEnumValues) {
       //update the lists of possible values for keys in this operator's {@link DimensionalSchema}.
@@ -118,9 +140,13 @@ public class AppDataSingleSchemaDimensionStoreHDHT extends AbstractAppDataDimens
     this.buckets = Sets.newHashSet(bucketID);
 
     if(!dimensionalSchema.isPredefinedFromTo()) {
-      //If there is no predifined from and to settings, then just use the startup time of
-      //the operator as the from time
-      dimensionalSchema.setFrom(System.currentTimeMillis());
+      if(minTimestamp != null) {
+        dimensionalSchema.setFrom(minTimestamp);
+      }
+
+      if(maxTimestamp != null) {
+        dimensionalSchema.setTo(minTimestamp);
+      }
     }
 
     if(updateEnumValues) {
