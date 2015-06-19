@@ -101,12 +101,12 @@ public class AppDataSingleSchemaDimensionStoreHDHT extends AbstractAppDataDimens
       long timestamp = gae.getEventKey().getKey().getFieldLong(DimensionsDescriptor.DIMENSION_TIME);
       dimensionalSchema.setFrom(timestamp);
 
-      if(timestamp < minTimestamp) {
+      if(minTimestamp == null || timestamp < minTimestamp) {
         minTimestamp = timestamp;
         dimensionalSchema.setFrom(minTimestamp);
       }
 
-      if(timestamp > maxTimestamp) {
+      if(maxTimestamp == null || timestamp > maxTimestamp) {
         maxTimestamp = timestamp;
         dimensionalSchema.setTo(minTimestamp);
       }
