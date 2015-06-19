@@ -95,8 +95,6 @@ public class AppDataSingleSchemaDimensionStoreHDHT extends AbstractAppDataDimens
 
     if(!dimensionalSchema.isPredefinedFromTo() &&
        gae.getKeys().getFieldDescriptor().getFields().getFields().contains(DimensionsDescriptor.DIMENSION_TIME)) {
-      //If there is no predifined from and to settings, then just use the startup time of
-      //the operator as the from time
 
       long timestamp = gae.getEventKey().getKey().getFieldLong(DimensionsDescriptor.DIMENSION_TIME);
       dimensionalSchema.setFrom(timestamp);
