@@ -18,7 +18,6 @@ package com.datatorrent.lib.dimensions.aggregator;
 
 import com.datatorrent.lib.appdata.schemas.Type;
 import com.datatorrent.lib.dimensions.Aggregate;
-import com.datatorrent.lib.dimensions.Aggregate.InputEvent;
 
 /**
  * <p>
@@ -29,15 +28,11 @@ import com.datatorrent.lib.dimensions.Aggregate.InputEvent;
  * <b>Note:</b> when aggregates are combined in a unifier it is not possible to tell which came first or last, so
  * one is picked arbitrarily to be the first.
  * </p>
+ * @param <EVENT> The type of the input event.
  */
-public class AggregatorFirst<EVENT> implements AbstractIncrementalAggregat<EVENT>
+public class AggregatorFirst<EVENT> extends AbstractIncrementalAggregator<EVENT>
 {
   private static final long serialVersionUID = 20154301646L;
-
-  /**
-   * The singleton instance of this class.
-   */
-  public static final AggregatorFirst INSTANCE = new AggregatorFirst();
 
   /**
    * Singleton constructor.
@@ -54,20 +49,14 @@ public class AggregatorFirst<EVENT> implements AbstractIncrementalAggregat<EVENT
   }
 
   @Override
-  public Aggregate getGroup(EVENT src, int aggregatorIndex)
-  {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-  }
-
-  @Override
   public void aggregate(Aggregate dest, EVENT src)
   {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    //Ignore
   }
 
   @Override
   public void aggregate(Aggregate dest, Aggregate src)
   {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    //Ignore
   }
 }

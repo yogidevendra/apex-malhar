@@ -16,7 +16,7 @@
 
 package com.datatorrent.lib.dimensions.aggregator;
 
-import com.datatorrent.lib.dimensions.Aggregate.Aggregate;
+import com.datatorrent.lib.appdata.gpo.GPOUtils;
 import com.datatorrent.lib.dimensions.Aggregate.InputEvent;
 import com.datatorrent.lib.appdata.schemas.Type;
 import com.datatorrent.lib.dimensions.Aggregate;
@@ -31,7 +31,7 @@ import com.datatorrent.lib.dimensions.Aggregate;
  * one is picked arbitrarily to be the last.
  * </p>
  */
-public class AggregatorLast implements IncrementalAggregator
+public class AggregatorLast<EVENT> extends AbstractIncrementalAggregator<EVENT>
 {
   private static final long serialVersionUID = 20154301647L;
 
@@ -55,20 +55,14 @@ public class AggregatorLast implements IncrementalAggregator
   }
 
   @Override
-  public Aggregate createDest(InputEvent first)
+  public void aggregate(Aggregate dest, EVENT src)
   {
-    return new Aggregate(first.getEventKey(), first.getAggregates());
-  }
-
-  @Override
-  public void aggregate(Aggregate dest, InputEvent src)
-  {
-    Aggregate.copy(dest, src);
+    GPOUtils.copyPOJOToGPO(dest.getAggregates(), this.getValueGetters(), src);
   }
 
   @Override
   public void aggregate(Aggregate dest, Aggregate src)
   {
-    //Do nothing
+    GPOUtils.
   }
 }

@@ -24,6 +24,7 @@ import java.util.Map;
 
 /**
  * This {@link IncrementalAggregator} performs a count of the number of times an input is encountered.
+ * @param <EVENT> The type of the input event.
  */
 public class AggregatorCount<EVENT> extends AbstractIncrementalAggregator<EVENT>
 {
@@ -51,6 +52,21 @@ public class AggregatorCount<EVENT> extends AbstractIncrementalAggregator<EVENT>
   private AggregatorCount()
   {
     //Do nothing
+  }
+
+  @Override
+  public Aggregate getGroup(EVENT src, int aggregatorIndex)
+  {
+    Aggregate aggregate = super.getGroup(src, aggregatorIndex);
+    long[] longFields = aggregate.getAggregates().getFieldsLong();
+
+    for(int index = 0;
+        index < longFields.length;
+        index++) {
+      longFields[index] = 1;
+    }
+
+    return aggregate;
   }
 
   @Override
