@@ -17,8 +17,8 @@
 package com.datatorrent.lib.dimensions.aggregator;
 
 import com.datatorrent.lib.appdata.schemas.Type;
-import com.datatorrent.lib.dimensions.DimensionsEvent.Aggregate;
-import com.datatorrent.lib.dimensions.DimensionsEvent.InputEvent;
+import com.datatorrent.lib.dimensions.Aggregate.Aggregate;
+import com.datatorrent.lib.dimensions.Aggregate.InputEvent;
 
 /**
  * <p>
@@ -35,7 +35,7 @@ import com.datatorrent.lib.dimensions.DimensionsEvent.InputEvent;
  * </p>
  *
  */
-public interface IncrementalAggregator extends com.datatorrent.lib.statistics.DimensionsComputation.Aggregator<InputEvent, Aggregate>
+public interface IncrementalAggregator<EVENT> extends com.datatorrent.lib.statistics.DimensionsComputation.Aggregator<EVENT, Aggregate>
 {
   /**
    * This method defines the type mapping for the {@link IncrementalAggregator}. The type mapping defines the relationship

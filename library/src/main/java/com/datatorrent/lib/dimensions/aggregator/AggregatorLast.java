@@ -16,10 +16,10 @@
 
 package com.datatorrent.lib.dimensions.aggregator;
 
-import com.datatorrent.lib.dimensions.DimensionsEvent.Aggregate;
-import com.datatorrent.lib.dimensions.DimensionsEvent.InputEvent;
+import com.datatorrent.lib.dimensions.Aggregate.Aggregate;
+import com.datatorrent.lib.dimensions.Aggregate.InputEvent;
 import com.datatorrent.lib.appdata.schemas.Type;
-import com.datatorrent.lib.dimensions.DimensionsEvent;
+import com.datatorrent.lib.dimensions.Aggregate;
 
 /**
  * <p>
@@ -63,7 +63,7 @@ public class AggregatorLast implements IncrementalAggregator
   @Override
   public void aggregate(Aggregate dest, InputEvent src)
   {
-    DimensionsEvent.copy(dest, src);
+    Aggregate.copy(dest, src);
   }
 
   @Override

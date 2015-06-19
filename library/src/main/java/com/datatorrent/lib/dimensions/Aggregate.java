@@ -16,9 +16,6 @@
 package com.datatorrent.lib.dimensions;
 
 import com.datatorrent.lib.appdata.gpo.GPOMutable;
-import com.datatorrent.lib.dimensions.AbstractDimensionsComputation.DTHashingStrategy;
-import com.datatorrent.lib.dimensions.AbstractDimensionsComputation.DimensionsCombination;
-import com.datatorrent.lib.dimensions.DimensionsComputation.UnifiableAggregate;
 import com.google.common.base.Preconditions;
 import java.io.Serializable;
 
@@ -28,13 +25,13 @@ import java.io.Serializable;
  * {@link AbstractDimensionsComputationFlexible} and {@link DimensionsStoreHDHT}.
  * </p>
  * <p>
- * A {@link DimensionsEvent} is constructed from two parts: an {@link EventKey} and a {@link GPOMutable} object
+ * A {@link Aggregate} is constructed from two parts: an {@link EventKey} and a {@link GPOMutable} object
  * which contains the values of aggregate fields. The {@link EventKey} is used to identify the dimension combination
  * an event belongs to, and consequently determines what input values should be aggregated together. The aggregates
  * are the actual data payload of the event which are to be aggregated.
  * </p>
  */
-public abstract class DimensionsEvent implements Serializable, UnifiableAggregate
+public abstract class Aggregate implements Serializable, com.datatorrent.lib.statistics.DimensionsComputation.AggregateEvent
 {
   private static final long serialVersionUID = 201503231204L;
 
@@ -47,14 +44,14 @@ public abstract class DimensionsEvent implements Serializable, UnifiableAggregat
    */
   private EventKey eventKey;
   /**
-   * This is the aggregateIndex assigned to this event.
+   * This is the aggregatorIndex assigned to this event.
    */
-  protected int aggregateIndex;
+  protected int aggregatorIndex;
 
   /**
    * Constructor for Kryo.
    */
-  private DimensionsEvent()
+  private Aggregate()
   {
     //For kryo
   }
@@ -64,8 +61,8 @@ public abstract class DimensionsEvent implements Serializable, UnifiableAggregat
    * @param eventKey The key from which to create a {@link DimensionsEvent}.
    * @param aggregates The aggregates from which to create {@link DimensionsEvent}.
    */
-  public DimensionsEvent(EventKey eventKey,
-                         GPOMutable aggregates)
+  public Aggregate(EventKey eventKey,
+                   GPOMutable aggregates)
   {
     setEventKey(eventKey);
     setAggregates(aggregates);
@@ -78,14 +75,14 @@ public abstract class DimensionsEvent implements Serializable, UnifiableAggregat
    * @param bucketID The bucketID
    * @param schemaID The schemaID.
    * @param dimensionDescriptorID The dimensionsDescriptorID.
-   * @param aggregatorIndex The aggregateIndex assigned to this event by the unifier.
+   * @param aggregatorIndex The aggregatorIndex assigned to this event by the unifier.
    */
-  public DimensionsEvent(GPOMutable keys,
-                         GPOMutable aggregates,
-                         int bucketID,
-                         int schemaID,
-                         int dimensionDescriptorID,
-                         int aggregatorIndex)
+  public Aggregate(GPOMutable keys,
+                   GPOMutable aggregates,
+                   int bucketID,
+                   int schemaID,
+                   int dimensionDescriptorID,
+                   int aggregatorIndex)
   {
     this.eventKey = new EventKey(bucketID,
                                  schemaID,
@@ -101,13 +98,13 @@ public abstract class DimensionsEvent implements Serializable, UnifiableAggregat
    * @param aggregates The value for fields in the aggregate.
    * @param schemaID The schemaID.
    * @param dimensionDescriptorID The dimensionsDescriptorID.
-   * @param aggregatorIndex  The aggregateIndex assigned to this event by the unifier.
+   * @param aggregatorIndex  The aggregatorIndex assigned to this event by the unifier.
    */
-  public DimensionsEvent(GPOMutable keys,
-                         GPOMutable aggregates,
-                         int schemaID,
-                         int dimensionDescriptorID,
-                         int aggregatorIndex)
+  public Aggregate(GPOMutable keys,
+                   GPOMutable aggregates,
+                   int schemaID,
+                   int dimensionDescriptorID,
+                   int aggregatorIndex)
   {
     this.eventKey = new EventKey(schemaID,
                                  dimensionDescriptorID,
@@ -202,16 +199,15 @@ public abstract class DimensionsEvent implements Serializable, UnifiableAggregat
     return eventKey.getBucketID();
   }
 
-  @Override
-  public void setAggregateIndex(int aggregatorIndex)
+  public void setAggregatorIndex(int aggregatorIndex)
   {
-    this.aggregateIndex = aggregatorIndex;
+    this.aggregatorIndex = aggregatorIndex;
   }
 
   @Override
-  public int getAggregateIndex()
+  public int getAggregatorIndex()
   {
-    return aggregateIndex;
+    return aggregatorIndex;
   }
 
   /**
@@ -219,7 +215,7 @@ public abstract class DimensionsEvent implements Serializable, UnifiableAggregat
    * @param aeDest The destination event.
    * @param aeSrc The source event.
    */
-  public static void copy(DimensionsEvent aeDest, DimensionsEvent aeSrc)
+  public static void copy(Aggregate aeDest, Aggregate aeSrc)
   {
     GPOMutable destAggs = aeDest.getAggregates();
     GPOMutable srcAggs = aeSrc.getAggregates();
@@ -273,7 +269,7 @@ public abstract class DimensionsEvent implements Serializable, UnifiableAggregat
    *  <li><b>schemaID:</b> This is the id of the {@link DimensionalSchema} that this {@link EventKey} corresponds to.</li>
    *  <li><b>dimensionDescriptorID:</b> This is the id of the {@link DimensionsDescriptor} that this {@link EventKey} corresponds to.</li>
    *  <li><b>aggregatorID:</b> This is the id of the aggregator that is used to aggregate the values associated with this {@link EventKey}
-   *  in a {@link DimensionsEvent}.</li>
+   *  in a {@link Aggregate}.</li>
    * </ul>
    * </p>
    */
@@ -531,7 +527,7 @@ public abstract class DimensionsEvent implements Serializable, UnifiableAggregat
     if(getClass() != obj.getClass()) {
       return false;
     }
-    final DimensionsEvent other = (DimensionsEvent)obj;
+    final Aggregate other = (Aggregate)obj;
     if(this.aggregates != other.aggregates && (this.aggregates == null || !this.aggregates.equals(other.aggregates))) {
       return false;
     }
@@ -539,238 +535,5 @@ public abstract class DimensionsEvent implements Serializable, UnifiableAggregat
       return false;
     }
     return true;
-  }
-
-  /**
-   * This subclass of {@link DimensionsEvent} is used to represent input events for dimensions computation operators
-   * that extend {@link AbstractDimensionsComputationFlexible}. {@link InputEvent}s do not have data or functionality
-   * that {@link DimensionsEvent}s do not. The primary purpose behind this class is to make it clear to programmers
-   * implementing {@link IncrementalAggregator}s that the inputs to their aggregators are not the same thing as the aggregates
-   * themselves.
-   */
-  public static class InputEvent extends DimensionsEvent
-  {
-    private static final long serialVersionUID = 201505181028L;
-
-    /**
-     * Constructor for serialization.
-     */
-    private InputEvent()
-    {
-      //For kryo
-    }
-
-    /**
-     * Creates an input event from the given {@link EventKey} and aggregates.
-     * @param eventKey The event key.
-     * @param aggregates The aggregate payload.
-     */
-    public InputEvent(EventKey eventKey,
-                      GPOMutable aggregates)
-    {
-      super(eventKey,
-            aggregates);
-    }
-
-    /**
-     * Creates an {@link InputEvent} from the given information.
-     * @param keys The key vlaues.
-     * @param aggregates The aggregate values.
-     * @param bucketID The bucketID.
-     * @param schemaID The schemaID.
-     * @param dimensionDescriptorID The dimensionDescriptor
-     * @param aggregatorID The aggregatorID.
-     */
-    public InputEvent(GPOMutable keys,
-                      GPOMutable aggregates,
-                      int bucketID,
-                      int schemaID,
-                      int dimensionDescriptorID,
-                      int aggregatorID)
-    {
-      super(keys,
-            aggregates,
-            bucketID,
-            schemaID,
-            dimensionDescriptorID,
-            aggregatorID);
-    }
-
-    /**
-     * Creates an {@link InputEvent} from the given information.
-     * @param keys The key values.
-     * @param aggregates The aggregate values.
-     * @param schemaID The schemaID.
-     * @param dimensionDescriptorID The dimensionsDescriptorID.
-     * @param aggregatorID The aggregatorID.
-     */
-    public InputEvent(GPOMutable keys,
-                      GPOMutable aggregates,
-                      int schemaID,
-                      int dimensionDescriptorID,
-                      int aggregatorID)
-    {
-      super(keys,
-            aggregates,
-            schemaID,
-            dimensionDescriptorID,
-            aggregatorID);
-    }
-  }
-
-  /**
-   * This subclass of {@link DimensionsEvent} is used to represent aggregates for dimensions computation operators
-   * that extend {@link AbstractDimensionsComputationFlexible}. {@link Aggregate}s do not have data or functionality
-   * that {@link DimensionsEvent}s do not. The primary purpose behind this class is to make it clear to programmers
-   * implementing {@link IncrementalAggregator}s that the output of their aggregators are not the same thing as the inputs.
-   */
-  public static class Aggregate extends DimensionsEvent implements com.datatorrent.lib.statistics.DimensionsComputation.AggregateEvent
-  {
-    private static final long serialVersionUID = 201505181028L;
-
-    /**
-     * Constructor for Kryo serialization.
-     */
-    private Aggregate()
-    {
-      //For kryo
-    }
-
-    /**
-     * Creates an {@link Aggregate} from the given key and aggregates.
-     * @param eventKey The key.
-     * @param aggregates The aggregates.
-     */
-    public Aggregate(EventKey eventKey,
-                     GPOMutable aggregates)
-    {
-      super(eventKey,
-            aggregates);
-    }
-
-    /**
-     * Creates an {@link Aggregate} from the given data.
-     * @param keys The keys to use when creating the aggregate.
-     * @param aggregates The aggregates to use when creating the aggregate.
-     * @param bucketID The bucket ID assigned to the aggregate.
-     * @param schemaID The schema ID assigned to the aggregate.
-     * @param dimensionDescriptorID The dimension descriptor ID assigned to the aggregate.
-     * @param aggregatorID The ID of the aggregator to apply to this aggregate.
-     */
-    public Aggregate(GPOMutable keys,
-                     GPOMutable aggregates,
-                     int bucketID,
-                     int schemaID,
-                     int dimensionDescriptorID,
-                     int aggregatorID)
-    {
-      super(keys,
-            aggregates,
-            bucketID,
-            schemaID,
-            dimensionDescriptorID,
-            aggregatorID);
-    }
-
-    /**
-     * This creates an {@link Aggregate} with the given information.
-     * @param keys The key.
-     * @param aggregates The aggregates.
-     * @param schemaID The schemaID.
-     * @param dimensionDescriptorID The dimensionDescriptorID.
-     * @param aggregatorID The ID of the aggregator to apply to this aggregate.
-     */
-    public Aggregate(GPOMutable keys,
-                     GPOMutable aggregates,
-                     int schemaID,
-                     int dimensionDescriptorID,
-                     int aggregatorID)
-    {
-      super(keys,
-            aggregates,
-            schemaID,
-            dimensionDescriptorID,
-            aggregatorID);
-    }
-
-    @Override
-    public int getAggregatorIndex()
-    {
-      return this.aggregateIndex;
-    }
-
-    /**
-     * This is a hashing strategy for {@link Aggregate}s, which maps aggregates based on their
-     * {@link EventKey}.
-     */
-    public static class AggregateHashingStrategy implements DTHashingStrategy<Aggregate>
-    {
-      /**
-       * The singleton instance of this class.
-       */
-      public static final AggregateHashingStrategy INSTANCE = new AggregateHashingStrategy();
-
-      private static final long serialVersionUID = 201505200426L;
-
-      /**
-       * Singleton pattern.
-       */
-      private AggregateHashingStrategy()
-      {
-        //Do nothing
-      }
-
-      @Override
-      public boolean equals(Aggregate inputEventA, Aggregate inputEventB)
-      {
-        return inputEventA.getEventKey().equals(inputEventB.getEventKey());
-      }
-
-      @Override
-      public int computeHashCode(Aggregate inputEvent)
-      {
-        return inputEvent.getEventKey().hashCode();
-      }
-    }
-  }
-
-  /**
-   * This is an implementation of {@link DimensionsCombination} which is used for correctly mapping
-   * {@link DimensionsEvent}s in dimensions computation operators extending {@link AbstractDimensionsComputationFlexible}.
-   */
-  public static class DimensionsEventDimensionsCombination implements DimensionsCombination<InputEvent, Aggregate>
-  {
-    private static final long serialVersionUID = 201505230842L;
-
-    /**
-     * Singleton pattern.
-     */
-    public static final DimensionsEventDimensionsCombination INSTANCE = new DimensionsEventDimensionsCombination();
-
-    /**
-     * Fore serialization and for singleton pattern.
-     */
-    private DimensionsEventDimensionsCombination()
-    {
-      //For kryo
-    }
-
-    @Override
-    public void setKeys(InputEvent aggregatorInput, Aggregate aggregate)
-    {
-      //NOOP
-    }
-
-    @Override
-    public boolean equals(InputEvent t, InputEvent t1)
-    {
-      return t.getEventKey().equals(t1.getEventKey());
-    }
-
-    @Override
-    public int computeHashCode(InputEvent o)
-    {
-      return o.getEventKey().hashCode();
-    }
   }
 }

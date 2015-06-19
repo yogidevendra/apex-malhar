@@ -49,7 +49,6 @@ import com.datatorrent.api.Context.OperatorContext;
  * {@link com.datatorrent.lib.dimensions.AbstractDimensionsComputationFlexible} instead.
  * @since 1.0.2
  */
-@Deprecated
 public class DimensionsComputation<EVENT, AGGREGATE extends DimensionsComputation.AggregateEvent> implements Operator
 {
   private Unifier<AGGREGATE> unifier;

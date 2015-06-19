@@ -15,11 +15,11 @@
  */
 package com.datatorrent.lib.dimensions.aggregator;
 
-import com.datatorrent.lib.dimensions.DimensionsEvent.Aggregate;
-import com.datatorrent.lib.dimensions.DimensionsEvent.InputEvent;
+import com.datatorrent.lib.dimensions.Aggregate.Aggregate;
+import com.datatorrent.lib.dimensions.Aggregate.InputEvent;
 import com.datatorrent.lib.appdata.gpo.GPOMutable;
 import com.datatorrent.lib.appdata.schemas.Type;
-import com.datatorrent.lib.dimensions.DimensionsEvent;
+import com.datatorrent.lib.dimensions.Aggregate;
 
 /**
  * This {@link IncrementalAggregator} takes the min of the fields provided in the {@link InputEvent}.
@@ -71,7 +71,7 @@ public class AggregatorMin implements IncrementalAggregator
    * @param dest The destination of the min aggregation.
    * @param src Another value to take the min of.
    */
-  public void aggregateHelper(DimensionsEvent dest, DimensionsEvent src)
+  public void aggregateHelper(Aggregate dest, Aggregate src)
   {
     GPOMutable destAggs = dest.getAggregates();
     GPOMutable srcAggs = src.getAggregates();

@@ -24,8 +24,6 @@ import javax.validation.constraints.NotNull;
 
 import java.util.Map;
 
-
-
 /**
  * A {@link Unifier} implementation for {@link DimensionsComputation}.<br/>
  * <p>
@@ -36,7 +34,6 @@ import java.util.Map;
  * @deprecated Use {@link com.datatorrent.lib.dimensions.DimensionsComputationUnifierImpl} instead.
  * @since 0.9.4
  */
-@Deprecated
 public class DimensionsComputationUnifierImpl<EVENT, AGGREGATE extends DimensionsComputation.AggregateEvent> extends BaseOperator implements Operator.Unifier<AGGREGATE>
 {
   @NotNull

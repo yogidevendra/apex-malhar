@@ -24,9 +24,9 @@ import com.datatorrent.lib.appdata.schemas.TimeBucket;
 import com.datatorrent.lib.dimensions.AbstractDimensionsComputationFlexibleSingleSchema;
 import com.datatorrent.lib.dimensions.DimensionsComputationFlexibleSingleSchemaMap;
 import com.datatorrent.lib.dimensions.DimensionsDescriptor;
-import com.datatorrent.lib.dimensions.DimensionsEvent;
-import com.datatorrent.lib.dimensions.DimensionsEvent.Aggregate;
-import com.datatorrent.lib.dimensions.DimensionsEvent.EventKey;
+import com.datatorrent.lib.dimensions.Aggregate;
+import com.datatorrent.lib.dimensions.Aggregate.Aggregate;
+import com.datatorrent.lib.dimensions.Aggregate.EventKey;
 import com.datatorrent.lib.dimensions.aggregator.AggregatorIncrementalType;
 import com.datatorrent.lib.dimensions.aggregator.AggregatorRegistry;
 import com.datatorrent.lib.testbench.CollectorTestSink;
@@ -92,7 +92,7 @@ public class DimensionsComputationFlexibleSingleSchemaMapTest
     DimensionsComputationFlexibleSingleSchemaMap dimensions = new DimensionsComputationFlexibleSingleSchemaMap();
     dimensions.setConfigurationSchemaJSON(SchemaUtils.jarResourceFileToString("adsGenericEventSimple.json"));
 
-    CollectorTestSink<DimensionsEvent> sink = new CollectorTestSink<DimensionsEvent>();
+    CollectorTestSink<Aggregate> sink = new CollectorTestSink<Aggregate>();
     TestUtils.setSink(dimensions.output, sink);
 
     DimensionsComputationFlexibleSingleSchemaMap dimensionsClone =

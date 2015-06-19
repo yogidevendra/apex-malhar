@@ -25,9 +25,9 @@ import com.datatorrent.lib.dimensions.AbstractDimensionsComputationFlexibleSingl
 import com.datatorrent.lib.dimensions.aggregator.AggregatorIncrementalType;
 import com.datatorrent.lib.dimensions.DimensionsComputationFlexibleSingleSchemaPOJO;
 import com.datatorrent.lib.dimensions.DimensionsDescriptor;
-import com.datatorrent.lib.dimensions.DimensionsEvent;
-import com.datatorrent.lib.dimensions.DimensionsEvent.Aggregate;
-import com.datatorrent.lib.dimensions.DimensionsEvent.EventKey;
+import com.datatorrent.lib.dimensions.Aggregate;
+import com.datatorrent.lib.dimensions.Aggregate.Aggregate;
+import com.datatorrent.lib.dimensions.Aggregate.EventKey;
 import com.datatorrent.lib.dimensions.aggregator.AggregatorRegistry;
 import com.datatorrent.lib.testbench.CollectorTestSink;
 import com.datatorrent.lib.util.TestUtils;
@@ -93,7 +93,7 @@ public class DimensionsComputationFlexibleSingleSchemaPOJOTest
 
     DimensionsComputationFlexibleSingleSchemaPOJO dimensions = createDimensionsComputationOperator("adsGenericEventSimple.json");
 
-    CollectorTestSink<DimensionsEvent> sink = new CollectorTestSink<DimensionsEvent>();
+    CollectorTestSink<Aggregate> sink = new CollectorTestSink<Aggregate>();
     TestUtils.setSink(dimensions.output, sink);
 
     DimensionsComputationFlexibleSingleSchemaPOJO dimensionsClone =
@@ -117,7 +117,7 @@ public class DimensionsComputationFlexibleSingleSchemaPOJOTest
 
     DimensionsComputationFlexibleSingleSchemaPOJO dcss = createDimensionsComputationOperator("adsGenericEventSchemaAdditional.json");
 
-    CollectorTestSink<DimensionsEvent> sink = new CollectorTestSink<DimensionsEvent>();
+    CollectorTestSink<Aggregate> sink = new CollectorTestSink<Aggregate>();
     TestUtils.setSink(dcss.output, sink);
 
     dcss.setup(null);
@@ -135,7 +135,7 @@ public class DimensionsComputationFlexibleSingleSchemaPOJOTest
 
     DimensionsComputationFlexibleSingleSchemaPOJO dcss = createDimensionsComputationOperator("adsGenericEventSchemaAggregations.json");
 
-    CollectorTestSink<DimensionsEvent> sink = new CollectorTestSink<DimensionsEvent>();
+    CollectorTestSink<Aggregate> sink = new CollectorTestSink<Aggregate>();
     TestUtils.setSink(dcss.output, sink);
 
     dcss.setup(null);

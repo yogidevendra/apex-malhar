@@ -17,9 +17,9 @@ package com.datatorrent.lib.dimensions.aggregator;
 
 import com.datatorrent.lib.appdata.gpo.GPOMutable;
 import com.datatorrent.lib.appdata.schemas.Type;
-import com.datatorrent.lib.dimensions.DimensionsEvent;
-import com.datatorrent.lib.dimensions.DimensionsEvent.Aggregate;
-import com.datatorrent.lib.dimensions.DimensionsEvent.InputEvent;
+import com.datatorrent.lib.dimensions.Aggregate;
+import com.datatorrent.lib.dimensions.Aggregate.Aggregate;
+import com.datatorrent.lib.dimensions.Aggregate.InputEvent;
 
 /**
  * This {@link IncrementalAggregator} performs a sum operation over the fields in the given {@link InputEvent}.
@@ -70,7 +70,7 @@ public class AggregatorSum implements IncrementalAggregator
    * @param dest The destination of the sum aggregate.
    * @param src The new values to add to the existing sum aggregation.
    */
-  private void aggregateHelper(DimensionsEvent dest, DimensionsEvent src)
+  private void aggregateHelper(Aggregate dest, Aggregate src)
   {
     GPOMutable destAggs = dest.getAggregates();
     GPOMutable srcAggs = src.getAggregates();

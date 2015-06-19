@@ -27,8 +27,8 @@ import com.datatorrent.lib.appdata.schemas.DimensionalConfigurationSchema;
 import com.datatorrent.lib.appdata.schemas.Fields;
 import com.datatorrent.lib.appdata.schemas.DimensionalSchema;
 import com.datatorrent.lib.appdata.schemas.SchemaRegistry;
-import com.datatorrent.lib.dimensions.DimensionsEvent;
-import com.datatorrent.lib.dimensions.DimensionsEvent.EventKey;
+import com.datatorrent.lib.dimensions.Aggregate;
+import com.datatorrent.lib.dimensions.Aggregate.EventKey;
 import com.datatorrent.lib.dimensions.aggregator.OTFAggregator;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -116,7 +116,7 @@ public class DimensionsQueryExecutor implements QueryExecutor<DataQueryDimension
         //See if we have the result for the query yet.
 
         //First check in the operator's Aggregate cache
-        DimensionsEvent gae = operator.cache.get(eventKey);
+        Aggregate gae = operator.cache.get(eventKey);
 
         if(gae != null) {
           //Result was in the cache
