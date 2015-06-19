@@ -27,7 +27,7 @@ import java.util.Map;
  * This {@link IncrementalAggregator} performs a count of the number of times an input is encountered.
  * @param <EVENT> The type of the input event.
  */
-public class AggregatorCount extends AbstractIncrementalAggregator<EVENT>
+public class AggregatorCount implements 
 {
   private static final long serialVersionUID = 20154301645L;
 
