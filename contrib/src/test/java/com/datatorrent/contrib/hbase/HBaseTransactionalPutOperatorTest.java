@@ -74,15 +74,14 @@ public class HBaseTransactionalPutOperatorTest {
         }
 
         @Override
-        public void sendCustomMetrics(Collection<String> metricNames)
-        {
-          throw new UnsupportedOperationException("not supported");
-        }
-
-        @Override
         public void setCounters(Object counters) {
           // TODO Auto-generated method stub
 
+        }
+
+        @Override
+        public void sendCustomMetrics(Collection<String> collection)
+        {
         }
       });
       thop.beginWindow(0);
@@ -139,15 +138,14 @@ public class HBaseTransactionalPutOperatorTest {
         }
 
         @Override
-        public void sendCustomMetrics(Collection<String> metricNames)
-        {
-          throw new UnsupportedOperationException("not supported");
-        }
-
-        @Override
         public void setCounters(Object counters) {
           // TODO Auto-generated method stub
 
+        }
+
+        @Override
+        public void sendCustomMetrics(Collection<String> collection)
+        {
         }
       });
       thop.beginWindow(0);
@@ -208,15 +206,14 @@ public class HBaseTransactionalPutOperatorTest {
         }
 
         @Override
-        public void sendCustomMetrics(Collection<String> metricNames)
-        {
-          throw new UnsupportedOperationException("not supported");
-        }
-
-        @Override
         public void setCounters(Object counters) {
           // TODO Auto-generated method stub
 
+        }
+
+        @Override
+        public void sendCustomMetrics(Collection<String> collection)
+        {
         }
       });
 
