@@ -171,11 +171,6 @@ public class AppDataSingleSchemaDimensionStoreHDHT extends AbstractAppDataDimens
   @Override
   protected SchemaResult processSchemaQuery(SchemaQuery schemaQuery)
   {
-    if(!dimensionalSchema.isPredefinedFromTo()) {
-      //Use the current time as the To time in the schema.
-      dimensionalSchema.setTo(System.currentTimeMillis());
-    }
-
     if(updateEnumValues) {
       //update the enum values in the schema.
       dimensionalSchema.setEnumsSetComparable(seenEnumValues);
