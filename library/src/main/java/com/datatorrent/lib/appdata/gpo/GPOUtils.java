@@ -1948,13 +1948,16 @@ public class GPOUtils
     return fieldToData;
   }
 
-  public static Map<String, Object> convertToMap(GPOMutable gpo, Fields fields)
+  public static Map<String, Object> convertToMapIntersection(GPOMutable gpo, Fields fields)
   {
     Map<String, Object> values = Maps.newHashMap();
 
     for(String field: fields.getFields()) {
-      Object valueObj = gpo.getField(field);
+      if(!gpo.getFieldDescriptor().getFields().getFields().contains(field)) {
+        continue;
+      }
 
+      Object valueObj = gpo.getField(field);
       values.put(field, valueObj);
     }
 
