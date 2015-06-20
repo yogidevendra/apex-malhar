@@ -47,7 +47,7 @@ public class SchemaQueryDeserializer implements CustomMessageDeserializer
 
     String type = schemaJO.getString(Query.FIELD_TYPE);
 
-    if(type.equals(SchemaQuery.TYPE)) {
+    if(!type.equals(SchemaQuery.TYPE)) {
       LOG.error("The given type {} is invalid.", type);
       return null;
     }
@@ -64,21 +64,23 @@ public class SchemaQueryDeserializer implements CustomMessageDeserializer
         return null;
       }
 
-
       if(contextJO.has(SchemaQuery.FIELD_CONTEXT_KEYS)) {
         JSONObject keys = contextJO.getJSONObject(SchemaQuery.FIELD_CONTEXT_KEYS);
         contextKeysMap = SchemaUtils.extractMap(keys);
       }
 
-      if(contextJO.has(SchemaQuery.FIELD_CONTEXT_KEYS)) {
+      if(contextJO.has(SchemaQuery.FIELD_SCHEMA_KEYS)) {
         JSONObject schemaKeys = contextJO.getJSONObject(SchemaQuery.FIELD_SCHEMA_KEYS);
         schemaKeysMap = SchemaUtils.extractMap(schemaKeys);
+        LOG.debug("{}", schemaKeysMap);
       }
     }
 
-    return new SchemaQuery(id,
-                           contextKeysMap,
-                           schemaKeysMap);
+    SchemaQuery sq = new SchemaQuery(id,
+                           schemaKeysMap,
+                           contextKeysMap);
+
+    return sq;
   }
 
   private static final Logger LOG = LoggerFactory.getLogger(SchemaQueryDeserializer.class);
