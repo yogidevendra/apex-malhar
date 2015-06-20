@@ -34,7 +34,7 @@ public abstract class Query extends QRBase
   /**
    * The schemaKeys.
    */
-  private Map<String, String> schemaKeys;
+  protected Map<String, String> schemaKeys;
 
   /**
    * No-arg constructor is required by some deserializers.

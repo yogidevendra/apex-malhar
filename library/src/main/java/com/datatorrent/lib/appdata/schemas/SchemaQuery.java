@@ -18,7 +18,7 @@ package com.datatorrent.lib.appdata.schemas;
 import com.datatorrent.lib.appdata.query.serde.MessageDeserializerInfo;
 import com.datatorrent.lib.appdata.query.serde.MessageType;
 import com.datatorrent.lib.appdata.query.serde.MessageValidatorInfo;
-import com.datatorrent.lib.appdata.query.serde.SimpleDataDeserializer;
+import com.datatorrent.lib.appdata.query.serde.SchemaQueryDeserializer;
 import com.datatorrent.lib.appdata.query.serde.SimpleDataValidator;
 
 import java.util.Map;
@@ -27,14 +27,19 @@ import java.util.Map;
  * This class represents a schema query.
  */
 @MessageType(type=SchemaQuery.TYPE)
-@MessageDeserializerInfo(clazz=SimpleDataDeserializer.class)
+@MessageDeserializerInfo(clazz=SchemaQueryDeserializer.class)
 @MessageValidatorInfo(clazz=SimpleDataValidator.class)
 public class SchemaQuery extends Query
 {
+  public static final String FIELD_CONTEXT = "context";
+  public static final String FIELD_CONTEXT_KEYS = "keys";
+
   /**
    * The type of the schemaQuery.
    */
   public static final String TYPE = "schemaQuery";
+
+  private Map<String, String> contextKeys;
 
   /**
    * No-arg constructor required for deserialization.
@@ -62,5 +67,14 @@ public class SchemaQuery extends Query
                      Map<String, String> schemaKeys)
   {
     super(id, TYPE, schemaKeys);
+  }
+
+  public SchemaQuery(String id,
+                     Map<String, String> schemaKeys,
+                     Map<String, String> contextKeys)
+  {
+    super(id, TYPE);
+    this.schemaKeys = schemaKeys;
+    this.contextKeys = contextKeys;
   }
 }
