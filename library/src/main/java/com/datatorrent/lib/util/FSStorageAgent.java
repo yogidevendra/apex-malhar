@@ -123,6 +123,7 @@ public class FSStorageAgent implements StorageAgent, Serializable
       finally {
         if (stateSaved) {
           logger.debug("Saving {}: {}", operatorId, window);
+          fs.delete(new Path(operatorIdStr, window), true);
           fs.rename(lPath, new Path(operatorIdStr, window));
         }
       }
