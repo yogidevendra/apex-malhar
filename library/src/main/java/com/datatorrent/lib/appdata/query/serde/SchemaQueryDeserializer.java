@@ -20,7 +20,6 @@ import com.datatorrent.lib.appdata.schemas.Message;
 import com.datatorrent.lib.appdata.schemas.Query;
 import com.datatorrent.lib.appdata.schemas.SchemaQuery;
 import com.datatorrent.lib.appdata.schemas.SchemaUtils;
-import com.google.common.collect.Maps;
 import java.io.IOException;
 import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
@@ -53,8 +52,8 @@ public class SchemaQueryDeserializer implements CustomMessageDeserializer
     }
 
     String id = schemaJO.getString(Query.FIELD_ID);
-    Map<String, String> contextKeysMap = Maps.newHashMap();
-    Map<String, String> schemaKeysMap = Maps.newHashMap();
+    Map<String, String> contextKeysMap = null;
+    Map<String, String> schemaKeysMap = null;
 
     if(schemaJO.has(SchemaQuery.FIELD_CONTEXT)) {
       JSONObject contextJO = schemaJO.getJSONObject(SchemaQuery.FIELD_CONTEXT);
@@ -67,12 +66,19 @@ public class SchemaQueryDeserializer implements CustomMessageDeserializer
       if(contextJO.has(SchemaQuery.FIELD_CONTEXT_KEYS)) {
         JSONObject keys = contextJO.getJSONObject(SchemaQuery.FIELD_CONTEXT_KEYS);
         contextKeysMap = SchemaUtils.extractMap(keys);
+
+        if(contextKeysMap.isEmpty()) {
+          contextKeysMap = null;
+        }
       }
 
       if(contextJO.has(SchemaQuery.FIELD_SCHEMA_KEYS)) {
         JSONObject schemaKeys = contextJO.getJSONObject(SchemaQuery.FIELD_SCHEMA_KEYS);
         schemaKeysMap = SchemaUtils.extractMap(schemaKeys);
-        LOG.debug("{}", schemaKeysMap);
+
+        if(schemaKeysMap.isEmpty()) {
+          schemaKeysMap = null;
+        }
       }
     }
 
