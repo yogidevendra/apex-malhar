@@ -526,8 +526,6 @@ public class DimensionsEvent implements Serializable
   {
     private static final long serialVersionUID = 201506190114L;
 
-    public IndexSubset indexSubset;
-
     /**
      * This creates a {@link DimensionsEvent} from the given event key and aggregates.
      *
@@ -552,11 +550,11 @@ public class DimensionsEvent implements Serializable
      * @param aggregatorIndex The aggregatorIndex assigned to this event by the unifier.
      */
     public InputEvent(GPOMutable keys,
-                     GPOMutable aggregates,
-                     int bucketID,
-                     int schemaID,
-                     int dimensionDescriptorID,
-                     int aggregatorIndex)
+                      GPOMutable aggregates,
+                      int bucketID,
+                      int schemaID,
+                      int dimensionDescriptorID,
+                      int aggregatorIndex)
     {
       this.eventKey = new EventKey(bucketID,
                                    schemaID,
@@ -576,32 +574,16 @@ public class DimensionsEvent implements Serializable
      * @param aggregatorIndex The aggregatorIndex assigned to this event by the unifier.
      */
     public InputEvent(GPOMutable keys,
-                     GPOMutable aggregates,
-                     int schemaID,
-                     int dimensionDescriptorID,
-                     int aggregatorIndex)
+                      GPOMutable aggregates,
+                      int schemaID,
+                      int dimensionDescriptorID,
+                      int aggregatorIndex)
     {
       this.eventKey = new EventKey(schemaID,
                                    dimensionDescriptorID,
                                    aggregatorIndex,
                                    keys);
       setAggregates(aggregates);
-    }
-
-    public static class IndexSubset
-    {
-      public int[] fieldsBooleanIndexSubset;
-      public int[] fieldsCharacterIndexSubset;
-
-      public int[] fieldsByteIndexSubset;
-      public int[] fieldsShortIndexSubset;
-      public int[] fieldsIntegerIndexSubset;
-      public int[] fieldsLongIndexSubset;
-
-      public int[] fieldsFloatIndexSubset;
-      public int[] fieldsDoubleIndexSubset;
-
-      public int[] fieldsStringIndexSubset;
     }
   }
 
@@ -621,7 +603,7 @@ public class DimensionsEvent implements Serializable
      * @param aggregates The aggregates from which to create {@link DimensionsEvent}.
      */
     public Aggregate(EventKey eventKey,
-                           GPOMutable aggregates)
+                     GPOMutable aggregates)
     {
       setEventKey(eventKey);
       setAggregates(aggregates);

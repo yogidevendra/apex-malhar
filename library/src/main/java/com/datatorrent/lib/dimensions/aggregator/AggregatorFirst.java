@@ -17,7 +17,8 @@
 package com.datatorrent.lib.dimensions.aggregator;
 
 import com.datatorrent.lib.appdata.schemas.Type;
-import com.datatorrent.lib.dimensions.DimensionsEvent;
+import com.datatorrent.lib.dimensions.DimensionsEvent.Aggregate;
+import com.datatorrent.lib.dimensions.DimensionsEvent.InputEvent;
 
 /**
  * <p>
@@ -28,9 +29,8 @@ import com.datatorrent.lib.dimensions.DimensionsEvent;
  * <b>Note:</b> when aggregates are combined in a unifier it is not possible to tell which came first or last, so
  * one is picked arbitrarily to be the first.
  * </p>
- * @param <EVENT> The type of the input event.
  */
-public class AggregatorFirst<EVENT> extends AbstractIncrementalAggregator<EVENT>
+public class AggregatorFirst extends AbstractIncrementalAggregator
 {
   private static final long serialVersionUID = 20154301646L;
 
@@ -40,19 +40,25 @@ public class AggregatorFirst<EVENT> extends AbstractIncrementalAggregator<EVENT>
   }
 
   @Override
+  public Aggregate getGroup(InputEvent src, int aggregatorIndex)
+  {
+    return super.getGroup(src, aggregatorIndex);
+  }
+
+  @Override
   public Type getOutputType(Type inputType)
   {
     return AggregatorUtils.IDENTITY_TYPE_MAP.get(inputType);
   }
 
   @Override
-  public void aggregate(DimensionsEvent dest, EVENT src)
+  public void aggregate(Aggregate dest, InputEvent src)
   {
     //Ignore
   }
 
   @Override
-  public void aggregate(DimensionsEvent dest, DimensionsEvent src)
+  public void aggregate(Aggregate dest, Aggregate src)
   {
     //Ignore
   }

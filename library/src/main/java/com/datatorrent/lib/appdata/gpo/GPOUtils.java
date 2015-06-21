@@ -1884,5 +1884,138 @@ public class GPOUtils
     }
   }
 
+  public static void indirectCopy(GPOMutable dest,
+                                  GPOMutable src,
+                                  IndexSubset indexSubset)
+  {
+    {
+      String[] destString = dest.getFieldsString();
+      String[] srcString = src.getFieldsString();
+      int[] srcIndex = indexSubset.fieldsStringIndexSubset;
+      if(destString != null) {
+        for(int index = 0;
+            index < destString.length;
+            index++) {
+          destString[index] = srcString[srcIndex[index]];
+        }
+      }
+    }
+
+    {
+      boolean[] destBoolean = dest.getFieldsBoolean();
+      boolean[] srcBoolean = src.getFieldsBoolean();
+      int[] srcIndex = indexSubset.fieldsBooleanIndexSubset;
+      if(destBoolean != null) {
+        for(int index = 0;
+            index < destBoolean.length;
+            index++) {
+          destBoolean[index] = srcBoolean[srcIndex[index]];
+        }
+      }
+    }
+
+    {
+      byte[] destByte = dest.getFieldsByte();
+      byte[] srcByte = src.getFieldsByte();
+      int[] srcIndex = indexSubset.fieldsByteIndexSubset;
+      if(destByte != null) {
+        for(int index = 0;
+            index < destByte.length;
+            index++) {
+          destByte[index] = srcByte[srcIndex[index]];
+        }
+      }
+    }
+
+    {
+      short[] destShort = dest.getFieldsShort();
+      short[] srcShort = src.getFieldsShort();
+      int[] srcIndex = indexSubset.fieldsShortIndexSubset;
+      if(destShort != null) {
+        for(int index = 0;
+            index < destShort.length;
+            index++) {
+          destShort[index] = srcShort[srcIndex[index]];
+        }
+      }
+    }
+
+    {
+      int[] destInteger = dest.getFieldsInteger();
+      int[] srcInteger = src.getFieldsInteger();
+      int[] srcIndex = indexSubset.fieldsIntegerIndexSubset;
+      if(destInteger != null) {
+        for(int index = 0;
+            index < destInteger.length;
+            index++) {
+          destInteger[index] = srcInteger[srcIndex[index]];
+        }
+      }
+    }
+
+    {
+      long[] destLong = dest.getFieldsLong();
+      long[] srcLong = src.getFieldsLong();
+      int[] srcIndex = indexSubset.fieldsLongIndexSubset;
+      if(destLong != null) {
+        for(int index = 0;
+            index < destLong.length;
+            index++) {
+          destLong[index] = srcLong[srcIndex[index]];
+        }
+      }
+    }
+
+    {
+      float[] destFloat = dest.getFieldsFloat();
+      float[] srcFloat = src.getFieldsFloat();
+      int[] srcIndex = indexSubset.fieldsFloatIndexSubset;
+      if(destFloat != null) {
+        for(int index = 0;
+            index < destFloat.length;
+            index++) {
+          destFloat[index] = srcFloat[srcIndex[index]];
+        }
+      }
+    }
+
+    {
+      double[] destDouble = dest.getFieldsDouble();
+      double[] srcDouble = src.getFieldsDouble();
+      int[] srcIndex = indexSubset.fieldsDoubleIndexSubset;
+      if(destDouble != null) {
+        for(int index = 0;
+            index < destDouble.length;
+            index++) {
+          destDouble[index] = srcDouble[srcIndex[index]];
+        }
+      }
+    }
+  }
+
+  /**
+   * The subset of indices to pull data out of.
+   */
+  public static class IndexSubset
+  {
+    public int[] fieldsBooleanIndexSubset;
+    public int[] fieldsCharacterIndexSubset;
+
+    public int[] fieldsByteIndexSubset;
+    public int[] fieldsShortIndexSubset;
+    public int[] fieldsIntegerIndexSubset;
+    public int[] fieldsLongIndexSubset;
+
+    public int[] fieldsFloatIndexSubset;
+    public int[] fieldsDoubleIndexSubset;
+
+    public int[] fieldsStringIndexSubset;
+
+    public IndexSubset()
+    {
+      //Do nothing
+    }
+  }
+
   private static final Logger LOG = LoggerFactory.getLogger(GPOUtils.class);
 }

@@ -15,9 +15,10 @@
  */
 package com.datatorrent.lib.dimensions.aggregator;
 
+import com.datatorrent.lib.appdata.gpo.GPOMutable;
 import com.datatorrent.lib.appdata.schemas.Type;
-import com.datatorrent.lib.dimensions.DimensionsEvent;
 import com.datatorrent.lib.dimensions.DimensionsEvent.Aggregate;
+import com.datatorrent.lib.dimensions.DimensionsEvent.InputEvent;
 import com.google.common.collect.Maps;
 
 import java.util.Collections;
@@ -25,9 +26,8 @@ import java.util.Map;
 
 /**
  * This {@link IncrementalAggregator} performs a count of the number of times an input is encountered.
- * @param <EVENT> The type of the input event.
  */
-public class AggregatorCount implements 
+public class AggregatorCount extends AbstractIncrementalAggregator
 {
   private static final long serialVersionUID = 20154301645L;
 
@@ -53,9 +53,13 @@ public class AggregatorCount implements
   }
 
   @Override
-  public DimensionsEvent getGroup(EVENT src, int aggregatorIndex)
+  public Aggregate getGroup(InputEvent src, int aggregatorIndex)
   {
-    DimensionsEvent aggregate = super.getGroup(src, aggregatorIndex);
+    GPOMutable aggregates = new GPOMutable(context.aggregateDescriptor);
+    Aggregate aggregate = new Aggregate(context.eventKey,
+                                        aggregates);
+    aggregate.setAggregatorIndex(aggregatorIndex);
+
     long[] longFields = aggregate.getAggregates().getFieldsLong();
 
     for(int index = 0;
@@ -68,7 +72,7 @@ public class AggregatorCount implements
   }
 
   @Override
-  public void aggregate(Aggregate dest, EVENT src)
+  public void aggregate(Aggregate dest, InputEvent src)
   {
     long[] fieldsLong = dest.getAggregates().getFieldsLong();
 
@@ -81,7 +85,7 @@ public class AggregatorCount implements
   }
 
   @Override
-  public void aggregate(DimensionsEvent destAgg, DimensionsEvent srcAgg)
+  public void aggregate(Aggregate destAgg, Aggregate srcAgg)
   {
     long[] destLongs = destAgg.getAggregates().getFieldsLong();
     long[] srcLongs = srcAgg.getAggregates().getFieldsLong();

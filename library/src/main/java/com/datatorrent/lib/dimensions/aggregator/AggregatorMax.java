@@ -18,6 +18,8 @@ package com.datatorrent.lib.dimensions.aggregator;
 import com.datatorrent.lib.appdata.gpo.GPOMutable;
 import com.datatorrent.lib.appdata.schemas.Type;
 import com.datatorrent.lib.dimensions.DimensionsEvent;
+import com.datatorrent.lib.dimensions.DimensionsEvent.Aggregate;
+import com.datatorrent.lib.dimensions.DimensionsEvent.InputEvent;
 import com.datatorrent.lib.util.PojoUtils.GetterByte;
 import com.datatorrent.lib.util.PojoUtils.GetterDouble;
 import com.datatorrent.lib.util.PojoUtils.GetterFloat;
@@ -27,9 +29,8 @@ import com.datatorrent.lib.util.PojoUtils.GetterShort;
 
 /**
  * This {@link IncrementalAggregator} takes the max of the fields provided in the {@link InputEvent}.
- * @param <EVENT> The type of the input event.
  */
-public class AggregatorMax<EVENT> extends AbstractIncrementalAggregator<EVENT>
+public class AggregatorMax extends AbstractIncrementalAggregator
 {
   private static final long serialVersionUID = 201503120332L;
 
@@ -39,10 +40,13 @@ public class AggregatorMax<EVENT> extends AbstractIncrementalAggregator<EVENT>
   }
 
   @Override
-  public DimensionsEvent getGroup(EVENT src, int aggregatorIndex)
+  public Aggregate getGroup(InputEvent src, int aggregatorIndex)
   {
-    DimensionsEvent aggregate = super.getGroup(src, aggregatorIndex);
-
+    GPOMutable aggregates = new GPOMutable(context.aggregateDescriptor);
+    Aggregate aggregate = new Aggregate(context.eventKey,
+                                        aggregates);
+    aggregate.setAggregatorIndex(aggregatorIndex);
+    
     {
       byte[] destByte = aggregate.getAggregates().getFieldsByte();
       if(destByte != null) {
