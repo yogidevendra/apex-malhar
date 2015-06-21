@@ -17,19 +17,13 @@ package com.datatorrent.lib.dimensions.aggregator;
 
 import com.datatorrent.lib.appdata.gpo.GPOMutable;
 import com.datatorrent.lib.appdata.schemas.Type;
-import com.datatorrent.lib.dimensions.DimensionsEvent;
-import com.datatorrent.lib.util.PojoUtils.GetterByte;
-import com.datatorrent.lib.util.PojoUtils.GetterDouble;
-import com.datatorrent.lib.util.PojoUtils.GetterFloat;
-import com.datatorrent.lib.util.PojoUtils.GetterInt;
-import com.datatorrent.lib.util.PojoUtils.GetterLong;
-import com.datatorrent.lib.util.PojoUtils.GetterShort;
+import com.datatorrent.lib.dimensions.DimensionsEvent.Aggregate;
+import com.datatorrent.lib.dimensions.DimensionsEvent.InputEvent;
 
 /**
  * This {@link IncrementalAggregator} takes the min of the fields provided in the {@link InputEvent}.
- * @param <EVENT> This is the type of the input event.
  */
-public class AggregatorMin<EVENT> extends AbstractIncrementalAggregator<EVENT>
+public class AggregatorMin extends AbstractIncrementalAggregator
 {
   private static final long serialVersionUID = 20154301648L;
 
@@ -39,19 +33,20 @@ public class AggregatorMin<EVENT> extends AbstractIncrementalAggregator<EVENT>
   }
 
   @Override
-  public void aggregate(DimensionsEvent dest, EVENT src)
+  public void aggregate(Aggregate dest, InputEvent src)
   {
     GPOMutable destAggs = dest.getAggregates();
+    GPOMutable srcAggs = src.getAggregates();
 
     {
       byte[] destByte = destAggs.getFieldsByte();
-      GetterByte<Object>[] gettersByte = this.getValueGetters().gettersByte;
-
+      byte[] srcByte = srcAggs.getFieldsByte();
+      int[] srcIndices = this.indexSubsetAggregates.fieldsByteIndexSubset;
       if(destByte != null) {
         for(int index = 0;
             index < destByte.length;
             index++) {
-          byte tempByte = gettersByte[index].get(src);
+          byte tempByte = srcByte[srcIndices[index]];
           if(destByte[index] > tempByte) {
             destByte[index] = tempByte;
           }
@@ -61,13 +56,13 @@ public class AggregatorMin<EVENT> extends AbstractIncrementalAggregator<EVENT>
 
     {
       short[] destShort = destAggs.getFieldsShort();
-      GetterShort<Object>[] gettersShort = this.getValueGetters().gettersShort;
-
+      short[] srcShort = srcAggs.getFieldsShort();
+      int[] srcIndices = this.indexSubsetAggregates.fieldsShortIndexSubset;
       if(destShort != null) {
         for(int index = 0;
             index < destShort.length;
             index++) {
-          short tempShort = gettersShort[index].get(src);
+          short tempShort = srcShort[srcIndices[index]];
           if(destShort[index] > tempShort) {
             destShort[index] = tempShort;
           }
@@ -77,13 +72,13 @@ public class AggregatorMin<EVENT> extends AbstractIncrementalAggregator<EVENT>
 
     {
       int[] destInteger = destAggs.getFieldsInteger();
-      GetterInt<Object>[] gettersInteger = this.getValueGetters().gettersInteger;
-
+      int[] srcInteger = srcAggs.getFieldsInteger();
+      int[] srcIndices = this.indexSubsetAggregates.fieldsIntegerIndexSubset;
       if(destInteger != null) {
         for(int index = 0;
             index < destInteger.length;
             index++) {
-          int tempInt = gettersInteger[index].get(src);
+          int tempInt = srcInteger[srcIndices[index]];
           if(destInteger[index] > tempInt) {
             destInteger[index] = tempInt;
           }
@@ -93,13 +88,13 @@ public class AggregatorMin<EVENT> extends AbstractIncrementalAggregator<EVENT>
 
     {
       long[] destLong = destAggs.getFieldsLong();
-      GetterLong<Object>[] gettersLong = this.getValueGetters().gettersLong;
-
+      long[] srcLong = srcAggs.getFieldsLong();
+      int[] srcIndices = this.indexSubsetAggregates.fieldsLongIndexSubset;
       if(destLong != null) {
         for(int index = 0;
             index < destLong.length;
             index++) {
-          long tempLong = gettersLong[index].get(src);
+          long tempLong = srcLong[srcIndices[index]];
           if(destLong[index] > tempLong) {
             destLong[index] = tempLong;
           }
@@ -109,13 +104,13 @@ public class AggregatorMin<EVENT> extends AbstractIncrementalAggregator<EVENT>
 
     {
       float[] destFloat = destAggs.getFieldsFloat();
-      GetterFloat<Object>[] gettersFloat = this.getValueGetters().gettersFloat;
-
+      float[] srcFloat = destAggs.getFieldsFloat();
+      int[] srcIndices = this.indexSubsetAggregates.fieldsFloatIndexSubset;
       if(destFloat != null) {
         for(int index = 0;
             index < destFloat.length;
             index++) {
-          float tempFloat = gettersFloat[index].get(src);
+          float tempFloat = srcFloat[srcIndices[index]];
           if(destFloat[index] > tempFloat) {
             destFloat[index] = tempFloat;
           }
@@ -125,13 +120,13 @@ public class AggregatorMin<EVENT> extends AbstractIncrementalAggregator<EVENT>
 
     {
       double[] destDouble = destAggs.getFieldsDouble();
-      GetterDouble<Object>[] gettersDouble = this.getValueGetters().gettersDouble;
-
+      double[] srcDouble = destAggs.getFieldsDouble();
+      int[] srcIndices = this.indexSubsetAggregates.fieldsDoubleIndexSubset;
       if(destDouble != null) {
         for(int index = 0;
             index < destDouble.length;
             index++) {
-          double tempDouble = gettersDouble[index].get(src);
+          double tempDouble = srcDouble[srcIndices[index]];
           if(destDouble[index] > tempDouble) {
             destDouble[index] = tempDouble;
           }
@@ -141,7 +136,7 @@ public class AggregatorMin<EVENT> extends AbstractIncrementalAggregator<EVENT>
   }
 
   @Override
-  public void aggregate(DimensionsEvent dest, DimensionsEvent src)
+  public void aggregate(Aggregate dest, Aggregate src)
   {
     GPOMutable destAggs = dest.getAggregates();
     GPOMutable srcAggs = src.getAggregates();

@@ -17,6 +17,7 @@
 package com.datatorrent.lib.dimensions.aggregator;
 
 import com.datatorrent.lib.appdata.schemas.Type;
+import com.datatorrent.lib.dimensions.DimensionsEvent;
 import com.datatorrent.lib.dimensions.DimensionsEvent.Aggregate;
 import com.datatorrent.lib.dimensions.DimensionsEvent.InputEvent;
 
@@ -48,11 +49,12 @@ public class AggregatorLast extends AbstractIncrementalAggregator
   @Override
   public void aggregate(Aggregate dest, InputEvent src)
   {
+    DimensionsEvent.copy(dest, src);
   }
 
   @Override
   public void aggregate(Aggregate dest, Aggregate src)
   {
-    GPOUtils.
+    DimensionsEvent.copy(dest, src);
   }
 }

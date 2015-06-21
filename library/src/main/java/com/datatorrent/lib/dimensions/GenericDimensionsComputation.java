@@ -22,9 +22,12 @@ import com.datatorrent.api.DefaultOutputPort;
 import com.datatorrent.api.Operator;
 import com.datatorrent.lib.appdata.schemas.DimensionalConfigurationSchema;
 import com.datatorrent.lib.appdata.schemas.FieldsDescriptor;
+import com.datatorrent.lib.dimensions.DimensionsEvent.Aggregate;
 import com.datatorrent.lib.dimensions.DimensionsEvent.EventKey;
+import com.datatorrent.lib.dimensions.DimensionsEvent.InputEvent;
 import com.datatorrent.lib.dimensions.aggregator.AggregatorRegistry;
 import com.datatorrent.lib.dimensions.aggregator.IncrementalAggregator;
+import com.datatorrent.lib.statistics.DimensionsComputation;
 import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -56,19 +59,16 @@ public abstract class GenericDimensionsComputation<EVENT> implements Operator
    */
   private int schemaID = DEFAULT_SCHEMA_ID;
 
-  private com.datatorrent.lib.statistics.DimensionsComputation<Object, DimensionsEvent> dimensionsComputation;
+  private DimensionsComputation<InputEvent, Aggregate> dimensionsComputation;
 
   /**
    * The {@link AggregatorRegistry} to use for this dimensions computation operator.
    */
   private AggregatorRegistry aggregatorRegistry = AggregatorRegistry.DEFAULT_AGGREGATOR_REGISTRY;
-  /**
-   * This maps aggregatorIDs provided by the {@link AggregatorRegistry} to aggregate indices, which are used
-   * by the dimensions computation unifier to unify aggregates appropriately.
-   */
-  protected Int2IntOpenHashMap aggregatorIdToAggregateIndex;
 
-  private transient com.datatorrent.lib.statistics.DimensionsComputationUnifierImpl<Object, DimensionsEvent> unifier;
+  private DimensionsComputationUnifierImpl<Object, DimensionsEvent> unifier;
+
+  private InputEvent inputEvent;
 
   /**
    * The output port for the aggregates.
@@ -84,7 +84,7 @@ public abstract class GenericDimensionsComputation<EVENT> implements Operator
   /**
    * The input port which receives events to perform dimensions computation on.
    */
-  public transient final DefaultInputPort<EVENT> inputEvent = new DefaultInputPort<EVENT>() {
+  public transient final DefaultInputPort<EVENT> input = new DefaultInputPort<EVENT>() {
     @Override
     public void process(EVENT tuple)
     {
@@ -100,7 +100,19 @@ public abstract class GenericDimensionsComputation<EVENT> implements Operator
   @SuppressWarnings({"unchecked","rawtypes"})
   public void setup(OperatorContext context)
   {
-    List<FieldsDescriptor> keyFieldsDescriptors = configurationSchema.getDimensionsDescriptorIDToKeyDescriptor();
+    InputEvent inputEvent = ;
+
+    //Num incremental aggregators
+    int numIncrementalAggregators = 0;
+
+    for(int dimensionsDescriptorID = 0;
+        dimensionsDescriptorID < configurationSchema.getDimensionsDescriptorIDToAggregatorIDs().size();
+        dimensionsDescriptorID++) {
+      IntArrayList aggIDList = configurationSchema.getDimensionsDescriptorIDToAggregatorIDs().get(dimensionsDescriptorID);
+      numIncrementalAggregators += aggIDList.size();
+    }
+
+    IncrementalAggregator[] aggregatorArray = new IncrementalAggregator[numIncrementalAggregators];
 
     for(int ddID = 0;
         ddID < keyFieldsDescriptors.size();
@@ -134,7 +146,7 @@ public abstract class GenericDimensionsComputation<EVENT> implements Operator
       }
     }
 
-    dimensionsComputation = new com.datatorrent.lib.statistics.DimensionsComputation<Object, DimensionsEvent>();
+    dimensionsComputation = new DimensionsComputation<InputEvent, Aggregate>();
 
     Map<Integer, IncrementalAggregator<Object>> idToAggregator = aggregatorRegistry.getIncrementalAggregatorIDToAggregator();
 
@@ -142,7 +154,7 @@ public abstract class GenericDimensionsComputation<EVENT> implements Operator
     aggregatorIdToAggregateIndex = new Int2IntOpenHashMap();
     Collections.sort(ids);
 
-    IncrementalAggregator<Object>[] aggregatorArray = (IncrementalAggregator < Object>[]) new IncrementalAggregator[ids.size()];
+    IncrementalAggregator[] aggregatorArray = new IncrementalAggregator[ids.size()];
 
     for(int aggregateIndex = 0;
         aggregateIndex < ids.size();
@@ -152,7 +164,7 @@ public abstract class GenericDimensionsComputation<EVENT> implements Operator
       aggregatorArray[aggregateIndex] = idToAggregator.get(aggregatorId);
     }
 
-    unifier = new com.datatorrent.lib.statistics.DimensionsComputationUnifierImpl<Object, DimensionsEvent>();
+    unifier = new DimensionsComputationUnifierImpl<InputEvent, Aggregate>();
     unifier.setAggregators(aggregatorArray);
   }
 
@@ -192,33 +204,12 @@ public abstract class GenericDimensionsComputation<EVENT> implements Operator
     this.aggregatorRegistry = aggregatorRegistry;
   }
 
-  /**
-   * This is a context object that is passed to the {@link #convertInput} method in order to
-   * determine the type of {@link InputEvent} that the {@link #convertInput} method should
-   * produce.
-   */
   public static class DimensionsConversionContext
   {
-    /**
-     * The schemaID to apply to the {@link InputEvent}.
-     */
-    public int schemaID;
-    /**
-     * The aggregatorID of the aggregator to use on the {@link InputEvent}.
-     */
-    public int aggregatorID;
-    /**
-     * The dimensions descriptor id to apply to the {@link InputEvent}.
-     */
-    public int dimensionDescriptorID;
     /**
      * The {@link DimensionsDescriptor} corresponding to the given dimension descriptor id.
      */
     public DimensionsDescriptor dd;
-    /**
-     * The {@link FieldsDescriptor} for the key of a new {@link InputEvent}.
-     */
-    public FieldsDescriptor keyFieldsDescriptor;
     /**
      * The {@link FieldsDescriptor} for the aggregate of a new {@link InputEvent}.
      */
@@ -227,6 +218,7 @@ public abstract class GenericDimensionsComputation<EVENT> implements Operator
      * The event key corresponding to this dimensions descriptor
      */
     public EventKey eventKey;
+    public int timestampIndex;
 
     /**
      * Constructor for creating conversion context.

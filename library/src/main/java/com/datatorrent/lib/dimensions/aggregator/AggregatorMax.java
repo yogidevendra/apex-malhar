@@ -13,19 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.datatorrent.lib.dimensions.aggregator;
 
 import com.datatorrent.lib.appdata.gpo.GPOMutable;
 import com.datatorrent.lib.appdata.schemas.Type;
-import com.datatorrent.lib.dimensions.DimensionsEvent;
 import com.datatorrent.lib.dimensions.DimensionsEvent.Aggregate;
 import com.datatorrent.lib.dimensions.DimensionsEvent.InputEvent;
-import com.datatorrent.lib.util.PojoUtils.GetterByte;
-import com.datatorrent.lib.util.PojoUtils.GetterDouble;
-import com.datatorrent.lib.util.PojoUtils.GetterFloat;
-import com.datatorrent.lib.util.PojoUtils.GetterInt;
-import com.datatorrent.lib.util.PojoUtils.GetterLong;
-import com.datatorrent.lib.util.PojoUtils.GetterShort;
 
 /**
  * This {@link IncrementalAggregator} takes the max of the fields provided in the {@link InputEvent}.
@@ -40,84 +34,110 @@ public class AggregatorMax extends AbstractIncrementalAggregator
   }
 
   @Override
-  public Aggregate getGroup(InputEvent src, int aggregatorIndex)
+  public void aggregate(Aggregate dest, InputEvent src)
   {
-    GPOMutable aggregates = new GPOMutable(context.aggregateDescriptor);
-    Aggregate aggregate = new Aggregate(context.eventKey,
-                                        aggregates);
-    aggregate.setAggregatorIndex(aggregatorIndex);
-    
+    GPOMutable destAggs = dest.getAggregates();
+    GPOMutable srcAggs = src.getAggregates();
+
     {
-      byte[] destByte = aggregate.getAggregates().getFieldsByte();
+      byte[] destByte = destAggs.getFieldsByte();
+      byte[] srcByte = srcAggs.getFieldsByte();
+      int[] srcIndices = this.indexSubsetAggregates.fieldsByteIndexSubset;
       if(destByte != null) {
         for(int index = 0;
             index < destByte.length;
             index++) {
-          destByte[index] = Byte.MIN_VALUE;
+          byte tempByte = srcByte[srcIndices[index]];
+          if(destByte[index] > tempByte) {
+            destByte[index] = tempByte;
+          }
         }
       }
     }
 
     {
-      short[] destShort = aggregate.getAggregates().getFieldsShort();
+      short[] destShort = destAggs.getFieldsShort();
+      short[] srcShort = srcAggs.getFieldsShort();
+      int[] srcIndices = this.indexSubsetAggregates.fieldsShortIndexSubset;
       if(destShort != null) {
         for(int index = 0;
             index < destShort.length;
             index++) {
-          destShort[index] = Short.MIN_VALUE;
+          short tempShort = srcShort[srcIndices[index]];
+          if(destShort[index] > tempShort) {
+            destShort[index] = tempShort;
+          }
         }
       }
     }
 
     {
-      int[] destInteger = aggregate.getAggregates().getFieldsInteger();
+      int[] destInteger = destAggs.getFieldsInteger();
+      int[] srcInteger = srcAggs.getFieldsInteger();
+      int[] srcIndices = this.indexSubsetAggregates.fieldsIntegerIndexSubset;
       if(destInteger != null) {
         for(int index = 0;
             index < destInteger.length;
             index++) {
-          destInteger[index] = Integer.MIN_VALUE;
+          int tempInt = srcInteger[srcIndices[index]];
+          if(destInteger[index] > tempInt) {
+            destInteger[index] = tempInt;
+          }
         }
       }
     }
 
     {
-      long[] destLong = aggregate.getAggregates().getFieldsLong();
+      long[] destLong = destAggs.getFieldsLong();
+      long[] srcLong = srcAggs.getFieldsLong();
+      int[] srcIndices = this.indexSubsetAggregates.fieldsLongIndexSubset;
       if(destLong != null) {
         for(int index = 0;
             index < destLong.length;
             index++) {
-          destLong[index] = Long.MIN_VALUE;
+          long tempLong = srcLong[srcIndices[index]];
+          if(destLong[index] > tempLong) {
+            destLong[index] = tempLong;
+          }
         }
       }
     }
 
     {
-      float[] destFloat = aggregate.getAggregates().getFieldsFloat();
+      float[] destFloat = destAggs.getFieldsFloat();
+      float[] srcFloat = destAggs.getFieldsFloat();
+      int[] srcIndices = this.indexSubsetAggregates.fieldsFloatIndexSubset;
       if(destFloat != null) {
         for(int index = 0;
             index < destFloat.length;
             index++) {
-          destFloat[index] = Float.NEGATIVE_INFINITY;
+          float tempFloat = srcFloat[srcIndices[index]];
+          if(destFloat[index] > tempFloat) {
+            destFloat[index] = tempFloat;
+          }
         }
       }
     }
 
     {
-      double[] destDouble = aggregate.getAggregates().getFieldsDouble();
+      double[] destDouble = destAggs.getFieldsDouble();
+      double[] srcDouble = destAggs.getFieldsDouble();
+      int[] srcIndices = this.indexSubsetAggregates.fieldsDoubleIndexSubset;
       if(destDouble != null) {
         for(int index = 0;
             index < destDouble.length;
             index++) {
-          destDouble[index] = Double.NEGATIVE_INFINITY;
+          double tempDouble = srcDouble[srcIndices[index]];
+          if(destDouble[index] > tempDouble) {
+            destDouble[index] = tempDouble;
+          }
         }
       }
     }
-
-    return aggregate;
   }
 
   @Override
-  public void aggregate(DimensionsEvent dest, DimensionsEvent src)
+  public void aggregate(Aggregate dest, Aggregate src)
   {
     GPOMutable destAggs = dest.getAggregates();
     GPOMutable srcAggs = src.getAggregates();
@@ -207,108 +227,6 @@ public class AggregatorMax extends AbstractIncrementalAggregator
             index++) {
           if(destDouble[index] < srcDouble[index]) {
             destDouble[index] = srcDouble[index];
-          }
-        }
-      }
-    }
-  }
-
-  @Override
-  public void aggregate(DimensionsEvent dest, EVENT src)
-  {
-    GPOMutable destAggs = dest.getAggregates();
-
-    {
-      byte[] destByte = destAggs.getFieldsByte();
-      GetterByte<Object>[] gettersByte = this.getValueGetters().gettersByte;
-
-      if(destByte != null) {
-        for(int index = 0;
-            index < destByte.length;
-            index++) {
-          byte tempByte = gettersByte[index].get(src);
-          if(destByte[index] < tempByte) {
-            destByte[index] = tempByte;
-          }
-        }
-      }
-    }
-
-    {
-      short[] destShort = destAggs.getFieldsShort();
-      GetterShort<Object>[] gettersShort = this.getValueGetters().gettersShort;
-
-      if(destShort != null) {
-        for(int index = 0;
-            index < destShort.length;
-            index++) {
-          short tempShort = gettersShort[index].get(src);
-          if(destShort[index] < tempShort) {
-            destShort[index] = tempShort;
-          }
-        }
-      }
-    }
-
-    {
-      int[] destInteger = destAggs.getFieldsInteger();
-      GetterInt<Object>[] gettersInteger = this.getValueGetters().gettersInteger;
-
-      if(destInteger != null) {
-        for(int index = 0;
-            index < destInteger.length;
-            index++) {
-          int tempInt = gettersInteger[index].get(src);
-          if(destInteger[index] < tempInt) {
-            destInteger[index] = tempInt;
-          }
-        }
-      }
-    }
-
-    {
-      long[] destLong = destAggs.getFieldsLong();
-      GetterLong<Object>[] gettersLong = this.getValueGetters().gettersLong;
-
-      if(destLong != null) {
-        for(int index = 0;
-            index < destLong.length;
-            index++) {
-          long tempLong = gettersLong[index].get(src);
-          if(destLong[index] < tempLong) {
-            destLong[index] = tempLong;
-          }
-        }
-      }
-    }
-
-    {
-      float[] destFloat = destAggs.getFieldsFloat();
-      GetterFloat<Object>[] gettersFloat = this.getValueGetters().gettersFloat;
-
-      if(destFloat != null) {
-        for(int index = 0;
-            index < destFloat.length;
-            index++) {
-          float tempFloat = gettersFloat[index].get(src);
-          if(destFloat[index] < tempFloat) {
-            destFloat[index] = tempFloat;
-          }
-        }
-      }
-    }
-
-    {
-      double[] destDouble = destAggs.getFieldsDouble();
-      GetterDouble<Object>[] gettersDouble = this.getValueGetters().gettersDouble;
-
-      if(destDouble != null) {
-        for(int index = 0;
-            index < destDouble.length;
-            index++) {
-          double tempDouble = gettersDouble[index].get(src);
-          if(destDouble[index] < tempDouble) {
-            destDouble[index] = tempDouble;
           }
         }
       }

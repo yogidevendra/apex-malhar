@@ -17,16 +17,15 @@ package com.datatorrent.lib.dimensions.aggregator;
 
 import com.datatorrent.lib.appdata.gpo.GPOMutable;
 import com.datatorrent.lib.appdata.schemas.Type;
-import com.datatorrent.lib.dimensions.DimensionsEvent;
-import com.datatorrent.lib.dimensions.DimensionsEvent.EventKey;
+import com.datatorrent.lib.dimensions.DimensionsEvent.Aggregate;
+import com.datatorrent.lib.dimensions.DimensionsEvent.InputEvent;
 
 import java.util.Arrays;
 
 /**
  * This {@link IncrementalAggregator} performs a sum operation over the fields in the given {@link InputEvent}.
- * @param <EVENT> This is the type of the input event.
  */
-public class AggregatorSum<EVENT> extends AbstractIncrementalAggregator<EVENT>
+public class AggregatorSum extends AbstractIncrementalAggregator
 {
   private static final long serialVersionUID = 20154301649L;
 
@@ -36,10 +35,9 @@ public class AggregatorSum<EVENT> extends AbstractIncrementalAggregator<EVENT>
   }
 
   @Override
-  public DimensionsEvent getGroup(EVENT src, int aggregatorIndex)
+  public Aggregate getGroup(InputEvent src, int aggregatorIndex)
   {
-    GPOMutable key = new GPOMutable(keyFieldsDescriptor);
-    GPOMutable value = new GPOMutable(valueFieldsDescriptor);
+    GPOMutable value = new GPOMutable(this.context.aggregateDescriptor);
 
     if(value.getFieldsByte() != null) {
       Arrays.fill(value.getFieldsByte(), (byte) 0);
@@ -65,20 +63,14 @@ public class AggregatorSum<EVENT> extends AbstractIncrementalAggregator<EVENT>
       Arrays.fill(value.getFieldsDouble(), 0.0);
     }
 
-    EventKey eventKey = new EventKey(bucketID,
-                                     schemaID,
-                                     dimensionDescriptorID,
-                                     aggregatorID,
-                                     key);
-
-    DimensionsEvent aggregate = new DimensionsEvent(eventKey,
+    Aggregate aggregate = new Aggregate(this.context.eventKey,
                                         value);
     aggregate.setAggregatorIndex(aggregatorIndex);
     return aggregate;
   }
 
   @Override
-  public void aggregate(DimensionsEvent dest, DimensionsEvent src)
+  public void aggregate(Aggregate dest, Aggregate src)
   {
     GPOMutable destAggs = dest.getAggregates();
     GPOMutable srcAggs = src.getAggregates();
@@ -163,7 +155,7 @@ public class AggregatorSum<EVENT> extends AbstractIncrementalAggregator<EVENT>
   }
 
   @Override
-  public void aggregate(DimensionsEvent dest, EVENT src)
+  public void aggregate(Aggregate dest, InputEvent src)
   {
 
   }

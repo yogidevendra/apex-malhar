@@ -179,6 +179,7 @@ public class DimensionalConfigurationSchema
    * This is a {@link FieldsDescriptor} object responsible for managing the key names and types.
    */
   private FieldsDescriptor keyDescriptor;
+  private FieldsDescriptor keyDescriptorWithTime;
   /**
    * This is a {@link FieldsDescriptor} object responsible for managing the name and types of of input values.
    */
@@ -412,6 +413,10 @@ public class DimensionalConfigurationSchema
     }
 
     keyDescriptor = new FieldsDescriptor(keyFieldToType);
+    Map<String, Type> fieldToTypeWithTime = Maps.newHashMap(keyFieldToType);
+    keyDescriptorWithTime = keyDescriptorWithTime(fieldToTypeWithTime,
+                                                  timeBuckets);
+
 
     //schemaAllValueToAggregatorToType
     schemaAllValueToAggregatorToType = Maps.newHashMap();
@@ -717,12 +722,6 @@ public class DimensionalConfigurationSchema
       }
     }
 
-    //Keys to values list immutable
-
-
-    //Key descriptor all
-    keyDescriptor = new FieldsDescriptor(fieldToType);
-
     //Time Buckets
     timeBuckets = Lists.newArrayList();
 
@@ -744,6 +743,13 @@ public class DimensionalConfigurationSchema
                                            + " was defined twice.");
       }
     }
+
+    //Key descriptor all
+    keyDescriptor = new FieldsDescriptor(fieldToType);
+
+    Map<String, Type> fieldToTypeWithTime = Maps.newHashMap(fieldToType);
+    keyDescriptorWithTime = keyDescriptorWithTime(fieldToTypeWithTime,
+                                                  timeBuckets);
 
     //Values
 
@@ -1105,6 +1111,17 @@ public class DimensionalConfigurationSchema
     }
   }
 
+  private FieldsDescriptor keyDescriptorWithTime(Map<String, Type> fieldToTypeWithTime,
+                                                 List<TimeBucket> timeBuckets)
+  {
+    if(timeBuckets.size() > 1 ||
+       (!timeBuckets.isEmpty() && !timeBuckets.get(0).equals(TimeBucket.ALL))) {
+      fieldToTypeWithTime.put(DimensionsDescriptor.DIMENSION_TIME, DimensionsDescriptor.DIMENSION_TIME_TYPE);
+    }
+
+    return new FieldsDescriptor(fieldToTypeWithTime);
+  }
+
   /**
    * Returns the {@link FieldsDescriptor} object for all key fields.
    * @return The {@link FieldsDescriptor} object for all key fields.
@@ -1375,6 +1392,22 @@ public class DimensionalConfigurationSchema
       return false;
     }
     return true;
+  }
+
+  /**
+   * @return the keyDescriptorWithTime
+   */
+  public FieldsDescriptor getKeyDescriptorWithTime()
+  {
+    return keyDescriptorWithTime;
+  }
+
+  /**
+   * @param keyDescriptorWithTime the keyDescriptorWithTime to set
+   */
+  public void setKeyDescriptorWithTime(FieldsDescriptor keyDescriptorWithTime)
+  {
+    this.keyDescriptorWithTime = keyDescriptorWithTime;
   }
 
   /**

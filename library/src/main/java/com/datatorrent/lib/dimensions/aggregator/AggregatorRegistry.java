@@ -47,7 +47,7 @@ public class AggregatorRegistry implements Serializable
    * This is a map from {@link IncrementalAggregator} names to {@link IncrementalAggregator}s used by the
    * default {@link AggregatorRegistry}.
    */
-  private static final transient Map<String, IncrementalAggregator<Object>> DEFAULT_NAME_TO_INCREMENTAL_AGGREGATOR;
+  private static final transient Map<String, IncrementalAggregator> DEFAULT_NAME_TO_INCREMENTAL_AGGREGATOR;
   /**
    * This is a map from {@link OTFAggregator} names to {@link OTFAggregator}s used by the default
    * {@link AggregatorRegistry}.
@@ -72,7 +72,7 @@ public class AggregatorRegistry implements Serializable
   /**
    * This is a map from the class of an {@link IncrementalAggregator} to the name of that {@link IncrementalAggregator}.
    */
-  private transient Map<Class<? extends IncrementalAggregator<Object>>, String> classToIncrementalAggregatorName;
+  private transient Map<Class<? extends IncrementalAggregator>, String> classToIncrementalAggregatorName;
   /**
    * This is a map from the name of an {@link OTFAggregator} to the list of the names of all {@link IncrementalAggregators}
    * that are child aggregators of that {@link OTFAggregator}.
@@ -81,11 +81,11 @@ public class AggregatorRegistry implements Serializable
   /**
    * This is a map from the aggregator ID of an {@link IncrementalAggregator} to the corresponding {@link IncrementalAggregator}.
    */
-  private transient Map<Integer, IncrementalAggregator<Object>> incrementalAggregatorIDToAggregator;
+  private transient Map<Integer, IncrementalAggregator> incrementalAggregatorIDToAggregator;
   /**
    * This is a map from the name assigned to an {@link IncrementalAggregator} to the {@link IncrementalAggregator}.
    */
-  private Map<String, IncrementalAggregator<Object>> nameToIncrementalAggregator;
+  private Map<String, IncrementalAggregator> nameToIncrementalAggregator;
   /**
    * This is a map from the name assigned to an {@link OTFAggregator} to the {@link OTFAggregator}.
    */
@@ -102,11 +102,11 @@ public class AggregatorRegistry implements Serializable
    * @return A mapping from the name of an {@link IncrementalAggregator} to the ID assigned to that
    * {@link IncrementalAggregator}.
    */
-  private static Map<String, Integer> autoGenIds(Map<String, IncrementalAggregator<Object>> nameToAggregator)
+  private static Map<String, Integer> autoGenIds(Map<String, IncrementalAggregator> nameToAggregator)
   {
     Map<String, Integer> staticAggregatorNameToID = Maps.newHashMap();
 
-    for(Map.Entry<String, IncrementalAggregator<Object>> entry: nameToAggregator.entrySet()) {
+    for(Map.Entry<String, IncrementalAggregator> entry: nameToAggregator.entrySet()) {
       staticAggregatorNameToID.put(entry.getKey(), stringHash(entry.getValue().getClass().getName()));
     }
 
@@ -160,7 +160,7 @@ public class AggregatorRegistry implements Serializable
    * @param nameToOTFAggregator This is a map from {@link String} to {@link OTFAggregator}, where the string is the name of
    * an {@link OTFAggregator} and the value is the {@link OTFAggregator} with that name.
    */
-  public AggregatorRegistry(Map<String, IncrementalAggregator<Object>> nameToIncrementalAggregator,
+  public AggregatorRegistry(Map<String, IncrementalAggregator> nameToIncrementalAggregator,
                             Map<String, OTFAggregator> nameToOTFAggregator)
   {
     this(nameToIncrementalAggregator,
@@ -186,7 +186,7 @@ public class AggregatorRegistry implements Serializable
    * @param incrementalAggregatorNameToID This is a map from the name of an {@link IncrementalAggregator} to the ID for that
    * {@link IncrementalAggregator}.
    */
-  public AggregatorRegistry(Map<String, IncrementalAggregator<Object>> nameToIncrementalAggregator,
+  public AggregatorRegistry(Map<String, IncrementalAggregator> nameToIncrementalAggregator,
                         Map<String, OTFAggregator> nameToOTFAggregator,
                         Map<String, Integer> incrementalAggregatorNameToID)
   {
@@ -203,7 +203,7 @@ public class AggregatorRegistry implements Serializable
    */
   private void validate()
   {
-    for(Map.Entry<String, IncrementalAggregator<Object>> entry: nameToIncrementalAggregator.entrySet()) {
+    for(Map.Entry<String, IncrementalAggregator> entry: nameToIncrementalAggregator.entrySet()) {
       Preconditions.checkNotNull(entry.getKey());
       Preconditions.checkNotNull(entry.getValue());
     }
@@ -235,7 +235,7 @@ public class AggregatorRegistry implements Serializable
 
     classToIncrementalAggregatorName = Maps.newHashMap();
 
-    for(Map.Entry<String, IncrementalAggregator<Object>> entry: nameToIncrementalAggregator.entrySet()) {
+    for(Map.Entry<String, IncrementalAggregator> entry: nameToIncrementalAggregator.entrySet()) {
       classToIncrementalAggregatorName.put((Class) entry.getValue().getClass(), entry.getKey());
     }
 
@@ -270,7 +270,7 @@ public class AggregatorRegistry implements Serializable
    * @param nameToIncrementalAggregator The mapping from an {@link IncrementalAggregator}'s name to an
    * {@link IncrementalAggregator}.
    */
-  private void setNameToIncrementalAggregator(Map<String, IncrementalAggregator<Object>> nameToIncrementalAggregator)
+  private void setNameToIncrementalAggregator(Map<String, IncrementalAggregator> nameToIncrementalAggregator)
   {
     this.nameToIncrementalAggregator = Maps.newHashMap(Preconditions.checkNotNull(nameToIncrementalAggregator));
   }
@@ -314,7 +314,7 @@ public class AggregatorRegistry implements Serializable
    * Gets the mapping from an {@link IncrementalAggregator}'s class to the {@link IncrementalAggregator}.
    * @return The mapping from an {@link IncrementalAggregator}'s class to the {@link IncrementalAggregator}.
    */
-  public Map<Class<? extends IncrementalAggregator<Object>>, String> getClassToIncrementalAggregatorName()
+  public Map<Class<? extends IncrementalAggregator>, String> getClassToIncrementalAggregatorName()
   {
     return classToIncrementalAggregatorName;
   }
@@ -323,7 +323,7 @@ public class AggregatorRegistry implements Serializable
    * Gets the mapping from an {@link IncrementalAggregator}'s ID to the {@link IncrementalAggregator}.
    * @return The mapping from an {@link IncrementalAggregator}'s ID to the {@link IncrementalAggregator}.
    */
-  public Map<Integer, IncrementalAggregator<Object>> getIncrementalAggregatorIDToAggregator()
+  public Map<Integer, IncrementalAggregator> getIncrementalAggregatorIDToAggregator()
   {
     return incrementalAggregatorIDToAggregator;
   }
@@ -381,7 +381,7 @@ public class AggregatorRegistry implements Serializable
    * Returns the name to {@link IncrementalAggregator} mapping, where the key is the name of the {@link OTFAggregator}.
    * @return The name to {@link IncrementalAggregator} mapping.
    */
-  public Map<String, IncrementalAggregator<Object>> getNameToIncrementalAggregator()
+  public Map<String, IncrementalAggregator> getNameToIncrementalAggregator()
   {
     return nameToIncrementalAggregator;
   }

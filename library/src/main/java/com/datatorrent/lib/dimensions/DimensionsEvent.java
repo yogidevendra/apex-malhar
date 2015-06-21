@@ -522,69 +522,10 @@ public class DimensionsEvent implements Serializable
     return true;
   }
 
-  public static class InputEvent extends DimensionsEvent
+  public static class InputEvent
   {
-    private static final long serialVersionUID = 201506190114L;
-
-    /**
-     * This creates a {@link DimensionsEvent} from the given event key and aggregates.
-     *
-     * @param eventKey The key from which to create a {@link DimensionsEvent}.
-     * @param aggregates The aggregates from which to create {@link DimensionsEvent}.
-     */
-    public InputEvent(EventKey eventKey,
-                      GPOMutable aggregates)
-    {
-      setEventKey(eventKey);
-      setAggregates(aggregates);
-    }
-
-    /**
-     * Creates a DimensionsEvent with the given key values, aggregates and ids.
-     *
-     * @param keys The values for fields in the key.
-     * @param aggregates The values for fields in the aggregate.
-     * @param bucketID The bucketID
-     * @param schemaID The schemaID.
-     * @param dimensionDescriptorID The dimensionsDescriptorID.
-     * @param aggregatorIndex The aggregatorIndex assigned to this event by the unifier.
-     */
-    public InputEvent(GPOMutable keys,
-                      GPOMutable aggregates,
-                      int bucketID,
-                      int schemaID,
-                      int dimensionDescriptorID,
-                      int aggregatorIndex)
-    {
-      this.eventKey = new EventKey(bucketID,
-                                   schemaID,
-                                   dimensionDescriptorID,
-                                   aggregatorIndex,
-                                   keys);
-      setAggregates(aggregates);
-    }
-
-    /**
-     * This creates an event with the given data. Note, this constructor assumes that the bucketID will be 0.
-     *
-     * @param keys The value for fields in the key.
-     * @param aggregates The value for fields in the aggregate.
-     * @param schemaID The schemaID.
-     * @param dimensionDescriptorID The dimensionsDescriptorID.
-     * @param aggregatorIndex The aggregatorIndex assigned to this event by the unifier.
-     */
-    public InputEvent(GPOMutable keys,
-                      GPOMutable aggregates,
-                      int schemaID,
-                      int dimensionDescriptorID,
-                      int aggregatorIndex)
-    {
-      this.eventKey = new EventKey(schemaID,
-                                   dimensionDescriptorID,
-                                   aggregatorIndex,
-                                   keys);
-      setAggregates(aggregates);
-    }
+    public GPOMutable eventKey;
+    public GPOMutable aggregates;
   }
 
   public static class Aggregate extends DimensionsEvent implements com.datatorrent.lib.statistics.DimensionsComputation.AggregateEvent

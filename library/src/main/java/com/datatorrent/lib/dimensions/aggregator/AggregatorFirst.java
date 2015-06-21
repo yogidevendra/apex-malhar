@@ -40,12 +40,6 @@ public class AggregatorFirst extends AbstractIncrementalAggregator
   }
 
   @Override
-  public Aggregate getGroup(InputEvent src, int aggregatorIndex)
-  {
-    return super.getGroup(src, aggregatorIndex);
-  }
-
-  @Override
   public Type getOutputType(Type inputType)
   {
     return AggregatorUtils.IDENTITY_TYPE_MAP.get(inputType);
