@@ -1893,7 +1893,7 @@ public class GPOUtils
     for(Map.Entry<String, String> entry: stringMap.entrySet()) {
       Object objValue;
       String valueString = entry.getValue();
-      Type valueType = fieldToType.get(entry.getValue());
+      Type valueType = fieldToType.get(entry.getKey());
 
       switch(valueType) {
         case BOOLEAN:
