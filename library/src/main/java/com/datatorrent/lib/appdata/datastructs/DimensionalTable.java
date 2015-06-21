@@ -183,7 +183,6 @@ public class DimensionalTable<DATA>
     List<Object> keysList = Lists.newArrayList();
 
     for(Object key: keys) {
-      Preconditions.checkNotNull(key);
       keysList.add(key);
     }
 
