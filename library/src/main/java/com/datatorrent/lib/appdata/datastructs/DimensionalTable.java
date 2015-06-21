@@ -219,7 +219,6 @@ public class DimensionalTable<DATA>
       Object value = entry.getValue();
 
       Preconditions.checkNotNull(keyName);
-      Preconditions.checkNotNull(value);
 
       Integer index = dimensionNameToIndex.get(keyName);
       keysArray[index] = value;
