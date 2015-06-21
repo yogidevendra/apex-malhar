@@ -106,7 +106,7 @@ public class AppDataSingleSchemaDimensionStoreHDHT extends AbstractAppDataDimens
 
       if(maxTimestamp == null || timestamp > maxTimestamp) {
         maxTimestamp = timestamp;
-        dimensionalSchema.setTo(minTimestamp);
+        dimensionalSchema.setTo(maxTimestamp);
       }
     }
 
