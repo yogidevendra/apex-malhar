@@ -23,7 +23,6 @@ import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -166,7 +165,7 @@ public class DimensionalTable<DATA>
 
   /**
    * Appends a row to the table. If the key combination for the row is not unique
-   * then an {@link IllegalStateException} is thrown.
+   * then the existing row is replaced.
    * @param data The data payload for the row.
    * @param keys The values for the components of the keys. The key components
    * must be specified in the same order as their header names.
@@ -188,9 +187,6 @@ public class DimensionalTable<DATA>
 
     DATA prev = dimensionKeysToData.put(keysList, data);
     logger.debug("prev {}", prev);
-
-    Preconditions.checkState(prev == null,
-                            "The given keys must be unique " + Arrays.toString(keys));
 
     for(int index = 0;
         index < keys.length;
