@@ -32,8 +32,6 @@ public enum AggregatorIncrementalType
   LAST(new AggregatorLast()),
   FIRST(new AggregatorFirst());
 
-  private static final Logger logger = LoggerFactory.getLogger(AggregatorIncrementalType.class);
-
   public static final Map<String, Integer> NAME_TO_ORDINAL;
   public static final Map<String, IncrementalAggregator> NAME_TO_AGGREGATOR;
 
@@ -67,4 +65,6 @@ public enum AggregatorIncrementalType
   {
     return aggregator;
   }
+  
+  private static final Logger LOG = LoggerFactory.getLogger(AggregatorIncrementalType.class);
 }

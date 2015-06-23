@@ -386,6 +386,7 @@ public class DimensionsComputation<EVENT, AGGREGATE extends DimensionsComputatio
       if (aggregateEvent == null) {
         aggregateEvent = aggregator.getGroup(tuple, aggregatorIdx);
 
+        logger.debug("put new");
         if(useAggregatesAsKeys) {
           put((EVENT) aggregateEvent, aggregateEvent);
         }

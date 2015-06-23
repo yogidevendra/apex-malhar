@@ -1996,10 +1996,7 @@ public class GPOUtils
             continue;
           }
 
-          LOG.debug("src {}", srcLong[srcIndex[index]]);
           destLong[index] = srcLong[srcIndex[index]];
-
-          LOG.debug("dest {}", destLong[index]);
         }
       }
     }
@@ -2035,6 +2032,124 @@ public class GPOUtils
         }
       }
     }
+  }
+
+  public static int hashcode(GPOMutable gpo)
+  {
+    int hashCode = 0;
+
+    {
+      String[] stringArray = gpo.getFieldsString();
+      if(stringArray != null) {
+        for(int index = 0;
+            index < stringArray.length;
+            index++) {
+          hashCode ^= stringArray[index].hashCode();
+        }
+      }
+    }
+
+    {
+      boolean[] booleanArray = gpo.getFieldsBoolean();
+      if(booleanArray != null) {
+        for(int index = 0;
+            index < booleanArray.length;
+            index++) {
+          hashCode ^= booleanArray[index] ? 1: 0;
+        }
+      }
+    }
+
+    {
+      char[] charArray = gpo.getFieldsCharacter();
+      if(charArray != null) {
+        for(int index = 0;
+            index < charArray.length;
+            index++) {
+          if(charArray[index] == -1) {
+            continue;
+          }
+          hashCode ^= Character.getNumericValue(charArray[index]);
+        }
+      }
+    }
+
+    {
+      byte[] byteArray = gpo.getFieldsByte();
+      if(byteArray != null) {
+        for(int index = 0;
+            index < byteArray.length;
+            index++) {
+          hashCode ^= byteArray[index];
+        }
+      }
+    }
+
+    {
+      short[] shortArray = gpo.getFieldsShort();
+      if(shortArray != null) {
+        for(int index = 0;
+            index < shortArray.length;
+            index++) {
+          if(shortArray[index] == -1) {
+            continue;
+          }
+          hashCode ^= shortArray[index];
+        }
+      }
+    }
+
+    {
+      int[] integerArray = gpo.getFieldsInteger();
+      if(integerArray != null) {
+        for(int index = 0;
+            index < integerArray.length;
+            index++) {
+          hashCode ^= integerArray[index];
+        }
+      }
+    }
+
+    {
+      long[] longArray = gpo.getFieldsLong();
+      if(longArray != null) {
+        for(int index = 0;
+            index < longArray.length;
+            index++) {
+          if(longArray[index] == -1) {
+            continue;
+          }
+          hashCode ^= longArray[index];
+        }
+      }
+    }
+
+    {
+      float[] floatArray = gpo.getFieldsFloat();
+      if(floatArray != null) {
+        for(int index = 0;
+            index < floatArray.length;
+            index++) {
+          if(floatArray[index] == -1) {
+            continue;
+          }
+          hashCode ^= Float.floatToIntBits(floatArray[index]);
+        }
+      }
+    }
+
+    {
+      double[] doubleArray = gpo.getFieldsDouble();
+      if(doubleArray != null) {
+        for(int index = 0;
+            index < doubleArray.length;
+            index++) {
+          hashCode ^= Double.doubleToLongBits(doubleArray[index]);
+        }
+      }
+    }
+
+    return hashCode;
   }
 
   public static int indirectHashcode(GPOMutable gpo,
@@ -2178,6 +2293,141 @@ public class GPOUtils
     }
 
     return hashCode;
+  }
+
+  public static boolean equals(GPOMutable dest,
+                               GPOMutable src)
+  {
+    {
+      String[] destString = dest.getFieldsString();
+      String[] srcString = src.getFieldsString();
+      if(destString != null) {
+        for(int index = 0;
+            index < srcString.length;
+            index++) {
+          if(!destString[index].equals(srcString[index])) {
+            return false;
+          }
+        }
+      }
+    }
+
+    {
+      boolean[] destBoolean = dest.getFieldsBoolean();
+      boolean[] srcBoolean = src.getFieldsBoolean();
+      if(destBoolean != null) {
+        for(int index = 0;
+            index < srcBoolean.length;
+            index++) {
+          if(destBoolean[index] != srcBoolean[index]) {
+            return false;
+          }
+        }
+      }
+    }
+
+    {
+      char[] destChar = dest.getFieldsCharacter();
+      char[] srcChar = src.getFieldsCharacter();
+      if(destChar != null) {
+        for(int index = 0;
+            index < srcChar.length;
+            index++) {
+          if(srcChar[index] == -1) {
+            continue;
+          }
+          if(destChar[index] != srcChar[index]) {
+            return false;
+          }
+        }
+      }
+    }
+
+    {
+      byte[] destByte = dest.getFieldsByte();
+      byte[] srcByte = src.getFieldsByte();
+      if(destByte != null) {
+        for(int index = 0;
+            index < srcByte.length;
+            index++) {
+          if(destByte[index] != srcByte[index]) {
+            return false;
+          }
+        }
+      }
+    }
+
+    {
+      short[] destShort = dest.getFieldsShort();
+      short[] srcShort = src.getFieldsShort();
+      if(destShort != null) {
+        for(int index = 0;
+            index < srcShort.length;
+            index++) {
+          if(destShort[index] != srcShort[index]) {
+            return false;
+          }
+        }
+      }
+    }
+
+    {
+      int[] destInteger = dest.getFieldsInteger();
+      int[] srcInteger = src.getFieldsInteger();
+      if(destInteger != null) {
+        for(int index = 0;
+            index < srcInteger.length;
+            index++) {
+          if(destInteger[index] != srcInteger[index]) {
+            return false;
+          }
+        }
+      }
+    }
+
+    {
+      long[] destLong = dest.getFieldsLong();
+      long[] srcLong = src.getFieldsLong();
+      if(destLong != null) {
+        for(int index = 0;
+            index < srcLong.length;
+            index++) {
+          if(destLong[index] != srcLong[index]) {
+            return false;
+          }
+        }
+      }
+    }
+
+    {
+      float[] destFloat = dest.getFieldsFloat();
+      float[] srcFloat = src.getFieldsFloat();
+      if(destFloat != null) {
+        for(int index = 0;
+            index < srcFloat.length;
+            index++) {
+          if(destFloat[index] != srcFloat[index]) {
+            return false;
+          }
+        }
+      }
+    }
+
+    {
+      double[] destDouble = dest.getFieldsDouble();
+      double[] srcDouble = src.getFieldsDouble();
+      if(destDouble != null) {
+        for(int index = 0;
+            index < srcDouble.length;
+            index++) {
+          if(destDouble[index] != srcDouble[index]) {
+            return false;
+          }
+        }
+      }
+    }
+
+    return true;
   }
 
   public static boolean indirectEquals(GPOMutable dest,

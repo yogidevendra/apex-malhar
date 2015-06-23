@@ -17,6 +17,7 @@ package com.datatorrent.lib.dimensions.aggregator;
 
 import com.datatorrent.lib.appdata.gpo.GPOMutable;
 import com.datatorrent.lib.appdata.schemas.Type;
+import com.datatorrent.lib.dimensions.DimensionsEvent;
 import com.datatorrent.lib.dimensions.DimensionsEvent.Aggregate;
 import com.datatorrent.lib.dimensions.DimensionsEvent.InputEvent;
 
@@ -76,6 +77,17 @@ public class AggregatorSum extends AbstractIncrementalAggregator
 
   @Override
   public void aggregate(Aggregate dest, Aggregate src)
+  {
+    aggregateHelper(dest, src);
+  }
+
+  @Override
+  public void aggregate(Aggregate dest, InputEvent src)
+  {
+    aggregateHelper(dest, src);
+  }
+
+  private void aggregateHelper(DimensionsEvent dest, DimensionsEvent src)
   {
     GPOMutable destAggs = dest.getAggregates();
     GPOMutable srcAggs = src.getAggregates();
@@ -158,13 +170,6 @@ public class AggregatorSum extends AbstractIncrementalAggregator
       }
     }
   }
-
-  @Override
-  public void aggregate(Aggregate dest, InputEvent src)
-  {
-
-  }
-
   @Override
   public Type getOutputType(Type inputType)
   {

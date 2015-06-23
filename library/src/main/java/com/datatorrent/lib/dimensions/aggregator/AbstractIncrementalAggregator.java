@@ -89,7 +89,7 @@ public abstract class AbstractIncrementalAggregator implements IncrementalAggreg
   @Override
   public int computeHashCode(InputEvent inputEvent)
   {
-    return GPOUtils.indirectHashcode(inputEvent.getKeys(), indexSubsetKeys);
+    return GPOUtils.hashcode(inputEvent.getKeys());
   }
 
   @Override
@@ -107,9 +107,8 @@ public abstract class AbstractIncrementalAggregator implements IncrementalAggreg
       aggregate = inputEvent1;
     }
 
-    return GPOUtils.indirectEquals(aggregate.getKeys(),
-                                   inputEvent.getKeys(),
-                                   indexSubsetKeys);
+    return GPOUtils.equals(aggregate.getKeys(),
+                           inputEvent.getKeys());
   }
 
   public static Aggregate createAggregate(InputEvent inputEvent,
@@ -121,22 +120,15 @@ public abstract class AbstractIncrementalAggregator implements IncrementalAggreg
     GPOMutable aggregates = new GPOMutable(context.aggregateDescriptor);
     GPOMutable keys = new GPOMutable(context.keyDescriptor);
 
-    LOG.debug("indexSubsetAggregates {}", indexSubsetAggregates);
     GPOUtils.indirectCopy(aggregates, inputEvent.getAggregates(), indexSubsetAggregates);
-    LOG.debug("copied {}", aggregates);
-    LOG.debug("time val {} {}", inputEvent.getKeys().getFieldLong("time"), indexSubsetKeys.fieldsLongIndexSubset);
     GPOUtils.indirectCopy(keys, inputEvent.getKeys(), indexSubsetKeys);
-    LOG.debug("time val {} {}", keys.getFieldLong("time"), indexSubsetKeys.fieldsLongIndexSubset);
 
     if(context.outputTimebucketIndex >= 0) {
       TimeBucket timeBucket = context.dd.getTimeBucket();
-      LOG.debug("time bucket {}", timeBucket);
 
       keys.getFieldsInteger()[context.outputTimebucketIndex] = timeBucket.ordinal();
-      LOG.debug("before round down {}", keys.getFieldsLong()[context.outputTimestampIndex]);
       keys.getFieldsLong()[context.outputTimestampIndex] =
       timeBucket.roundDown(inputEvent.getKeys().getFieldsLong()[context.inputTimestampIndex]);
-      LOG.debug("before round down {}", keys.getFieldsLong()[context.outputTimestampIndex]);
     }
 
     EventKey eventKey = new EventKey(context.schemaID,

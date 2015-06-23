@@ -17,6 +17,7 @@ package com.datatorrent.lib.dimensions.aggregator;
 
 import com.datatorrent.lib.appdata.gpo.GPOMutable;
 import com.datatorrent.lib.appdata.schemas.Type;
+import com.datatorrent.lib.dimensions.DimensionsEvent;
 import com.datatorrent.lib.dimensions.DimensionsEvent.Aggregate;
 import com.datatorrent.lib.dimensions.DimensionsEvent.InputEvent;
 
@@ -35,108 +36,16 @@ public class AggregatorMin extends AbstractIncrementalAggregator
   @Override
   public void aggregate(Aggregate dest, InputEvent src)
   {
-    GPOMutable destAggs = dest.getAggregates();
-    GPOMutable srcAggs = src.getAggregates();
-
-    {
-      byte[] destByte = destAggs.getFieldsByte();
-      byte[] srcByte = srcAggs.getFieldsByte();
-      int[] srcIndices = this.indexSubsetAggregates.fieldsByteIndexSubset;
-      if(destByte != null) {
-        for(int index = 0;
-            index < destByte.length;
-            index++) {
-          byte tempByte = srcByte[srcIndices[index]];
-          if(destByte[index] > tempByte) {
-            destByte[index] = tempByte;
-          }
-        }
-      }
-    }
-
-    {
-      short[] destShort = destAggs.getFieldsShort();
-      short[] srcShort = srcAggs.getFieldsShort();
-      int[] srcIndices = this.indexSubsetAggregates.fieldsShortIndexSubset;
-      if(destShort != null) {
-        for(int index = 0;
-            index < destShort.length;
-            index++) {
-          short tempShort = srcShort[srcIndices[index]];
-          if(destShort[index] > tempShort) {
-            destShort[index] = tempShort;
-          }
-        }
-      }
-    }
-
-    {
-      int[] destInteger = destAggs.getFieldsInteger();
-      int[] srcInteger = srcAggs.getFieldsInteger();
-      int[] srcIndices = this.indexSubsetAggregates.fieldsIntegerIndexSubset;
-      if(destInteger != null) {
-        for(int index = 0;
-            index < destInteger.length;
-            index++) {
-          int tempInt = srcInteger[srcIndices[index]];
-          if(destInteger[index] > tempInt) {
-            destInteger[index] = tempInt;
-          }
-        }
-      }
-    }
-
-    {
-      long[] destLong = destAggs.getFieldsLong();
-      long[] srcLong = srcAggs.getFieldsLong();
-      int[] srcIndices = this.indexSubsetAggregates.fieldsLongIndexSubset;
-      if(destLong != null) {
-        for(int index = 0;
-            index < destLong.length;
-            index++) {
-          long tempLong = srcLong[srcIndices[index]];
-          if(destLong[index] > tempLong) {
-            destLong[index] = tempLong;
-          }
-        }
-      }
-    }
-
-    {
-      float[] destFloat = destAggs.getFieldsFloat();
-      float[] srcFloat = destAggs.getFieldsFloat();
-      int[] srcIndices = this.indexSubsetAggregates.fieldsFloatIndexSubset;
-      if(destFloat != null) {
-        for(int index = 0;
-            index < destFloat.length;
-            index++) {
-          float tempFloat = srcFloat[srcIndices[index]];
-          if(destFloat[index] > tempFloat) {
-            destFloat[index] = tempFloat;
-          }
-        }
-      }
-    }
-
-    {
-      double[] destDouble = destAggs.getFieldsDouble();
-      double[] srcDouble = destAggs.getFieldsDouble();
-      int[] srcIndices = this.indexSubsetAggregates.fieldsDoubleIndexSubset;
-      if(destDouble != null) {
-        for(int index = 0;
-            index < destDouble.length;
-            index++) {
-          double tempDouble = srcDouble[srcIndices[index]];
-          if(destDouble[index] > tempDouble) {
-            destDouble[index] = tempDouble;
-          }
-        }
-      }
-    }
+    aggregateHelper(dest, src);
   }
 
   @Override
   public void aggregate(Aggregate dest, Aggregate src)
+  {
+    aggregateHelper(dest, src);
+  }
+
+  private void aggregateHelper(DimensionsEvent dest, DimensionsEvent src)
   {
     GPOMutable destAggs = dest.getAggregates();
     GPOMutable srcAggs = src.getAggregates();

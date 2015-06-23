@@ -110,6 +110,9 @@ public abstract class GenericDimensionsComputationSingleSchema<EVENT> implements
     //Num incremental aggregators
     int numIncrementalAggregators = 0;
 
+    FieldsDescriptor masterKeyFieldsDescriptor = configurationSchema.getKeyDescriptorWithTime();
+    List<FieldsDescriptor> keyFieldsDescriptors = configurationSchema.getDimensionsDescriptorIDToKeyDescriptor();
+
     for(int dimensionsDescriptorID = 0;
         dimensionsDescriptorID < configurationSchema.getDimensionsDescriptorIDToAggregatorIDs().size();
         dimensionsDescriptorID++) {
@@ -119,9 +122,6 @@ public abstract class GenericDimensionsComputationSingleSchema<EVENT> implements
 
     int incrementalAggregatorIndex = 0;
     IncrementalAggregator[] aggregatorArray = new IncrementalAggregator[numIncrementalAggregators];
-
-    FieldsDescriptor masterKeyFieldsDescriptor = configurationSchema.getKeyDescriptorWithTime();
-    List<FieldsDescriptor> keyFieldsDescriptors = configurationSchema.getDimensionsDescriptorIDToKeyDescriptor();
 
     for(int dimensionsDescriptorID = 0;
         dimensionsDescriptorID < keyFieldsDescriptors.size();
@@ -142,11 +142,6 @@ public abstract class GenericDimensionsComputationSingleSchema<EVENT> implements
         IndexSubset indexSubsetAggregate = GPOUtils.computeSubIndices(this.configurationSchema.getDimensionsDescriptorIDToAggregatorIDToInputAggregatorDescriptor().get
                                                                       (dimensionsDescriptorID).get(aggID),
                                                                       this.configurationSchema.getInputValuesDescriptor());
-
-        LOG.debug("computed indexSubsetAggregate {}", indexSubsetAggregate);
-
-        LOG.debug("{}", indexSubsetKey.fieldsIntegerIndexSubset);
-        LOG.debug("{}", indexSubsetAggregate.fieldsIntegerIndexSubset);
 
         conversionContext.schemaID = schemaID;
         conversionContext.dimensionsDescriptorID = dimensionsDescriptorID;
@@ -180,8 +175,6 @@ public abstract class GenericDimensionsComputationSingleSchema<EVENT> implements
         aggregator.setIndexSubsetAggregates(indexSubsetAggregate);
 
         aggregatorArray[incrementalAggregatorIndex] = aggregator;
-
-        incrementalAggregatorIndex++;
       }
     }
 
