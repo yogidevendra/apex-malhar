@@ -17,8 +17,6 @@
 package com.datatorrent.demos.dimensions.ads;
 
 import com.datatorrent.lib.appdata.schemas.TimeBucket;
-import com.datatorrent.lib.dimensions.AbstractDimensionsComputation.DTHashingStrategy;
-import com.datatorrent.lib.dimensions.DimensionsComputation.UnifiableAggregate;
 import com.datatorrent.lib.statistics.DimensionsComputation;
 import com.datatorrent.lib.statistics.DimensionsComputation.Aggregator;
 import java.io.Serializable;
@@ -192,77 +190,6 @@ public class AdInfo implements Serializable
   public void setTime(long time)
   {
     this.time = time;
-  }
-
-  public static class AdsDimensionsCombination extends AdInfoAggregator implements AbstractDimensionsComputation.DimensionsCombination<AdInfo, AdInfoAggregateEvent>
-  {
-    @Override
-    public void setKeys(AdInfo aggregatorInput, AdInfoAggregateEvent aggregate)
-    {
-      if (time != null) {
-        aggregate.timeBucket = timeBucketInt;
-        aggregate.time = TimeUnit.MILLISECONDS.convert(time.convert(aggregatorInput.time, TimeUnit.MILLISECONDS), time);
-      }
-
-      if (publisherId) {
-        aggregate.publisher = aggregatorInput.publisher;
-        aggregate.publisherID = aggregatorInput.publisherID;
-      }
-      else {
-        aggregate.publisherID = -1;
-      }
-
-      if (advertiserId) {
-        aggregate.advertiser = aggregatorInput.advertiser;
-        aggregate.advertiserID = aggregatorInput.advertiserID;
-      }
-      else {
-        aggregate.advertiserID = -1;
-      }
-
-      if (adUnit) {
-        aggregate.location = aggregatorInput.location;
-        aggregate.locationID = aggregatorInput.locationID;
-      }
-      else {
-        aggregate.locationID = -1;
-      }
-
-      aggregate.dimensionsDescriptorID = this.dimensionsDescriptorID;
-    }
-  }
-
-  public static class AdInfoSumAggregator implements com.datatorrent.lib.dimensions.aggregator.Aggregator<AdInfo, AdInfoAggregateEvent>
-  {
-    @Override
-    public void aggregate(AdInfoAggregateEvent dest, AdInfo src)
-    {
-      dest.clicks += src.clicks;
-      dest.cost += src.cost;
-      dest.impressions += src.impressions;
-      dest.revenue += src.revenue;
-    }
-
-    @Override
-    public void aggregate(AdInfoAggregateEvent dest, AdInfoAggregateEvent src)
-    {
-      dest.clicks += src.clicks;
-      dest.cost += src.cost;
-      dest.impressions += src.impressions;
-      dest.revenue += src.revenue;
-    }
-
-    @Override
-    public AdInfoAggregateEvent createDest(AdInfo first)
-    {
-      AdInfoAggregateEvent dest = new AdInfoAggregateEvent();
-      dest.clicks = first.clicks;
-      dest.cost = first.cost;
-      dest.impressions = first.impressions;
-      dest.revenue = first.revenue;
-
-      return dest;
-    }
   }
 
   public static class AdInfoAggregator implements Aggregator<AdInfo, AdInfoAggregateEvent>
@@ -470,37 +397,7 @@ public class AdInfo implements Serializable
     private static final long serialVersionUID = 201402211829L;
   }
 
-  public static class AdInfoHashingStrategy implements DTHashingStrategy<AdInfoAggregateEvent>
-  {
-    public AdInfoHashingStrategy()
-    {
-    }
-
-    @Override
-    public int computeHashCode(AdInfoAggregateEvent t)
-    {
-      int hash = 5;
-      hash = 71 * hash + t.publisherID;
-      hash = 71 * hash + t.advertiserID;
-      hash = 71 * hash + t.locationID;
-      hash = 71 * hash + (int)t.time;
-      hash = 71 * hash + t.timeBucket;
-
-      return hash;
-    }
-
-    @Override
-    public boolean equals(AdInfoAggregateEvent t, AdInfoAggregateEvent t1)
-    {
-      return t.publisherID == t1.publisherID &&
-             t.advertiserID == t1.advertiserID &&
-             t.locationID == t1.locationID &&
-             t.time == t1.time &&
-             t.timeBucket == t1.timeBucket;
-    }
-  }
-
-  public static class AdInfoAggregateEvent extends AdInfo implements DimensionsComputation.AggregateEvent, UnifiableAggregate
+  public static class AdInfoAggregateEvent extends AdInfo implements DimensionsComputation.AggregateEvent
   {
     private static final long serialVersionUID = 1L;
     int aggregatorIndex;
@@ -523,16 +420,9 @@ public class AdInfo implements Serializable
       return aggregatorIndex;
     }
 
-    @Override
-    public int getAggregateIndex()
+    public void setAggregatorIndex(int aggregatorIndex)
     {
-      return aggregatorIndex;
-    }
-
-    @Override
-    public void setAggregateIndex(int aggregateIndex)
-    {
-      this.aggregatorIndex = aggregateIndex;
+      this.aggregatorIndex = aggregatorIndex;
     }
 
     /**
