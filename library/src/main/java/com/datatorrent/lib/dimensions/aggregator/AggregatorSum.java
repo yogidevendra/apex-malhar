@@ -22,6 +22,8 @@ import com.datatorrent.lib.dimensions.DimensionsEvent.InputEvent;
 
 import java.util.Arrays;
 
+import static com.datatorrent.lib.dimensions.aggregator.AbstractIncrementalAggregator.createAggregate;
+
 /**
  * This {@link IncrementalAggregator} performs a sum operation over the fields in the given {@link InputEvent}.
  */
@@ -37,7 +39,13 @@ public class AggregatorSum extends AbstractIncrementalAggregator
   @Override
   public Aggregate getGroup(InputEvent src, int aggregatorIndex)
   {
-    GPOMutable value = new GPOMutable(this.context.aggregateDescriptor);
+    Aggregate aggregate = createAggregate(src,
+                                          context,
+                                          indexSubsetAggregates,
+                                          indexSubsetKeys,
+                                          aggregatorIndex);
+
+    GPOMutable value = aggregate.getAggregates();
 
     if(value.getFieldsByte() != null) {
       Arrays.fill(value.getFieldsByte(), (byte) 0);
@@ -63,9 +71,6 @@ public class AggregatorSum extends AbstractIncrementalAggregator
       Arrays.fill(value.getFieldsDouble(), 0.0);
     }
 
-    Aggregate aggregate = new Aggregate(this.context.eventKey,
-                                        value);
-    aggregate.setAggregatorIndex(aggregatorIndex);
     return aggregate;
   }
 

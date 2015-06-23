@@ -77,6 +77,8 @@ public class DimensionsComputation<EVENT, AGGREGATE extends DimensionsComputatio
   {
     for (int i = 0; i < aggregatorMaps.length; i++) {
       aggregatorMaps[i].add(tuple, i);
+
+      logger.debug("{}", aggregatorMaps.length);
     }
   }
 
@@ -91,6 +93,22 @@ public class DimensionsComputation<EVENT, AGGREGATE extends DimensionsComputatio
       processInputTuple(tuple);
     }
   };
+
+  /**
+   * @return the useAggregatesAsKeys
+   */
+  public boolean isUseAggregatesAsKeys()
+  {
+    return useAggregatesAsKeys;
+  }
+
+  /**
+   * @param useAggregatesAsKeys the useAggregatesAsKeys to set
+   */
+  public void setUseAggregatesAsKeys(boolean useAggregatesAsKeys)
+  {
+    this.useAggregatesAsKeys = useAggregatesAsKeys;
+  }
 
   public static interface AggregateEvent
   {
@@ -107,6 +125,7 @@ public class DimensionsComputation<EVENT, AGGREGATE extends DimensionsComputatio
   }
 
   private AggregatorMap<EVENT, AGGREGATE>[] aggregatorMaps;
+  private boolean useAggregatesAsKeys = false;
 
   /**
    * Set the dimensions which should each get the tuples going forward.
@@ -165,6 +184,9 @@ public class DimensionsComputation<EVENT, AGGREGATE extends DimensionsComputatio
   @Override
   public void setup(OperatorContext context)
   {
+    for(int i = aggregatorMaps.length; i-- > 0;) {
+      aggregatorMaps[i].setUseAggregatesAsKeys(useAggregatesAsKeys);
+    }
   }
 
   @Override
@@ -335,6 +357,7 @@ public class DimensionsComputation<EVENT, AGGREGATE extends DimensionsComputatio
   public static class AggregatorMap<EVENT, AGGREGATE extends AggregateEvent> extends TCustomHashMap<EVENT, AGGREGATE>
   {
     transient Aggregator<EVENT, AGGREGATE> aggregator;
+    private boolean useAggregatesAsKeys = false;
 
     @SuppressWarnings("PublicConstructorInNonPublicClass")
     public AggregatorMap()
@@ -356,12 +379,19 @@ public class DimensionsComputation<EVENT, AGGREGATE extends DimensionsComputatio
       this.aggregator = aggregator;
     }
 
+    @SuppressWarnings("unchecked")
     public void add(EVENT tuple, int aggregatorIdx)
     {
       AGGREGATE aggregateEvent = get(tuple);
       if (aggregateEvent == null) {
         aggregateEvent = aggregator.getGroup(tuple, aggregatorIdx);
-        put(tuple, aggregateEvent);
+
+        if(useAggregatesAsKeys) {
+          put((EVENT) aggregateEvent, aggregateEvent);
+        }
+        else {
+          put(tuple, aggregateEvent);
+        }
       }
 
       aggregator.aggregate(aggregateEvent, tuple);
@@ -403,6 +433,22 @@ public class DimensionsComputation<EVENT, AGGREGATE extends DimensionsComputatio
       int result = super.hashCode();
       result = 31 * result + (aggregator != null ? aggregator.hashCode() : 0);
       return result;
+    }
+
+    /**
+     * @return the useAggregatesAsKeys
+     */
+    public boolean isUseAggregatesAsKeys()
+    {
+      return useAggregatesAsKeys;
+    }
+
+    /**
+     * @param useAggregatesAsKeys the useAggregatesAsKeys to set
+     */
+    public void setUseAggregatesAsKeys(boolean useAggregatesAsKeys)
+    {
+      this.useAggregatesAsKeys = useAggregatesAsKeys;
     }
 
     @SuppressWarnings("unused")

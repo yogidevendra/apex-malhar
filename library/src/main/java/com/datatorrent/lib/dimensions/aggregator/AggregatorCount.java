@@ -15,7 +15,6 @@
  */
 package com.datatorrent.lib.dimensions.aggregator;
 
-import com.datatorrent.lib.appdata.gpo.GPOMutable;
 import com.datatorrent.lib.appdata.schemas.Type;
 import com.datatorrent.lib.dimensions.DimensionsEvent.Aggregate;
 import com.datatorrent.lib.dimensions.DimensionsEvent.InputEvent;
@@ -55,10 +54,11 @@ public class AggregatorCount extends AbstractIncrementalAggregator
   @Override
   public Aggregate getGroup(InputEvent src, int aggregatorIndex)
   {
-    GPOMutable aggregates = new GPOMutable(context.aggregateDescriptor);
-    Aggregate aggregate = new Aggregate(context.eventKey,
-                                        aggregates);
-    aggregate.setAggregatorIndex(aggregatorIndex);
+    Aggregate aggregate = createAggregate(src,
+                                          context,
+                                          indexSubsetAggregates,
+                                          indexSubsetKeys,
+                                          aggregatorIndex);
 
     long[] longFields = aggregate.getAggregates().getFieldsLong();
 

@@ -1894,8 +1894,11 @@ public class GPOUtils
       int[] srcIndex = indexSubset.fieldsStringIndexSubset;
       if(destString != null) {
         for(int index = 0;
-            index < destString.length;
+            index < srcIndex.length;
             index++) {
+          if(srcIndex[index] == -1) {
+            continue;
+          }
           destString[index] = srcString[srcIndex[index]];
         }
       }
@@ -1907,9 +1910,28 @@ public class GPOUtils
       int[] srcIndex = indexSubset.fieldsBooleanIndexSubset;
       if(destBoolean != null) {
         for(int index = 0;
-            index < destBoolean.length;
+            index < srcIndex.length;
             index++) {
+          if(srcIndex[index] == -1) {
+            continue;
+          }
           destBoolean[index] = srcBoolean[srcIndex[index]];
+        }
+      }
+    }
+
+    {
+      char[] destChar = dest.getFieldsCharacter();
+      char[] srcChar = src.getFieldsCharacter();
+      int[] srcIndex = indexSubset.fieldsBooleanIndexSubset;
+      if(destChar != null) {
+        for(int index = 0;
+            index < srcIndex.length;
+            index++) {
+          if(srcIndex[index] == -1) {
+            continue;
+          }
+          destChar[index] = srcChar[srcIndex[index]];
         }
       }
     }
@@ -1920,8 +1942,11 @@ public class GPOUtils
       int[] srcIndex = indexSubset.fieldsByteIndexSubset;
       if(destByte != null) {
         for(int index = 0;
-            index < destByte.length;
+            index < srcIndex.length;
             index++) {
+          if(srcIndex[index] == -1) {
+            continue;
+          }
           destByte[index] = srcByte[srcIndex[index]];
         }
       }
@@ -1933,8 +1958,11 @@ public class GPOUtils
       int[] srcIndex = indexSubset.fieldsShortIndexSubset;
       if(destShort != null) {
         for(int index = 0;
-            index < destShort.length;
+            index < srcIndex.length;
             index++) {
+          if(srcIndex[index] == -1) {
+            continue;
+          }
           destShort[index] = srcShort[srcIndex[index]];
         }
       }
@@ -1946,8 +1974,11 @@ public class GPOUtils
       int[] srcIndex = indexSubset.fieldsIntegerIndexSubset;
       if(destInteger != null) {
         for(int index = 0;
-            index < destInteger.length;
+            index < srcIndex.length;
             index++) {
+          if(srcIndex[index] == -1) {
+            continue;
+          }
           destInteger[index] = srcInteger[srcIndex[index]];
         }
       }
@@ -1959,9 +1990,16 @@ public class GPOUtils
       int[] srcIndex = indexSubset.fieldsLongIndexSubset;
       if(destLong != null) {
         for(int index = 0;
-            index < destLong.length;
+            index < srcIndex.length;
             index++) {
+          if(srcIndex[index] == -1) {
+            continue;
+          }
+
+          LOG.debug("src {}", srcLong[srcIndex[index]]);
           destLong[index] = srcLong[srcIndex[index]];
+
+          LOG.debug("dest {}", destLong[index]);
         }
       }
     }
@@ -1972,8 +2010,11 @@ public class GPOUtils
       int[] srcIndex = indexSubset.fieldsFloatIndexSubset;
       if(destFloat != null) {
         for(int index = 0;
-            index < destFloat.length;
+            index < srcIndex.length;
             index++) {
+          if(srcIndex[index] == -1) {
+            continue;
+          }
           destFloat[index] = srcFloat[srcIndex[index]];
         }
       }
@@ -1985,8 +2026,11 @@ public class GPOUtils
       int[] srcIndex = indexSubset.fieldsDoubleIndexSubset;
       if(destDouble != null) {
         for(int index = 0;
-            index < destDouble.length;
+            index < srcIndex.length;
             index++) {
+          if(srcIndex[index] == -1) {
+            continue;
+          }
           destDouble[index] = srcDouble[srcIndex[index]];
         }
       }
@@ -2003,8 +2047,11 @@ public class GPOUtils
       int[] srcIndex = indexSubset.fieldsStringIndexSubset;
       if(stringArray != null) {
         for(int index = 0;
-            index < stringArray.length;
+            index < srcIndex.length;
             index++) {
+          if(srcIndex[index] == -1) {
+            continue;
+          }
           hashCode ^= stringArray[srcIndex[index]].hashCode();
         }
       }
@@ -2015,9 +2062,27 @@ public class GPOUtils
       int[] srcIndex = indexSubset.fieldsBooleanIndexSubset;
       if(booleanArray != null) {
         for(int index = 0;
-            index < booleanArray.length;
+            index < srcIndex.length;
             index++) {
+          if(srcIndex[index] == -1) {
+            continue;
+          }
           hashCode ^= booleanArray[srcIndex[index]] ? 1: 0;
+        }
+      }
+    }
+
+    {
+      char[] charArray = gpo.getFieldsCharacter();
+      int[] srcIndex = indexSubset.fieldsCharacterIndexSubset;
+      if(charArray != null) {
+        for(int index = 0;
+            index < srcIndex.length;
+            index++) {
+          if(srcIndex[index] == -1) {
+            continue;
+          }
+          hashCode ^= Character.getNumericValue(charArray[srcIndex[index]]);
         }
       }
     }
@@ -2027,8 +2092,11 @@ public class GPOUtils
       int[] srcIndex = indexSubset.fieldsByteIndexSubset;
       if(byteArray != null) {
         for(int index = 0;
-            index < byteArray.length;
+            index < srcIndex.length;
             index++) {
+          if(srcIndex[index] == -1) {
+            continue;
+          }
           hashCode ^= byteArray[srcIndex[index]];
         }
       }
@@ -2039,8 +2107,11 @@ public class GPOUtils
       int[] srcIndex = indexSubset.fieldsShortIndexSubset;
       if(shortArray != null) {
         for(int index = 0;
-            index < shortArray.length;
+            index < srcIndex.length;
             index++) {
+          if(srcIndex[index] == -1) {
+            continue;
+          }
           hashCode ^= shortArray[srcIndex[index]];
         }
       }
@@ -2051,8 +2122,11 @@ public class GPOUtils
       int[] srcIndex = indexSubset.fieldsIntegerIndexSubset;
       if(integerArray != null) {
         for(int index = 0;
-            index < integerArray.length;
+            index < srcIndex.length;
             index++) {
+          if(srcIndex[index] == -1) {
+            continue;
+          }
           hashCode ^= integerArray[srcIndex[index]];
         }
       }
@@ -2063,8 +2137,11 @@ public class GPOUtils
       int[] srcIndex = indexSubset.fieldsLongIndexSubset;
       if(longArray != null) {
         for(int index = 0;
-            index < longArray.length;
+            index < srcIndex.length;
             index++) {
+          if(srcIndex[index] == -1) {
+            continue;
+          }
           hashCode ^= longArray[srcIndex[index]];
         }
       }
@@ -2075,8 +2152,11 @@ public class GPOUtils
       int[] srcIndex = indexSubset.fieldsFloatIndexSubset;
       if(floatArray != null) {
         for(int index = 0;
-            index < floatArray.length;
+            index < srcIndex.length;
             index++) {
+          if(srcIndex[index] == -1) {
+            continue;
+          }
           hashCode ^= Float.floatToIntBits(floatArray[srcIndex[index]]);
         }
       }
@@ -2087,8 +2167,11 @@ public class GPOUtils
       int[] srcIndex = indexSubset.fieldsDoubleIndexSubset;
       if(doubleArray != null) {
         for(int index = 0;
-            index < doubleArray.length;
+            index < srcIndex.length;
             index++) {
+          if(srcIndex[index] == -1) {
+            continue;
+          }
           hashCode ^= Double.doubleToLongBits(doubleArray[srcIndex[index]]);
         }
       }
@@ -2109,7 +2192,10 @@ public class GPOUtils
         for(int index = 0;
             index < srcIndex.length;
             index++) {
-          if(!destString[srcIndex[index]].equals(srcString[srcIndex[index]])) {
+          if(srcIndex[index] == -1) {
+            continue;
+          }
+          if(!destString[index].equals(srcString[srcIndex[index]])) {
             return false;
           }
         }
@@ -2124,7 +2210,28 @@ public class GPOUtils
         for(int index = 0;
             index < srcIndex.length;
             index++) {
-          if(destBoolean[srcIndex[index]] != srcBoolean[srcIndex[index]]) {
+          if(srcIndex[index] == -1) {
+            continue;
+          }
+          if(destBoolean[index] != srcBoolean[srcIndex[index]]) {
+            return false;
+          }
+        }
+      }
+    }
+
+    {
+      char[] destChar = dest.getFieldsCharacter();
+      char[] srcChar = src.getFieldsCharacter();
+      int[] srcIndex = indexSubset.fieldsBooleanIndexSubset;
+      if(destChar != null) {
+        for(int index = 0;
+            index < srcIndex.length;
+            index++) {
+          if(srcIndex[index] == -1) {
+            continue;
+          }
+          if(destChar[index] != srcChar[srcIndex[index]]) {
             return false;
           }
         }
@@ -2139,7 +2246,10 @@ public class GPOUtils
         for(int index = 0;
             index < srcIndex.length;
             index++) {
-          if(destByte[srcIndex[index]] != srcByte[srcIndex[index]]) {
+          if(srcIndex[index] == -1) {
+            continue;
+          }
+          if(destByte[index] != srcByte[srcIndex[index]]) {
             return false;
           }
         }
@@ -2154,7 +2264,10 @@ public class GPOUtils
         for(int index = 0;
             index < srcIndex.length;
             index++) {
-          if(destShort[srcIndex[index] != srcShort[srcIndex[index]]) {
+          if(srcIndex[index] == -1) {
+            continue;
+          }
+          if(destShort[index] != srcShort[srcIndex[index]]) {
             return false;
           }
         }
@@ -2167,8 +2280,11 @@ public class GPOUtils
       int[] srcIndex = indexSubset.fieldsIntegerIndexSubset;
       if(destInteger != null) {
         for(int index = 0;
-            index < destInteger.length;
+            index < srcIndex.length;
             index++) {
+          if(srcIndex[index] == -1) {
+            continue;
+          }
           if(destInteger[index] != srcInteger[srcIndex[index]]) {
             return false;
           }
@@ -2182,8 +2298,11 @@ public class GPOUtils
       int[] srcIndex = indexSubset.fieldsLongIndexSubset;
       if(destLong != null) {
         for(int index = 0;
-            index < destLong.length;
+            index < srcIndex.length;
             index++) {
+          if(srcIndex[index] == -1) {
+            continue;
+          }
           if(destLong[index] != srcLong[srcIndex[index]]) {
             return false;
           }
@@ -2197,8 +2316,11 @@ public class GPOUtils
       int[] srcIndex = indexSubset.fieldsFloatIndexSubset;
       if(destFloat != null) {
         for(int index = 0;
-            index < destFloat.length;
+            index < srcIndex.length;
             index++) {
+          if(srcIndex[index] == -1) {
+            continue;
+          }
           if(destFloat[index] != srcFloat[srcIndex[index]]) {
             return false;
           }
@@ -2212,8 +2334,11 @@ public class GPOUtils
       int[] srcIndex = indexSubset.fieldsDoubleIndexSubset;
       if(destDouble != null) {
         for(int index = 0;
-            index < destDouble.length;
+            index < srcIndex.length;
             index++) {
+          if(srcIndex[index] == -1) {
+            continue;
+          }
           if(destDouble[index] != srcDouble[srcIndex[index]]) {
             return false;
           }
@@ -2222,6 +2347,83 @@ public class GPOUtils
     }
 
     return true;
+  }
+
+  public static IndexSubset computeSubIndices(FieldsDescriptor child,
+                                              FieldsDescriptor parent)
+  {
+    IndexSubset indexSubset = new IndexSubset();
+
+    for(Map.Entry<Type, List<String>> entry: child.getTypeToFields().entrySet()) {
+      Type type = entry.getKey();
+      List<String> childFields = entry.getValue();
+      List<String> parentFields = parent.getTypeToFields().get(type);
+
+      int size = child.getTypeToSize().get(type);
+      int[] indices;
+      if(child.getTypeToFields().get(type) != null &&
+         child.getCompressedTypes().contains(type)) {
+        indices = new int[1];
+      }
+      else {
+        indices = new int[size];
+
+        for(int index = 0;
+            index < size;
+            index++) {
+          if(parentFields == null) {
+            indices[index] = -1;
+          }
+          else {
+            indices[index] = parentFields.indexOf(childFields.get(index));
+          }
+        }
+      }
+
+      switch(type) {
+        case BOOLEAN: {
+          indexSubset.fieldsBooleanIndexSubset = indices;
+          break;
+        }
+        case CHAR: {
+          indexSubset.fieldsCharacterIndexSubset = indices;
+          break;
+        }
+        case STRING: {
+          indexSubset.fieldsStringIndexSubset = indices;
+          break;
+        }
+        case BYTE: {
+          indexSubset.fieldsByteIndexSubset = indices;
+          break;
+        }
+        case SHORT: {
+          indexSubset.fieldsShortIndexSubset = indices;
+          break;
+        }
+        case INTEGER: {
+          indexSubset.fieldsIntegerIndexSubset = indices;
+          break;
+        }
+        case LONG: {
+          indexSubset.fieldsLongIndexSubset = indices;
+          break;
+        }
+        case FLOAT: {
+          indexSubset.fieldsFloatIndexSubset = indices;
+          break;
+        }
+        case DOUBLE: {
+          indexSubset.fieldsDoubleIndexSubset = indices;
+          break;
+        }
+        default: {
+          throw new UnsupportedOperationException("This type " + type + " is not supported.");
+        }
+      }
+    }
+
+    return indexSubset;
   }
 
   /**
@@ -2245,6 +2447,12 @@ public class GPOUtils
     public IndexSubset()
     {
       //Do nothing
+    }
+
+    @Override
+    public String toString()
+    {
+      return "IndexSubset{" + "fieldsBooleanIndexSubset=" + fieldsBooleanIndexSubset + ", fieldsCharacterIndexSubset=" + fieldsCharacterIndexSubset + ", fieldsByteIndexSubset=" + fieldsByteIndexSubset + ", fieldsShortIndexSubset=" + fieldsShortIndexSubset + ", fieldsIntegerIndexSubset=" + fieldsIntegerIndexSubset + ", fieldsLongIndexSubset=" + fieldsLongIndexSubset + ", fieldsFloatIndexSubset=" + fieldsFloatIndexSubset + ", fieldsDoubleIndexSubset=" + fieldsDoubleIndexSubset + ", fieldsStringIndexSubset=" + fieldsStringIndexSubset + '}';
     }
   }
 
