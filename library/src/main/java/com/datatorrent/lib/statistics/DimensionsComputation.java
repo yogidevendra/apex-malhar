@@ -77,8 +77,6 @@ public class DimensionsComputation<EVENT, AGGREGATE extends DimensionsComputatio
   {
     for (int i = 0; i < aggregatorMaps.length; i++) {
       aggregatorMaps[i].add(tuple, i);
-
-      logger.debug("{}", aggregatorMaps.length);
     }
   }
 
@@ -278,7 +276,6 @@ public class DimensionsComputation<EVENT, AGGREGATE extends DimensionsComputatio
         if (context.getParallelPartitionCount() == 0) {
           newPartitionsCount = remainingDimensions;
         } else {
-          logger.error("Cannot distribute {} dimensions over {} parallel partitions.", remainingDimensions, newPartitionsCount);
           return partitions;
         }
       }
@@ -386,7 +383,6 @@ public class DimensionsComputation<EVENT, AGGREGATE extends DimensionsComputatio
       if (aggregateEvent == null) {
         aggregateEvent = aggregator.getGroup(tuple, aggregatorIdx);
 
-        logger.debug("put new");
         if(useAggregatesAsKeys) {
           put((EVENT) aggregateEvent, aggregateEvent);
         }
