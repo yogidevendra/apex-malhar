@@ -27,12 +27,12 @@ import com.datatorrent.contrib.hdht.tfile.TFileImpl;
 import com.datatorrent.demos.dimensions.ads.InputItemGenerator;
 import com.datatorrent.lib.appdata.schemas.SchemaUtils;
 import com.datatorrent.lib.counters.BasicCounters;
-import com.datatorrent.lib.dimensions.DimensionsComputationFlexibleSingleSchemaPOJO;
-import com.datatorrent.lib.dimensions.DimensionsComputationUnifierImpl;
 import com.datatorrent.lib.dimensions.DimensionsEvent.Aggregate;
 import com.datatorrent.lib.dimensions.DimensionsEvent.InputEvent;
+import com.datatorrent.lib.dimensions.GenericDimensionsComputationSingleSchemaPOJO;
 import com.datatorrent.lib.io.PubSubWebSocketAppDataQuery;
 import com.datatorrent.lib.io.PubSubWebSocketAppDataResult;
+import com.datatorrent.lib.statistics.DimensionsComputationUnifierImpl;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import java.net.URI;
@@ -142,7 +142,7 @@ public class AdsDimensionsDemo implements StreamingApplication
 
     InputItemGenerator input = dag.addOperator("InputGenerator", InputItemGenerator.class);
     input.advertiserName = advertisers;
-    DimensionsComputationFlexibleSingleSchemaPOJO dimensions = dag.addOperator("DimensionsComputation", DimensionsComputationFlexibleSingleSchemaPOJO.class);
+    GenericDimensionsComputationSingleSchemaPOJO dimensions = dag.addOperator("DimensionsComputation", GenericDimensionsComputationSingleSchemaPOJO.class);
     dag.getMeta(dimensions).getAttributes().put(Context.OperatorContext.APPLICATION_WINDOW_COUNT, 4);
     dag.getMeta(dimensions).getAttributes().put(Context.OperatorContext.CHECKPOINT_WINDOW_COUNT, 4);
     AppDataSingleSchemaDimensionStoreHDHT store = dag.addOperator("Store", AppDataSingleSchemaDimensionStoreHDHT.class);
@@ -171,7 +171,7 @@ public class AdsDimensionsDemo implements StreamingApplication
 
     dimensions.setUnifier(new DimensionsComputationUnifierImpl<InputEvent, Aggregate>());
     dag.getMeta(dimensions).getMeta(dimensions.output).getUnifierMeta().getAttributes().put(OperatorContext.MEMORY_MB, 8092);
-    
+
     //Set store properties
     String basePath = Preconditions.checkNotNull(conf.get(propStorePath),
                                                  "a base path should be specified in the properties.xml");
@@ -195,13 +195,8 @@ public class AdsDimensionsDemo implements StreamingApplication
     wsIn.setUri(uri);
     queryPort = wsIn.outputPort;
 
-    if(conf.getBoolean(PROP_EMBEDD_QUERY, false)) {
-      store.setEmbeddableQuery(wsIn);
-    }
-    else {
-      dag.addOperator("Query", wsIn);
-      dag.addStream("Query", queryPort, store.query).setLocality(Locality.CONTAINER_LOCAL);
-    }
+    dag.addOperator("Query", wsIn);
+    dag.addStream("Query", queryPort, store.query).setLocality(Locality.CONTAINER_LOCAL);
 
     PubSubWebSocketAppDataResult wsOut = dag.addOperator("QueryResult", new PubSubWebSocketAppDataResult());
     wsOut.setUri(uri);
@@ -211,7 +206,7 @@ public class AdsDimensionsDemo implements StreamingApplication
 
     dag.setAttribute(store, Context.OperatorContext.COUNTERS_AGGREGATOR, new BasicCounters.LongAggregator<MutableLong>());
 
-    dag.addStream("InputStream", input.outputPort, dimensions.inputEvent).setLocality(Locality.CONTAINER_LOCAL);
+    dag.addStream("InputStream", input.outputPort, dimensions.input).setLocality(Locality.CONTAINER_LOCAL);
     dag.addStream("DimensionalData", dimensions.output, store.input);
     dag.addStream("QueryResult", store.queryResult, queryResultPort);
   }

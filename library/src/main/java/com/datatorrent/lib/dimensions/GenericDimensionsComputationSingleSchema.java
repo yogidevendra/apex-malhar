@@ -67,7 +67,7 @@ public abstract class GenericDimensionsComputationSingleSchema<EVENT> implements
    */
   private AggregatorRegistry aggregatorRegistry = AggregatorRegistry.DEFAULT_AGGREGATOR_REGISTRY;
 
-  private DimensionsComputationUnifierImpl<Aggregate, Aggregate> unifier;
+  private DimensionsComputationUnifierImpl<InputEvent, Aggregate> unifier;
 
   protected InputEvent inputEvent;
 
@@ -78,7 +78,7 @@ public abstract class GenericDimensionsComputationSingleSchema<EVENT> implements
     @Override
     public Unifier<Aggregate> getUnifier()
     {
-      return unifier;
+      return getUnifier();
     }
   };
 
@@ -255,6 +255,22 @@ public abstract class GenericDimensionsComputationSingleSchema<EVENT> implements
   public void setConfigurationSchemaJSON(String configurationSchemaJSON)
   {
     this.configurationSchemaJSON = configurationSchemaJSON;
+  }
+
+  /**
+   * @return the unifier
+   */
+  public DimensionsComputationUnifierImpl<InputEvent, Aggregate> getUnifier()
+  {
+    return unifier;
+  }
+
+  /**
+   * @param unifier the unifier to set
+   */
+  public void setUnifier(DimensionsComputationUnifierImpl<InputEvent, Aggregate> unifier)
+  {
+    this.unifier = unifier;
   }
 
   public static class DimensionsConversionContext

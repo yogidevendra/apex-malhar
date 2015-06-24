@@ -26,17 +26,13 @@ import com.datatorrent.api.annotation.ApplicationAnnotation;
 import com.datatorrent.contrib.dimensions.AppDataSingleSchemaDimensionStoreHDHT;
 import com.datatorrent.contrib.hdht.tfile.TFileImpl;
 import com.datatorrent.demos.dimensions.ads.AdInfo;
-import com.datatorrent.demos.dimensions.ads.AdInfo.AdInfoSumAggregator;
-import com.datatorrent.demos.dimensions.ads.AdInfo.AdsDimensionsCombination;
 import com.datatorrent.demos.dimensions.ads.InputItemGenerator;
 import com.datatorrent.lib.appdata.schemas.SchemaUtils;
 import com.datatorrent.lib.counters.BasicCounters;
-import com.datatorrent.lib.dimensions.AbstractDimensionsComputation.DimensionsCombination;
-import com.datatorrent.lib.dimensions.DimensionsComputationCustom;
-import com.datatorrent.lib.dimensions.DimensionsComputationUnifierImpl;
-import com.datatorrent.lib.dimensions.aggregator.Aggregator;
 import com.datatorrent.lib.io.PubSubWebSocketAppDataQuery;
 import com.datatorrent.lib.io.PubSubWebSocketAppDataResult;
+import com.datatorrent.lib.statistics.DimensionsComputation;
+import com.datatorrent.lib.statistics.DimensionsComputationUnifierImpl;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -66,7 +62,7 @@ public class AdsDimensionsDemoPerformant implements StreamingApplication
     //Declare operators
 
     InputItemGenerator input = dag.addOperator("InputGenerator", InputItemGenerator.class);
-    DimensionsComputationCustom<AdInfo, AdInfo.AdInfoAggregateEvent> dimensions = dag.addOperator("DimensionsComputation", new DimensionsComputationCustom<AdInfo, AdInfo.AdInfoAggregateEvent>());
+    DimensionsComputation<AdInfo, AdInfo.AdInfoAggregateEvent> dimensions = dag.addOperator("DimensionsComputation", new DimensionsComputation<AdInfo, AdInfo.AdInfoAggregateEvent>());
     DimensionsComputationUnifierImpl<AdInfo, AdInfo.AdInfoAggregateEvent> unifier = new DimensionsComputationUnifierImpl<AdInfo, AdInfo.AdInfoAggregateEvent>();
     dimensions.setUnifier(unifier);
 
@@ -144,13 +140,8 @@ public class AdsDimensionsDemoPerformant implements StreamingApplication
     wsIn.setUri(uri);
     queryPort = wsIn.outputPort;
 
-    if(conf.getBoolean(PROP_EMBEDD_QUERY, false)) {
-      store.setEmbeddableQuery(wsIn);
-    }
-    else {
-      dag.addOperator("Query", wsIn);
-      dag.addStream("Query", queryPort, store.query).setLocality(Locality.CONTAINER_LOCAL);
-    }
+    dag.addOperator("Query", wsIn);
+    dag.addStream("Query", queryPort, store.query).setLocality(Locality.CONTAINER_LOCAL);
 
     PubSubWebSocketAppDataResult wsOut = dag.addOperator("QueryResult", new PubSubWebSocketAppDataResult());
     wsOut.setUri(uri);
