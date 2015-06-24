@@ -55,7 +55,7 @@ public abstract class AbstractWindowEndQueueManager<QUERY_TYPE, META_QUERY, QUEU
 
   private final Semaphore semaphore = new Semaphore(0);
   private final ConditionBarrier conditionBarrier = new ConditionBarrier();
-  private AtomicInteger numLeft = new AtomicInteger();
+  private final AtomicInteger numLeft = new AtomicInteger();
 
   /**
    * Creates a new QueueManager.
@@ -107,7 +107,7 @@ public abstract class AbstractWindowEndQueueManager<QUERY_TYPE, META_QUERY, QUEU
   }
 
   @Override
-  public synchronized QueryBundle<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT> dequeueBlock()
+  public QueryBundle<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT> dequeueBlock()
   {
     return dequeueHelper(true);
   }
@@ -177,18 +177,40 @@ public abstract class AbstractWindowEndQueueManager<QUERY_TYPE, META_QUERY, QUEU
         }
       }
 
-      numLeft.getAndDecrement();
-      QueryBundle<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT> queryQueueable = currentNode.getPayload();
+      synchronized(numLeft) {
+        numLeft.getAndDecrement();
+        QueryBundle<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT> queryQueueable = currentNode.getPayload();
 
-      first = false;
+        first = false;
 
-      QueueListNode<QueryBundle<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT>> nextNode = currentNode.getNext();
+        QueueListNode<QueryBundle<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT>> nextNode = currentNode.getNext();
 
-      if(removeBundle(queryQueueable)) {
-        queryQueue.removeNode(currentNode);
-        removedNode(currentNode);
+        if(removeBundle(queryQueueable)) {
+          queryQueue.removeNode(currentNode);
+          removedNode(currentNode);
 
-        if(block) {
+          if(block) {
+            if(nextNode == null) {
+              readCurrent = true;
+            }
+            else {
+              currentNode = nextNode;
+              readCurrent = false;
+            }
+          }
+          else {
+            if(nextNode == null) {
+              readCurrent = true;
+              break;
+            }
+            else {
+              currentNode = nextNode;
+            }
+          }
+        }
+        else {
+          qq = currentNode.getPayload();
+
           if(nextNode == null) {
             readCurrent = true;
           }
@@ -196,29 +218,9 @@ public abstract class AbstractWindowEndQueueManager<QUERY_TYPE, META_QUERY, QUEU
             currentNode = nextNode;
             readCurrent = false;
           }
-        }
-        else {
-          if(nextNode == null) {
-            readCurrent = true;
-            break;
-          }
-          else {
-            currentNode = nextNode;
-          }
-        }
-      }
-      else {
-        qq = currentNode.getPayload();
 
-        if(nextNode == null) {
-          readCurrent = true;
+          break;
         }
-        else {
-          currentNode = nextNode;
-          readCurrent = false;
-        }
-
-        break;
       }
     }
 
@@ -277,14 +279,16 @@ public abstract class AbstractWindowEndQueueManager<QUERY_TYPE, META_QUERY, QUEU
   }
 
   @Override
-  public synchronized void beginWindow(long windowId)
+  public void beginWindow(long windowId)
   {
     currentNode = queryQueue.getHead();
     readCurrent = false;
 
-    numLeft.set(queryQueue.getSize());
-    semaphore.drainPermits();
-    semaphore.release(queryQueue.getSize());
+    synchronized(numLeft) {
+      numLeft.set(queryQueue.getSize());
+      semaphore.drainPermits();
+      semaphore.release(queryQueue.getSize());
+    }
   }
 
   @Override
