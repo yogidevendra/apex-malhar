@@ -281,10 +281,9 @@ public abstract class AbstractWindowEndQueueManager<QUERY_TYPE, META_QUERY, QUEU
   @Override
   public void beginWindow(long windowId)
   {
-    currentNode = queryQueue.getHead();
-    readCurrent = false;
-
     synchronized(numLeft) {
+      currentNode = queryQueue.getHead();
+      readCurrent = false;
       numLeft.set(queryQueue.getSize());
       semaphore.drainPermits();
       semaphore.release(queryQueue.getSize());
