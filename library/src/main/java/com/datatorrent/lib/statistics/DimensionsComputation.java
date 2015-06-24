@@ -158,11 +158,6 @@ public class DimensionsComputation<EVENT, AGGREGATE extends DimensionsComputatio
     return aggregators;
   }
 
-  public AggregatorMap<EVENT, AGGREGATE>[] getAggregatorMaps()
-  {
-    return aggregatorMaps;
-  }
-
   @Override
   public void beginWindow(long windowId)
   {
@@ -351,7 +346,7 @@ public class DimensionsComputation<EVENT, AGGREGATE extends DimensionsComputatio
   }
 
   @DefaultSerializer(ExternalizableSerializer.class)
-  public static class AggregatorMap<EVENT, AGGREGATE extends AggregateEvent> extends TCustomHashMap<EVENT, AGGREGATE>
+  static class AggregatorMap<EVENT, AGGREGATE extends AggregateEvent> extends TCustomHashMap<EVENT, AGGREGATE>
   {
     transient Aggregator<EVENT, AGGREGATE> aggregator;
     private boolean useAggregatesAsKeys = false;

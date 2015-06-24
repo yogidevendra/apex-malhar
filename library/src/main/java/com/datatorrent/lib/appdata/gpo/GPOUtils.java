@@ -318,7 +318,7 @@ public class GPOUtils
         break;
       }
       default:
-        throw new UnsupportedOperationException("This is not supported for type: " + type);
+          throw new UnsupportedOperationException("Type " + type);
     }
   }
 
@@ -561,7 +561,7 @@ public class GPOUtils
         jo.put(field, resultFormatter.format(gpo.getFieldDouble(field)));
       }
       else {
-        throw new UnsupportedOperationException("The type " + fieldType + " is not supported.");
+          throw new UnsupportedOperationException("Type " + fieldType);
       }
     }
 
@@ -806,7 +806,7 @@ public class GPOUtils
         break;
       }
       default:
-        throw new UnsupportedOperationException("The field " + field + " doesn't have a valid type.");
+          throw new UnsupportedOperationException("Type " + type);
       }
     }
 
@@ -987,7 +987,7 @@ public class GPOUtils
           break;
         }
         default:
-          throw new UnsupportedOperationException("Cannot deserialize type " + type);
+          throw new UnsupportedOperationException("Type " + type);
       }
     }
 
@@ -1049,14 +1049,15 @@ public class GPOUtils
   public static long deserializeLong(byte[] buffer,
                                      MutableInt offset)
   {
-    long val = ((((long) buffer[0 + offset.intValue()]) & 0xFFL) << 56) |
-           ((((long) buffer[1 + offset.intValue()]) & 0xFFL) << 48) |
-           ((((long) buffer[2 + offset.intValue()]) & 0xFFL) << 40) |
-           ((((long) buffer[3 + offset.intValue()]) & 0xFFL) << 32) |
-           ((((long) buffer[4 + offset.intValue()]) & 0xFFL) << 24) |
-           ((((long) buffer[5 + offset.intValue()]) & 0xFFL) << 16) |
-           ((((long) buffer[6 + offset.intValue()]) & 0xFFL) << 8)  |
-           (((long) buffer[7 + offset.intValue()]) & 0xFFL);
+    int offsetInt = offset.intValue();
+    long val = ((((long) buffer[0 + offsetInt]) & 0xFFL) << 56) |
+           ((((long) buffer[1 + offsetInt]) & 0xFFL) << 48) |
+           ((((long) buffer[2 + offsetInt]) & 0xFFL) << 40) |
+           ((((long) buffer[3 + offsetInt]) & 0xFFL) << 32) |
+           ((((long) buffer[4 + offsetInt]) & 0xFFL) << 24) |
+           ((((long) buffer[5 + offsetInt]) & 0xFFL) << 16) |
+           ((((long) buffer[6 + offsetInt]) & 0xFFL) << 8)  |
+           (((long) buffer[7 + offsetInt]) & 0xFFL);
 
     offset.add(Type.LONG.getByteSize());
     return val;
@@ -1073,14 +1074,15 @@ public class GPOUtils
                                    byte[] buffer,
                                    MutableInt offset)
   {
-    buffer[0 + offset.intValue()] = (byte) ((val >> 56) & 0xFFL);
-    buffer[1 + offset.intValue()] = (byte) ((val >> 48) & 0xFFL);
-    buffer[2 + offset.intValue()] = (byte) ((val >> 40) & 0xFFL);
-    buffer[3 + offset.intValue()] = (byte) ((val >> 32) & 0xFFL);
-    buffer[4 + offset.intValue()] = (byte) ((val >> 24) & 0xFFL);
-    buffer[5 + offset.intValue()] = (byte) ((val >> 16) & 0xFFL);
-    buffer[6 + offset.intValue()] = (byte) ((val >> 8) & 0xFFL);
-    buffer[7 + offset.intValue()] = (byte) (val & 0xFFL);
+    int offsetInt = offset.intValue();
+    buffer[0 + offsetInt] = (byte) ((val >> 56) & 0xFFL);
+    buffer[1 + offsetInt] = (byte) ((val >> 48) & 0xFFL);
+    buffer[2 + offsetInt] = (byte) ((val >> 40) & 0xFFL);
+    buffer[3 + offsetInt] = (byte) ((val >> 32) & 0xFFL);
+    buffer[4 + offsetInt] = (byte) ((val >> 24) & 0xFFL);
+    buffer[5 + offsetInt] = (byte) ((val >> 16) & 0xFFL);
+    buffer[6 + offsetInt] = (byte) ((val >> 8) & 0xFFL);
+    buffer[7 + offsetInt] = (byte) (val & 0xFFL);
 
     offset.add(Type.LONG.getByteSize());
   }
@@ -1118,14 +1120,15 @@ public class GPOUtils
   public static double deserializeDouble(byte[] buffer,
                                        MutableInt offset)
   {
-    long val = (((long) buffer[0 + offset.intValue()]) & 0xFFL) << 56 |
-           ((((long) buffer[1 + offset.intValue()]) & 0xFFL) << 48) |
-           ((((long) buffer[2 + offset.intValue()]) & 0xFFL) << 40) |
-           ((((long) buffer[3 + offset.intValue()]) & 0xFFL) << 32) |
-           ((((long) buffer[4 + offset.intValue()]) & 0xFFL) << 24) |
-           ((((long) buffer[5 + offset.intValue()]) & 0xFFL) << 16) |
-           ((((long) buffer[6 + offset.intValue()]) & 0xFFL) << 8)  |
-           (((long) buffer[7 + offset.intValue()]) & 0xFFL);
+    int offsetInt = offset.intValue();
+    long val = (((long) buffer[0 + offsetInt]) & 0xFFL) << 56 |
+           ((((long) buffer[1 + offsetInt]) & 0xFFL) << 48) |
+           ((((long) buffer[2 + offsetInt]) & 0xFFL) << 40) |
+           ((((long) buffer[3 + offsetInt]) & 0xFFL) << 32) |
+           ((((long) buffer[4 + offsetInt]) & 0xFFL) << 24) |
+           ((((long) buffer[5 + offsetInt]) & 0xFFL) << 16) |
+           ((((long) buffer[6 + offsetInt]) & 0xFFL) << 8)  |
+           (((long) buffer[7 + offsetInt]) & 0xFFL);
 
     offset.add(Type.DOUBLE.getByteSize());
     return Double.longBitsToDouble(val);
@@ -1144,14 +1147,15 @@ public class GPOUtils
   {
     long val = Double.doubleToLongBits(valD);
 
-    buffer[0 + offset.intValue()] = (byte) ((val >> 56) & 0xFFL);
-    buffer[1 + offset.intValue()] = (byte) ((val >> 48) & 0xFFL);
-    buffer[2 + offset.intValue()] = (byte) ((val >> 40) & 0xFFL);
-    buffer[3 + offset.intValue()] = (byte) ((val >> 32) & 0xFFL);
-    buffer[4 + offset.intValue()] = (byte) ((val >> 24) & 0xFFL);
-    buffer[5 + offset.intValue()] = (byte) ((val >> 16) & 0xFFL);
-    buffer[6 + offset.intValue()] = (byte) ((val >> 8) & 0xFFL);
-    buffer[7 + offset.intValue()] = (byte) (val & 0xFFL);
+    int offsetInt = offset.intValue();
+    buffer[0 + offsetInt] = (byte) ((val >> 56) & 0xFFL);
+    buffer[1 + offsetInt] = (byte) ((val >> 48) & 0xFFL);
+    buffer[2 + offsetInt] = (byte) ((val >> 40) & 0xFFL);
+    buffer[3 + offsetInt] = (byte) ((val >> 32) & 0xFFL);
+    buffer[4 + offsetInt] = (byte) ((val >> 24) & 0xFFL);
+    buffer[5 + offsetInt] = (byte) ((val >> 16) & 0xFFL);
+    buffer[6 + offsetInt] = (byte) ((val >> 8) & 0xFFL);
+    buffer[7 + offsetInt] = (byte) (val & 0xFFL);
 
     offset.add(Type.DOUBLE.getByteSize());
   }
@@ -1166,10 +1170,11 @@ public class GPOUtils
   public static int deserializeInt(byte[] buffer,
                                    MutableInt offset)
   {
-    int val = ((((int) buffer[0 + offset.intValue()]) & 0xFF) << 24) |
-           ((((int) buffer[1 + offset.intValue()]) & 0xFF) << 16) |
-           ((((int) buffer[2 + offset.intValue()]) & 0xFF) << 8)  |
-           (((int) buffer[3 + offset.intValue()]) & 0xFF);
+    int offsetInt = offset.intValue();
+    int val = ((((int) buffer[0 + offsetInt]) & 0xFF) << 24) |
+           ((((int) buffer[1 + offsetInt]) & 0xFF) << 16) |
+           ((((int) buffer[2 + offsetInt]) & 0xFF) << 8)  |
+           (((int) buffer[3 + offsetInt]) & 0xFF);
 
     offset.add(Type.INTEGER.getByteSize());
     return val;
@@ -1197,10 +1202,11 @@ public class GPOUtils
                                   byte[] buffer,
                                   MutableInt offset)
   {
-    buffer[0 + offset.intValue()] = (byte) ((val >> 24) & 0xFF);
-    buffer[1 + offset.intValue()] = (byte) ((val >> 16) & 0xFF);
-    buffer[2 + offset.intValue()] = (byte) ((val >> 8) & 0xFF);
-    buffer[3 + offset.intValue()] = (byte) (val & 0xFF);
+    int offsetInt = offset.intValue();
+    buffer[0 + offsetInt] = (byte) ((val >> 24) & 0xFF);
+    buffer[1 + offsetInt] = (byte) ((val >> 16) & 0xFF);
+    buffer[2 + offsetInt] = (byte) ((val >> 8) & 0xFF);
+    buffer[3 + offsetInt] = (byte) (val & 0xFF);
 
     offset.add(Type.INTEGER.getByteSize());
   }
@@ -1226,10 +1232,11 @@ public class GPOUtils
   public static float deserializeFloat(byte[] buffer,
                                    MutableInt offset)
   {
-    int val = ((((int) buffer[0 + offset.intValue()]) & 0xFF) << 24) |
-           ((((int) buffer[1 + offset.intValue()]) & 0xFF) << 16) |
-           ((((int) buffer[2 + offset.intValue()]) & 0xFF) << 8)  |
-           (((int) buffer[3 + offset.intValue()]) & 0xFF);
+    int offsetInt = offset.intValue();
+    int val = ((((int) buffer[0 + offsetInt]) & 0xFF) << 24) |
+           ((((int) buffer[1 + offsetInt]) & 0xFF) << 16) |
+           ((((int) buffer[2 + offsetInt]) & 0xFF) << 8)  |
+           (((int) buffer[3 + offsetInt]) & 0xFF);
 
     offset.add(Type.FLOAT.getByteSize());
     return Float.intBitsToFloat(val);
@@ -1246,12 +1253,13 @@ public class GPOUtils
                                   byte[] buffer,
                                   MutableInt offset)
   {
+    int offsetInt = offset.intValue();
     int val = Float.floatToIntBits(valf);
 
-    buffer[0 + offset.intValue()] = (byte) ((val >> 24) & 0xFF);
-    buffer[1 + offset.intValue()] = (byte) ((val >> 16) & 0xFF);
-    buffer[2 + offset.intValue()] = (byte) ((val >> 8) & 0xFF);
-    buffer[3 + offset.intValue()] = (byte) (val & 0xFF);
+    buffer[0 + offsetInt] = (byte) ((val >> 24) & 0xFF);
+    buffer[1 + offsetInt] = (byte) ((val >> 16) & 0xFF);
+    buffer[2 + offsetInt] = (byte) ((val >> 8) & 0xFF);
+    buffer[3 + offsetInt] = (byte) (val & 0xFF);
 
     offset.add(Type.FLOAT.getByteSize());
   }
@@ -1266,8 +1274,9 @@ public class GPOUtils
   public static short deserializeShort(byte[] buffer,
                                        MutableInt offset)
   {
-    short val = (short) (((((int) buffer[0 + offset.intValue()]) & 0xFF) << 8)  |
-                (((int) buffer[1 + offset.intValue()]) & 0xFF));
+    int offsetInt = offset.intValue();
+    short val = (short) (((((int) buffer[0 + offsetInt]) & 0xFF) << 8)  |
+                (((int) buffer[1 + offsetInt]) & 0xFF));
 
     offset.add(Type.SHORT.getByteSize());
     return val;
@@ -1284,8 +1293,9 @@ public class GPOUtils
                                     byte[] buffer,
                                     MutableInt offset)
   {
-    buffer[0 + offset.intValue()] = (byte) ((val >> 8) & 0xFF);
-    buffer[1 + offset.intValue()] = (byte) (val & 0xFF);
+    int offsetInt = offset.intValue();
+    buffer[0 + offsetInt] = (byte) ((val >> 8) & 0xFF);
+    buffer[1 + offsetInt] = (byte) (val & 0xFF);
 
     offset.add(Type.SHORT.getByteSize());
   }
@@ -1365,8 +1375,9 @@ public class GPOUtils
   public static char deserializeChar(byte[] buffer,
                                      MutableInt offset)
   {
-    char val = (char) (((((int) buffer[0 + offset.intValue()]) & 0xFF) << 8)  |
-                (((int) buffer[1 + offset.intValue()]) & 0xFF));
+    int offsetInt = offset.intValue();
+    char val = (char) (((((int) buffer[0 + offsetInt]) & 0xFF) << 8)  |
+                (((int) buffer[1 + offsetInt]) & 0xFF));
 
     offset.add(Type.CHAR.getByteSize());
     return val;
@@ -1383,8 +1394,9 @@ public class GPOUtils
                                    byte[] buffer,
                                    MutableInt offset)
   {
-    buffer[0 + offset.intValue()] = (byte) ((val >> 8) & 0xFF);
-    buffer[1 + offset.intValue()] = (byte) (val & 0xFF);
+    int offsetInt = offset.intValue();
+    buffer[0 + offsetInt] = (byte) ((val >> 8) & 0xFF);
+    buffer[1 + offsetInt] = (byte) (val & 0xFF);
 
     offset.add(Type.CHAR.getByteSize());
   }
@@ -1399,17 +1411,18 @@ public class GPOUtils
    * @param clazz The Class of the POJO to extract values from.
    * @return An array of boolean getters for given fields.
    */
-  @SuppressWarnings({"unchecked","rawtypes"})
   public static GetterBoolean<Object>[] createGetterBoolean(List<String> fields,
                                                             Map<String, String> valueToExpression,
                                                             Class<?> clazz)
   {
+    @SuppressWarnings({"unchecked","rawtypes"})
     GetterBoolean<Object>[] gettersBoolean = new GetterBoolean[fields.size()];
 
     for(int getterIndex = 0;
         getterIndex < fields.size();
         getterIndex++) {
       String field = fields.get(getterIndex);
+      PojoUtils.
       gettersBoolean[getterIndex] = PojoUtils.createGetterBoolean(clazz, valueToExpression.get(field));
     }
 
@@ -1426,11 +1439,11 @@ public class GPOUtils
    * @param clazz The Class of the POJO to extract values from.
    * @return An array of string getters for given fields.
    */
-  @SuppressWarnings({"unchecked","rawtypes"})
   public static Getter<Object, String>[] createGetterString(List<String> fields,
                                                             Map<String, String> valueToExpression,
                                                             Class<?> clazz)
   {
+    @SuppressWarnings({"unchecked","rawtypes"})
     Getter<Object, String>[] gettersString = new Getter[fields.size()];
 
     for(int getterIndex = 0;
@@ -1453,11 +1466,11 @@ public class GPOUtils
    * @param clazz The Class of the POJO to extract values from.
    * @return An array of char getters for given fields.
    */
-  @SuppressWarnings({"unchecked","rawtypes"})
   public static GetterChar<Object>[] createGetterChar(List<String> fields,
                                                       Map<String, String> valueToExpression,
                                                       Class<?> clazz)
   {
+    @SuppressWarnings({"unchecked","rawtypes"})
     GetterChar<Object>[] gettersChar = new GetterChar[fields.size()];
 
     for(int getterIndex = 0;
@@ -1480,11 +1493,11 @@ public class GPOUtils
    * @param clazz The Class of the POJO to extract values from.
    * @return An array of byte getters for given fields.
    */
-  @SuppressWarnings({"unchecked","rawtypes"})
   public static GetterByte<Object>[] createGetterByte(List<String> fields,
                                                       Map<String, String> valueToExpression,
                                                       Class<?> clazz)
   {
+    @SuppressWarnings({"unchecked","rawtypes"})
     GetterByte<Object>[] gettersByte = new GetterByte[fields.size()];
 
     for(int getterIndex = 0;
@@ -1507,11 +1520,11 @@ public class GPOUtils
    * @param clazz The Class of the POJO to extract values from.
    * @return An array of short getters for given fields.
    */
-  @SuppressWarnings({"unchecked","rawtypes"})
   public static GetterShort<Object>[] createGetterShort(List<String> fields,
                                                         Map<String, String> valueToExpression,
                                                         Class<?> clazz)
   {
+    @SuppressWarnings({"unchecked","rawtypes"})
     GetterShort<Object>[] gettersShort = new GetterShort[fields.size()];
 
     for(int getterIndex = 0;
@@ -1534,11 +1547,11 @@ public class GPOUtils
    * @param clazz The Class of the POJO to extract values from.
    * @return An array of integer getters for given fields.
    */
-  @SuppressWarnings({"unchecked","rawtypes"})
   public static GetterInt<Object>[] createGetterInt(List<String> fields,
                                                     Map<String, String> valueToExpression,
                                                     Class<?> clazz)
   {
+    @SuppressWarnings({"unchecked","rawtypes"})
     GetterInt<Object>[] gettersInt = new GetterInt[fields.size()];
 
     for(int getterIndex = 0;
@@ -1561,11 +1574,11 @@ public class GPOUtils
    * @param clazz The Class of the POJO to extract values from.
    * @return An array of long getters for given fields.
    */
-  @SuppressWarnings({"unchecked","rawtypes"})
   public static GetterLong<Object>[] createGetterLong(List<String> fields,
                                                       Map<String, String> valueToExpression,
                                                       Class<?> clazz)
   {
+    @SuppressWarnings({"unchecked","rawtypes"})
     GetterLong<Object>[] gettersLong = new GetterLong[fields.size()];
 
     for(int getterIndex = 0;
@@ -1588,11 +1601,11 @@ public class GPOUtils
    * @param clazz The Class of the POJO to extract values from.
    * @return An array of float getters for given fields.
    */
-  @SuppressWarnings({"unchecked","rawtypes"})
   public static GetterFloat<Object>[] createGetterFloat(List<String> fields,
                                                         Map<String, String> valueToExpression,
                                                         Class<?> clazz)
   {
+    @SuppressWarnings({"unchecked","rawtypes"})
     GetterFloat<Object>[] gettersFloat = new GetterFloat[fields.size()];
 
     for(int getterIndex = 0;
@@ -1615,11 +1628,11 @@ public class GPOUtils
    * @param clazz The Class of the POJO to extract values from.
    * @return An array of double getters for given fields.
    */
-  @SuppressWarnings({"unchecked","rawtypes"})
   public static GetterDouble<Object>[] createGetterDouble(List<String> fields,
                                                           Map<String, String> valueToExpression,
                                                           Class<?> clazz)
   {
+    @SuppressWarnings({"unchecked","rawtypes"})
     GetterDouble<Object>[] gettersDouble = new GetterDouble[fields.size()];
 
     for(int getterIndex = 0;
@@ -1642,11 +1655,11 @@ public class GPOUtils
    * @param clazz The Class of the POJO to extract values from.
    * @return An array of object getters for given fields.
    */
-  @SuppressWarnings({"unchecked","rawtypes"})
   public static Getter<Object, Object>[] createGetterObject(List<String> fields,
                                                             Map<String, String> valueToExpression,
                                                             Class<?> clazz)
   {
+    @SuppressWarnings({"unchecked","rawtypes"})
     Getter<Object, Object>[] gettersObject = new Getter[fields.size()];
 
     for(int getterIndex = 0;
@@ -2066,9 +2079,6 @@ public class GPOUtils
         for(int index = 0;
             index < charArray.length;
             index++) {
-          if(charArray[index] == -1) {
-            continue;
-          }
           hashCode ^= Character.getNumericValue(charArray[index]);
         }
       }
@@ -2091,9 +2101,6 @@ public class GPOUtils
         for(int index = 0;
             index < shortArray.length;
             index++) {
-          if(shortArray[index] == -1) {
-            continue;
-          }
           hashCode ^= shortArray[index];
         }
       }
@@ -2116,9 +2123,6 @@ public class GPOUtils
         for(int index = 0;
             index < longArray.length;
             index++) {
-          if(longArray[index] == -1) {
-            continue;
-          }
           hashCode ^= longArray[index];
         }
       }
@@ -2130,9 +2134,6 @@ public class GPOUtils
         for(int index = 0;
             index < floatArray.length;
             index++) {
-          if(floatArray[index] == -1) {
-            continue;
-          }
           hashCode ^= Float.floatToIntBits(floatArray[index]);
         }
       }
@@ -2333,9 +2334,6 @@ public class GPOUtils
         for(int index = 0;
             index < srcChar.length;
             index++) {
-          if(srcChar[index] == -1) {
-            continue;
-          }
           if(destChar[index] != srcChar[index]) {
             return false;
           }
@@ -2668,7 +2666,7 @@ public class GPOUtils
           break;
         }
         default: {
-          throw new UnsupportedOperationException("This type " + type + " is not supported.");
+          throw new UnsupportedOperationException("Type " + type);
         }
       }
     }
