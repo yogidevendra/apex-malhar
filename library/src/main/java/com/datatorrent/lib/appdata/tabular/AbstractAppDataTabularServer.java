@@ -109,6 +109,7 @@ public abstract class AbstractAppDataTabularServer<INPUT_EVENT> implements Opera
 
         if(schemaResult != null) {
           String schemaResultJSON = resultSerializerFactory.serialize(schemaResult);
+          LOG.debug("emitting {}", schemaResultJSON);
           queryResult.emit(schemaResultJSON);
         }
       }
