@@ -17,6 +17,7 @@ package com.datatorrent.lib.statistics;
 
 import java.io.*;
 import java.lang.reflect.Array;
+
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -28,8 +29,6 @@ import com.esotericsoftware.kryo.Serializer;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import gnu.trove.map.hash.TCustomHashMap;
 import gnu.trove.strategy.HashingStrategy;
@@ -443,8 +442,6 @@ public class DimensionsComputation<EVENT, AGGREGATE extends DimensionsComputatio
       this.useAggregatesAsKeys = useAggregatesAsKeys;
     }
 
-    @SuppressWarnings("unused")
-    private static final Logger logger = LoggerFactory.getLogger(AggregatorMap.class);
     private static final long serialVersionUID = 201311171410L;
   }
 
@@ -469,6 +466,4 @@ public class DimensionsComputation<EVENT, AGGREGATE extends DimensionsComputatio
   {
     return aggregatorMaps != null ? Arrays.hashCode(aggregatorMaps) : 0;
   }
-
-  private static final Logger logger = LoggerFactory.getLogger(DimensionsComputation.class);
 }

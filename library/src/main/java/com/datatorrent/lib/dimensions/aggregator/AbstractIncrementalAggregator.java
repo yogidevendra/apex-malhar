@@ -110,8 +110,9 @@ public abstract class AbstractIncrementalAggregator implements IncrementalAggreg
     return aggregate.getEventKey().getSchemaID() == inputEvent.getEventKey().getSchemaID() &&
            aggregate.getEventKey().getDimensionDescriptorID() == inputEvent.getEventKey().getDimensionDescriptorID() &&
            aggregate.getEventKey().getAggregatorID() == inputEvent.getEventKey().getDimensionDescriptorID() &&
-           GPOUtils.equals(aggregate.getKeys(),
-                           inputEvent.getKeys());
+           GPOUtils.indirectEquals(aggregate.getKeys(),
+                                   inputEvent.getKeys(),
+                                   indexSubsetKeys);
   }
 
   public static Aggregate createAggregate(InputEvent inputEvent,

@@ -695,5 +695,30 @@ public class DimensionsEvent implements Serializable
     {
       return aggregatorIndex;
     }
+
+    @Override
+    public int hashCode()
+    {
+      int hash = 5;
+      hash = 79 * hash + (this.eventKey != null ? this.eventKey.hashCode() : 0);
+      return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj)
+    {
+      if(obj == null) {
+        return false;
+      }
+      if(getClass() != obj.getClass()) {
+        return false;
+      }
+      final DimensionsEvent other = (DimensionsEvent)obj;
+      
+      if(this.eventKey != other.eventKey && (this.eventKey == null || !this.eventKey.equals(other.eventKey))) {
+        return false;
+      }
+      return true;
+    }
   }
 }
