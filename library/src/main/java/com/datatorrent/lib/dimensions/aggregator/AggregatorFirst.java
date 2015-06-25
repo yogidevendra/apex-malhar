@@ -30,37 +30,11 @@ import com.datatorrent.lib.dimensions.DimensionsEvent.InputEvent;
  * one is picked arbitrarily to be the first.
  * </p>
  */
-public class AggregatorFirst implements IncrementalAggregator
+public class AggregatorFirst extends AbstractIncrementalAggregator
 {
   private static final long serialVersionUID = 20154301646L;
 
-  /**
-   * The singleton instance of this class.
-   */
-  public static final AggregatorFirst INSTANCE = new AggregatorFirst();
-
-  /**
-   * Singleton constructor.
-   */
-  private AggregatorFirst()
-  {
-    //Do nothing
-  }
-
-  @Override
-  public Aggregate createDest(InputEvent first)
-  {
-    return new Aggregate(first.getEventKey(), first.getAggregates());
-  }
-
-  @Override
-  public void aggregate(Aggregate dest, InputEvent src)
-  {
-    //Do nothing
-  }
-
-  @Override
-  public void aggregate(Aggregate dest, Aggregate src)
+  public AggregatorFirst()
   {
     //Do nothing
   }
@@ -69,5 +43,17 @@ public class AggregatorFirst implements IncrementalAggregator
   public Type getOutputType(Type inputType)
   {
     return AggregatorUtils.IDENTITY_TYPE_MAP.get(inputType);
+  }
+
+  @Override
+  public void aggregate(Aggregate dest, InputEvent src)
+  {
+    //Ignore
+  }
+
+  @Override
+  public void aggregate(Aggregate dest, Aggregate src)
+  {
+    //Ignore
   }
 }

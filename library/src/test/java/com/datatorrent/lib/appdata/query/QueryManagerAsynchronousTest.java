@@ -17,7 +17,6 @@
 package com.datatorrent.lib.appdata.query;
 
 import com.datatorrent.api.DefaultOutputPort;
-import com.datatorrent.lib.appdata.dimensions.DimensionsComputationCustomTest.AdInfoResult;
 import com.datatorrent.lib.appdata.query.serde.MessageSerializerFactory;
 import com.datatorrent.lib.appdata.schemas.ResultFormatter;
 import com.datatorrent.lib.testbench.CollectorTestSink;
@@ -42,7 +41,7 @@ public class QueryManagerAsynchronousTest
     AppDataWindowEndQueueManager<MockQuery, Void> queueManager = new AppDataWindowEndQueueManager<MockQuery, Void>();
 
     DefaultOutputPort<String> outputPort = new DefaultOutputPort<String>();
-    CollectorTestSink<AdInfoResult> sink = new CollectorTestSink<AdInfoResult>();
+    CollectorTestSink<MockResult> sink = new CollectorTestSink<MockResult>();
     TestUtils.setSink(outputPort, sink);
 
     MessageSerializerFactory msf = new MessageSerializerFactory(new ResultFormatter());
@@ -82,8 +81,8 @@ public class QueryManagerAsynchronousTest
 
   public static class NOPQueryExecutor implements QueryExecutor<MockQuery, Void, MutableLong, MockResult>
   {
-    private double waitMillisProb;
-    private Random rand = new Random();
+    private final double waitMillisProb;
+    private final Random rand = new Random();
 
     public NOPQueryExecutor(double waitMillisProb)
     {
@@ -110,9 +109,9 @@ public class QueryManagerAsynchronousTest
   {
     private final int totalTuples;
     private final int batchSize;
-    private AppDataWindowEndQueueManager<MockQuery, Void> queueManager;
-    private double waitMillisProb;
-    private Random rand = new Random();
+    private final AppDataWindowEndQueueManager<MockQuery, Void> queueManager;
+    private final double waitMillisProb;
+    private final Random rand = new Random();
 
     public ProducerThread(AppDataWindowEndQueueManager<MockQuery, Void> queueManager,
                           int totalTuples,

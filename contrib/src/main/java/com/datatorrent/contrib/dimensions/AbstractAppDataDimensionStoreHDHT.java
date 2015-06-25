@@ -133,12 +133,6 @@ public abstract class AbstractAppDataDimensionStoreHDHT extends DimensionsStoreH
   @Override
   public void setup(Context.OperatorContext context)
   {
-    //if(embeddableQuery != null) {
-      //If an embeddableQuery operator is set, then enable it.
-      //embeddableQuery.setInputPort(query);
-      //embeddableQuery.setup(context);
-    //}
-
     aggregatorRegistry.setup();
 
     schemaRegistry = getSchemaRegistry();
@@ -173,11 +167,6 @@ public abstract class AbstractAppDataDimensionStoreHDHT extends DimensionsStoreH
   @Override
   public void beginWindow(long windowId)
   {
-    //if(embeddableQuery != null) {
-      //If embeddable query operator is set
-      //embeddableQuery.beginWindow(windowId);
-    //}
-
     schemaQueueManager.beginWindow(windowId);
     schemaProcessor.beginWindow(windowId);
 
@@ -190,11 +179,6 @@ public abstract class AbstractAppDataDimensionStoreHDHT extends DimensionsStoreH
   @Override
   public void endWindow()
   {
-    //if(embeddableQuery != null) {
-      //If embeddable query operator is set
-      //embeddableQuery.endWindow();
-    //}
-
     super.endWindow();
 
     queryProcessor.endWindow();
@@ -207,11 +191,6 @@ public abstract class AbstractAppDataDimensionStoreHDHT extends DimensionsStoreH
   @Override
   public void teardown()
   {
-    //if(embeddableQuery != null) {
-      //If embeddable query operator is set
-      //embeddableQuery.teardown();
-    //}
-
     queryProcessor.teardown();
     dimensionsQueueManager.teardown();
 

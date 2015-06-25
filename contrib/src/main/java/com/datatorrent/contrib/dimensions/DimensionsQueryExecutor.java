@@ -115,7 +115,7 @@ public class DimensionsQueryExecutor implements QueryExecutor<DataQueryDimension
 
         //See if we have the result for the query yet.
 
-        //First check in the operator's Aggregate cache
+        //First check in the operator's DimensionsEvent cache
         DimensionsEvent gae = operator.cache.get(eventKey);
 
         if(gae != null) {

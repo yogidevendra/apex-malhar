@@ -1,6 +1,17 @@
 /*
- *  Copyright (c) 2012-2015 Malhar, Inc.
- *  All Rights Reserved.
+ * Copyright (c) 2015 DataTorrent, Inc. ALL Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.datatorrent.lib.appdata.gpo;
@@ -9,6 +20,7 @@ import com.datatorrent.lib.appdata.schemas.Fields;
 import com.datatorrent.lib.appdata.schemas.FieldsDescriptor;
 import com.datatorrent.lib.appdata.schemas.ResultFormatter;
 import com.datatorrent.lib.appdata.schemas.Type;
+import com.datatorrent.lib.dimensions.DimensionsDescriptor;
 import com.datatorrent.lib.util.PojoUtils;
 import com.datatorrent.lib.util.PojoUtils.Getter;
 import com.datatorrent.lib.util.PojoUtils.GetterBoolean;
@@ -21,6 +33,8 @@ import com.datatorrent.lib.util.PojoUtils.GetterLong;
 import com.datatorrent.lib.util.PojoUtils.GetterShort;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
+import java.io.Serializable;
+import java.lang.reflect.Array;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -136,190 +150,8 @@ public class GPOUtils
    */
   public static void setFieldFromJSON(GPOMutable gpo, Type type, String field, JSONArray jo, int index)
   {
-    switch(type) {
-      case BOOLEAN: {
-        Boolean val;
-
-        try {
-          val = jo.getBoolean(index);
-        }
-        catch(JSONException ex) {
-          throw new IllegalArgumentException("The key " + field + " does not have a valid bool value.", ex);
-        }
-
-        gpo.setField(field, val);
-        break;
-      }
-      case BYTE: {
-        int val;
-
-        try {
-          val = jo.getInt(index);
-        }
-        catch(JSONException ex) {
-          throw new IllegalArgumentException("The key "
-                                             + field
-                                             + " does not have a valid byte value.", ex);
-        }
-
-        if(val < (int)Byte.MIN_VALUE) {
-          throw new IllegalArgumentException("The key "
-                                             + field
-                                             + " has a value "
-                                             + val
-                                             + " which is too small to fit into a byte.");
-        }
-
-        if(val > (int)Byte.MAX_VALUE) {
-          throw new IllegalArgumentException("The key "
-                                             + field
-                                             + " has a value "
-                                             + val
-                                             + " which is too larg to fit into a byte.");
-        }
-
-        gpo.setField(field, (byte)val);
-        break;
-      }
-      case SHORT: {
-        int val;
-
-        try {
-          val = jo.getInt(index);
-        }
-        catch(JSONException ex) {
-          throw new IllegalArgumentException("The key "
-                                             + field
-                                             + " does not have a valid short value.",
-                                             ex);
-        }
-
-        if(val < (int)Short.MIN_VALUE) {
-          throw new IllegalArgumentException("The key "
-                                             + field
-                                             + " has a value "
-                                             + val
-                                             + " which is too small to fit into a short.");
-        }
-
-        if(val > (int)Short.MAX_VALUE) {
-          throw new IllegalArgumentException("The key "
-                                             + field
-                                             + " has a value "
-                                             + val
-                                             + " which is too large to fit into a short.");
-        }
-
-        gpo.setField(field, (short)val);
-        break;
-      }
-      case INTEGER: {
-        int val;
-
-        try {
-          val = jo.getInt(index);
-        }
-        catch(JSONException ex) {
-          throw new IllegalArgumentException("The key "
-                                             + field
-                                             + " does not have a valid int value.",
-                                             ex);
-        }
-
-        gpo.setField(field, val);
-        break;
-      }
-      case LONG: {
-        long val;
-
-        try {
-          val = jo.getLong(index);
-        }
-        catch(JSONException ex) {
-          throw new IllegalArgumentException("The key "
-                                             + field
-                                             + " does not have a valid long value.",
-                                             ex);
-        }
-
-        gpo.setField(field, val);
-        break;
-      }
-      case CHAR: {
-        String val;
-
-        try {
-          val = jo.getString(index);
-        }
-        catch(JSONException ex) {
-          throw new IllegalArgumentException("The key "
-                                             + field
-                                             + " does not have a valid character value.",
-                                             ex);
-        }
-
-        if(val.length() != 1) {
-          throw new IllegalArgumentException("The key "
-                                             + field
-                                             + " has a value "
-                                             + val
-                                             + " that is not one character long.");
-        }
-
-        gpo.setField(field, val.charAt(0));
-        break;
-      }
-      case STRING: {
-        String val;
-
-        try {
-          val = jo.getString(index);
-        }
-        catch(JSONException ex) {
-          throw new IllegalArgumentException("The key "
-                                             + field
-                                             + " does not have a valid string value.",
-                                             ex);
-        }
-
-        gpo.setField(field, val);
-        break;
-      }
-      case DOUBLE: {
-        Double val;
-
-        try {
-          val = jo.getDouble(index);
-        }
-        catch(JSONException ex) {
-          throw new IllegalArgumentException("The key "
-                                             + field
-                                             + " does not have a valid double value.",
-                                             ex);
-        }
-
-        gpo.setField(field, val);
-        break;
-      }
-      case FLOAT: {
-        Float val;
-
-        try {
-          val = (float)jo.getDouble(index);
-        }
-        catch(JSONException ex) {
-          throw new IllegalArgumentException("The key "
-                                             + field
-                                             + " does not have a valid double value.",
-                                             ex);
-        }
-
-        gpo.setField(field, val);
-        break;
-      }
-      default:
-        throw new UnsupportedOperationException("This is not supported for type: " + type);
-    }
+    GPOType gpoType = GPOType.GPO_TYPE_ARRAY[type.ordinal()];
+    gpoType.setFieldFromJSON(gpo, field, jo, index);
   }
 
   /**
@@ -532,37 +364,8 @@ public class GPOUtils
 
     for(String field: fields.getFields()) {
       Type fieldType = fd.getType(field);
-
-      if(fieldType == Type.BOOLEAN) {
-        jo.put(field, gpo.getFieldBool(field));
-      }
-      else if(fieldType == Type.CHAR) {
-        jo.put(field, ((Character) gpo.getFieldChar(field)).toString());
-      }
-      else if(fieldType == Type.STRING) {
-        jo.put(field, gpo.getFieldString(field));
-      }
-      else if(fieldType == Type.BYTE) {
-        jo.put(field, resultFormatter.format(gpo.getFieldByte(field)));
-      }
-      else if(fieldType == Type.SHORT) {
-        jo.put(field, resultFormatter.format(gpo.getFieldShort(field)));
-      }
-      else if(fieldType == Type.INTEGER) {
-        jo.put(field, resultFormatter.format(gpo.getFieldInt(field)));
-      }
-      else if(fieldType == Type.LONG) {
-        jo.put(field, resultFormatter.format(gpo.getFieldLong(field)));
-      }
-      else if(fieldType == Type.FLOAT) {
-        jo.put(field, resultFormatter.format(gpo.getFieldFloat(field)));
-      }
-      else if(fieldType == Type.DOUBLE) {
-        jo.put(field, resultFormatter.format(gpo.getFieldDouble(field)));
-      }
-      else {
-        throw new UnsupportedOperationException("The type " + fieldType + " is not supported.");
-      }
+      GPOType gpoType = GPOType.GPO_TYPE_ARRAY[fieldType.ordinal()];
+      gpoType.serializeJSONObject(jo, gpo, field, resultFormatter);
     }
 
     return jo;
@@ -749,65 +552,8 @@ public class GPOUtils
       }
 
       Type type = gpo.getFieldDescriptor().getType(field);
-
-      switch(type) {
-      case BOOLEAN: {
-        serializeBoolean(gpo.getFieldBool(field),
-                         sbytes,
-                         offset);
-        break;
-      }
-      case BYTE: {
-        serializeByte(gpo.getFieldByte(field),
-                      sbytes,
-                      offset);
-        break;
-      }
-      case SHORT: {
-        serializeShort(gpo.getFieldShort(field),
-                      sbytes,
-                      offset);
-        break;
-      }
-      case INTEGER: {
-        serializeInt(gpo.getFieldInt(field),
-                     sbytes,
-                     offset);
-        break;
-      }
-      case LONG: {
-        serializeLong(gpo.getFieldLong(field),
-                     sbytes,
-                     offset);
-        break;
-      }
-      case CHAR: {
-        serializeChar(gpo.getFieldChar(field),
-                      sbytes,
-                      offset);
-        break;
-      }
-      case STRING: {
-        serializeString(gpo.getFieldString(field),
-                        sbytes,
-                        offset);
-        break;
-      }
-      case FLOAT: {
-        serializeFloat(gpo.getFieldFloat(field),
-                       sbytes,
-                       offset);
-        break;
-      }
-      case DOUBLE: {
-        serializeDouble(gpo.getFieldDouble(field),
-                        sbytes,
-                        offset);
-        break;
-      }
-      default:
-        throw new UnsupportedOperationException("The field " + field + " doesn't have a valid type.");
-      }
+      GPOType gpoType = GPOType.GPO_TYPE_ARRAY[type.ordinal()];
+      gpoType.serialize(gpo, field, sbytes, offset);
     }
 
     return sbytes;
@@ -938,57 +684,8 @@ public class GPOUtils
       }
 
       Type type = fieldsDescriptor.getType(field);
-
-      switch(type)
-      {
-        case BOOLEAN: {
-          boolean val = deserializeBoolean(serializedGPO, offsetM);
-          gpo.setField(field, val);
-          break;
-        }
-        case BYTE: {
-          byte val = deserializeByte(serializedGPO, offsetM);
-          gpo.setField(field, val);
-          break;
-        }
-        case CHAR: {
-          char val = deserializeChar(serializedGPO, offsetM);
-          gpo.setField(field, val);
-          break;
-        }
-        case SHORT: {
-          short val = deserializeShort(serializedGPO, offsetM);
-          gpo.setField(field, val);
-          break;
-        }
-        case INTEGER: {
-          int val = deserializeInt(serializedGPO, offsetM);
-          gpo.setField(field, val);
-          break;
-        }
-        case LONG: {
-          long val = deserializeLong(serializedGPO, offsetM);
-          gpo.setField(field, val);
-          break;
-        }
-        case FLOAT: {
-          float val = deserializeFloat(serializedGPO, offsetM);
-          gpo.setField(field, val);
-          break;
-        }
-        case DOUBLE: {
-          double val = deserializeDouble(serializedGPO, offsetM);
-          gpo.setField(field, val);
-          break;
-        }
-        case STRING: {
-          String val = deserializeString(serializedGPO, offsetM);
-          gpo.setField(field, val);
-          break;
-        }
-        default:
-          throw new UnsupportedOperationException("Cannot deserialize type " + type);
-      }
+      GPOType gpoType = GPOType.GPO_TYPE_ARRAY[type.ordinal()];
+      gpoType.deserialize(gpo, field, serializedGPO, offsetM);
     }
 
     return gpo;
@@ -1049,14 +746,15 @@ public class GPOUtils
   public static long deserializeLong(byte[] buffer,
                                      MutableInt offset)
   {
-    long val = ((((long) buffer[0 + offset.intValue()]) & 0xFFL) << 56) |
-           ((((long) buffer[1 + offset.intValue()]) & 0xFFL) << 48) |
-           ((((long) buffer[2 + offset.intValue()]) & 0xFFL) << 40) |
-           ((((long) buffer[3 + offset.intValue()]) & 0xFFL) << 32) |
-           ((((long) buffer[4 + offset.intValue()]) & 0xFFL) << 24) |
-           ((((long) buffer[5 + offset.intValue()]) & 0xFFL) << 16) |
-           ((((long) buffer[6 + offset.intValue()]) & 0xFFL) << 8)  |
-           (((long) buffer[7 + offset.intValue()]) & 0xFFL);
+    int offsetInt = offset.intValue();
+    long val = ((((long) buffer[0 + offsetInt]) & 0xFFL) << 56) |
+           ((((long) buffer[1 + offsetInt]) & 0xFFL) << 48) |
+           ((((long) buffer[2 + offsetInt]) & 0xFFL) << 40) |
+           ((((long) buffer[3 + offsetInt]) & 0xFFL) << 32) |
+           ((((long) buffer[4 + offsetInt]) & 0xFFL) << 24) |
+           ((((long) buffer[5 + offsetInt]) & 0xFFL) << 16) |
+           ((((long) buffer[6 + offsetInt]) & 0xFFL) << 8)  |
+           (((long) buffer[7 + offsetInt]) & 0xFFL);
 
     offset.add(Type.LONG.getByteSize());
     return val;
@@ -1073,14 +771,15 @@ public class GPOUtils
                                    byte[] buffer,
                                    MutableInt offset)
   {
-    buffer[0 + offset.intValue()] = (byte) ((val >> 56) & 0xFFL);
-    buffer[1 + offset.intValue()] = (byte) ((val >> 48) & 0xFFL);
-    buffer[2 + offset.intValue()] = (byte) ((val >> 40) & 0xFFL);
-    buffer[3 + offset.intValue()] = (byte) ((val >> 32) & 0xFFL);
-    buffer[4 + offset.intValue()] = (byte) ((val >> 24) & 0xFFL);
-    buffer[5 + offset.intValue()] = (byte) ((val >> 16) & 0xFFL);
-    buffer[6 + offset.intValue()] = (byte) ((val >> 8) & 0xFFL);
-    buffer[7 + offset.intValue()] = (byte) (val & 0xFFL);
+    int offsetInt = offset.intValue();
+    buffer[0 + offsetInt] = (byte) ((val >> 56) & 0xFFL);
+    buffer[1 + offsetInt] = (byte) ((val >> 48) & 0xFFL);
+    buffer[2 + offsetInt] = (byte) ((val >> 40) & 0xFFL);
+    buffer[3 + offsetInt] = (byte) ((val >> 32) & 0xFFL);
+    buffer[4 + offsetInt] = (byte) ((val >> 24) & 0xFFL);
+    buffer[5 + offsetInt] = (byte) ((val >> 16) & 0xFFL);
+    buffer[6 + offsetInt] = (byte) ((val >> 8) & 0xFFL);
+    buffer[7 + offsetInt] = (byte) (val & 0xFFL);
 
     offset.add(Type.LONG.getByteSize());
   }
@@ -1118,14 +817,15 @@ public class GPOUtils
   public static double deserializeDouble(byte[] buffer,
                                        MutableInt offset)
   {
-    long val = (((long) buffer[0 + offset.intValue()]) & 0xFFL) << 56 |
-           ((((long) buffer[1 + offset.intValue()]) & 0xFFL) << 48) |
-           ((((long) buffer[2 + offset.intValue()]) & 0xFFL) << 40) |
-           ((((long) buffer[3 + offset.intValue()]) & 0xFFL) << 32) |
-           ((((long) buffer[4 + offset.intValue()]) & 0xFFL) << 24) |
-           ((((long) buffer[5 + offset.intValue()]) & 0xFFL) << 16) |
-           ((((long) buffer[6 + offset.intValue()]) & 0xFFL) << 8)  |
-           (((long) buffer[7 + offset.intValue()]) & 0xFFL);
+    int offsetInt = offset.intValue();
+    long val = (((long) buffer[0 + offsetInt]) & 0xFFL) << 56 |
+           ((((long) buffer[1 + offsetInt]) & 0xFFL) << 48) |
+           ((((long) buffer[2 + offsetInt]) & 0xFFL) << 40) |
+           ((((long) buffer[3 + offsetInt]) & 0xFFL) << 32) |
+           ((((long) buffer[4 + offsetInt]) & 0xFFL) << 24) |
+           ((((long) buffer[5 + offsetInt]) & 0xFFL) << 16) |
+           ((((long) buffer[6 + offsetInt]) & 0xFFL) << 8)  |
+           (((long) buffer[7 + offsetInt]) & 0xFFL);
 
     offset.add(Type.DOUBLE.getByteSize());
     return Double.longBitsToDouble(val);
@@ -1144,14 +844,15 @@ public class GPOUtils
   {
     long val = Double.doubleToLongBits(valD);
 
-    buffer[0 + offset.intValue()] = (byte) ((val >> 56) & 0xFFL);
-    buffer[1 + offset.intValue()] = (byte) ((val >> 48) & 0xFFL);
-    buffer[2 + offset.intValue()] = (byte) ((val >> 40) & 0xFFL);
-    buffer[3 + offset.intValue()] = (byte) ((val >> 32) & 0xFFL);
-    buffer[4 + offset.intValue()] = (byte) ((val >> 24) & 0xFFL);
-    buffer[5 + offset.intValue()] = (byte) ((val >> 16) & 0xFFL);
-    buffer[6 + offset.intValue()] = (byte) ((val >> 8) & 0xFFL);
-    buffer[7 + offset.intValue()] = (byte) (val & 0xFFL);
+    int offsetInt = offset.intValue();
+    buffer[0 + offsetInt] = (byte) ((val >> 56) & 0xFFL);
+    buffer[1 + offsetInt] = (byte) ((val >> 48) & 0xFFL);
+    buffer[2 + offsetInt] = (byte) ((val >> 40) & 0xFFL);
+    buffer[3 + offsetInt] = (byte) ((val >> 32) & 0xFFL);
+    buffer[4 + offsetInt] = (byte) ((val >> 24) & 0xFFL);
+    buffer[5 + offsetInt] = (byte) ((val >> 16) & 0xFFL);
+    buffer[6 + offsetInt] = (byte) ((val >> 8) & 0xFFL);
+    buffer[7 + offsetInt] = (byte) (val & 0xFFL);
 
     offset.add(Type.DOUBLE.getByteSize());
   }
@@ -1166,10 +867,11 @@ public class GPOUtils
   public static int deserializeInt(byte[] buffer,
                                    MutableInt offset)
   {
-    int val = ((((int) buffer[0 + offset.intValue()]) & 0xFF) << 24) |
-           ((((int) buffer[1 + offset.intValue()]) & 0xFF) << 16) |
-           ((((int) buffer[2 + offset.intValue()]) & 0xFF) << 8)  |
-           (((int) buffer[3 + offset.intValue()]) & 0xFF);
+    int offsetInt = offset.intValue();
+    int val = ((((int) buffer[0 + offsetInt]) & 0xFF) << 24) |
+           ((((int) buffer[1 + offsetInt]) & 0xFF) << 16) |
+           ((((int) buffer[2 + offsetInt]) & 0xFF) << 8)  |
+           (((int) buffer[3 + offsetInt]) & 0xFF);
 
     offset.add(Type.INTEGER.getByteSize());
     return val;
@@ -1197,10 +899,11 @@ public class GPOUtils
                                   byte[] buffer,
                                   MutableInt offset)
   {
-    buffer[0 + offset.intValue()] = (byte) ((val >> 24) & 0xFF);
-    buffer[1 + offset.intValue()] = (byte) ((val >> 16) & 0xFF);
-    buffer[2 + offset.intValue()] = (byte) ((val >> 8) & 0xFF);
-    buffer[3 + offset.intValue()] = (byte) (val & 0xFF);
+    int offsetInt = offset.intValue();
+    buffer[0 + offsetInt] = (byte) ((val >> 24) & 0xFF);
+    buffer[1 + offsetInt] = (byte) ((val >> 16) & 0xFF);
+    buffer[2 + offsetInt] = (byte) ((val >> 8) & 0xFF);
+    buffer[3 + offsetInt] = (byte) (val & 0xFF);
 
     offset.add(Type.INTEGER.getByteSize());
   }
@@ -1226,10 +929,11 @@ public class GPOUtils
   public static float deserializeFloat(byte[] buffer,
                                    MutableInt offset)
   {
-    int val = ((((int) buffer[0 + offset.intValue()]) & 0xFF) << 24) |
-           ((((int) buffer[1 + offset.intValue()]) & 0xFF) << 16) |
-           ((((int) buffer[2 + offset.intValue()]) & 0xFF) << 8)  |
-           (((int) buffer[3 + offset.intValue()]) & 0xFF);
+    int offsetInt = offset.intValue();
+    int val = ((((int) buffer[0 + offsetInt]) & 0xFF) << 24) |
+           ((((int) buffer[1 + offsetInt]) & 0xFF) << 16) |
+           ((((int) buffer[2 + offsetInt]) & 0xFF) << 8)  |
+           (((int) buffer[3 + offsetInt]) & 0xFF);
 
     offset.add(Type.FLOAT.getByteSize());
     return Float.intBitsToFloat(val);
@@ -1246,12 +950,13 @@ public class GPOUtils
                                   byte[] buffer,
                                   MutableInt offset)
   {
+    int offsetInt = offset.intValue();
     int val = Float.floatToIntBits(valf);
 
-    buffer[0 + offset.intValue()] = (byte) ((val >> 24) & 0xFF);
-    buffer[1 + offset.intValue()] = (byte) ((val >> 16) & 0xFF);
-    buffer[2 + offset.intValue()] = (byte) ((val >> 8) & 0xFF);
-    buffer[3 + offset.intValue()] = (byte) (val & 0xFF);
+    buffer[0 + offsetInt] = (byte) ((val >> 24) & 0xFF);
+    buffer[1 + offsetInt] = (byte) ((val >> 16) & 0xFF);
+    buffer[2 + offsetInt] = (byte) ((val >> 8) & 0xFF);
+    buffer[3 + offsetInt] = (byte) (val & 0xFF);
 
     offset.add(Type.FLOAT.getByteSize());
   }
@@ -1266,8 +971,9 @@ public class GPOUtils
   public static short deserializeShort(byte[] buffer,
                                        MutableInt offset)
   {
-    short val = (short) (((((int) buffer[0 + offset.intValue()]) & 0xFF) << 8)  |
-                (((int) buffer[1 + offset.intValue()]) & 0xFF));
+    int offsetInt = offset.intValue();
+    short val = (short) (((((int) buffer[0 + offsetInt]) & 0xFF) << 8)  |
+                (((int) buffer[1 + offsetInt]) & 0xFF));
 
     offset.add(Type.SHORT.getByteSize());
     return val;
@@ -1284,8 +990,9 @@ public class GPOUtils
                                     byte[] buffer,
                                     MutableInt offset)
   {
-    buffer[0 + offset.intValue()] = (byte) ((val >> 8) & 0xFF);
-    buffer[1 + offset.intValue()] = (byte) (val & 0xFF);
+    int offsetInt = offset.intValue();
+    buffer[0 + offsetInt] = (byte) ((val >> 8) & 0xFF);
+    buffer[1 + offsetInt] = (byte) (val & 0xFF);
 
     offset.add(Type.SHORT.getByteSize());
   }
@@ -1365,8 +1072,9 @@ public class GPOUtils
   public static char deserializeChar(byte[] buffer,
                                      MutableInt offset)
   {
-    char val = (char) (((((int) buffer[0 + offset.intValue()]) & 0xFF) << 8)  |
-                (((int) buffer[1 + offset.intValue()]) & 0xFF));
+    int offsetInt = offset.intValue();
+    char val = (char) (((((int) buffer[0 + offsetInt]) & 0xFF) << 8)  |
+                (((int) buffer[1 + offsetInt]) & 0xFF));
 
     offset.add(Type.CHAR.getByteSize());
     return val;
@@ -1383,14 +1091,46 @@ public class GPOUtils
                                    byte[] buffer,
                                    MutableInt offset)
   {
-    buffer[0 + offset.intValue()] = (byte) ((val >> 8) & 0xFF);
-    buffer[1 + offset.intValue()] = (byte) (val & 0xFF);
+    int offsetInt = offset.intValue();
+    buffer[0 + offsetInt] = (byte) ((val >> 8) & 0xFF);
+    buffer[1 + offsetInt] = (byte) (val & 0xFF);
 
     offset.add(Type.CHAR.getByteSize());
   }
 
   /**
-   * Utility method for creating boolean getters. This method is useful for creating a {@link GPOGetters} object
+   * Utility method for creating getters. This method is useful for creating a {@link GPOGetters} object
+   * which can be used to copy POJOs into GPOMutable objects.
+   * @param fields The fields to create getters for. The order of the fields in this list will be the same order
+   * that the getters will be returned in.
+   * @param valueToExpression A map from field names to the corresponding java expression to be used for getting
+   * the fields.
+   * @param clazz The Class of the POJO to extract values from.
+   * @param getterClazz The class of the getter object to create.
+   * @return An array of boolean getters for given fields.
+   */
+  public static <T> T[] createGetters(List<String> fields,
+                                      Map<String, String> valueToExpression,
+                                      Class<?> clazz,
+                                      Class<?> getterClazz,
+                                      Class<?> getterMethodClazz)
+  {
+    @SuppressWarnings("unchecked")
+    T[] getters = (T[])Array.newInstance(getterMethodClazz, fields.size());
+
+    for(int getterIndex = 0;
+        getterIndex < fields.size();
+        getterIndex++) {
+      String field = fields.get(getterIndex);
+      getters[getterIndex] = (T) PojoUtils.constructGetter(clazz, valueToExpression.get(field), getterClazz);
+      //PojoUtils.createGetterBoolean(clazz, valueToExpression.get(field));
+    }
+
+    return getters;
+  }
+
+  /**
+   * Utility method for creating getters. This method is useful for creating a {@link GPOGetters} object
    * which can be used to copy POJOs into GPOMutable objects.
    * @param fields The fields to create getters for. The order of the fields in this list will be the same order
    * that the getters will be returned in.
@@ -1399,264 +1139,48 @@ public class GPOUtils
    * @param clazz The Class of the POJO to extract values from.
    * @return An array of boolean getters for given fields.
    */
-  @SuppressWarnings({"unchecked","rawtypes"})
-  public static GetterBoolean<Object>[] createGetterBoolean(List<String> fields,
-                                                            Map<String, String> valueToExpression,
-                                                            Class<?> clazz)
+  public static Getter<Object, String>[] createGettersString(List<String> fields,
+                                                             Map<String, String> valueToExpression,
+                                                             Class<?> clazz)
   {
-    GetterBoolean<Object>[] gettersBoolean = new GetterBoolean[fields.size()];
+    @SuppressWarnings({"unchecked","rawtypes"})
+    Getter<Object, String>[] getters = new Getter[fields.size()];
 
     for(int getterIndex = 0;
         getterIndex < fields.size();
         getterIndex++) {
       String field = fields.get(getterIndex);
-      gettersBoolean[getterIndex] = PojoUtils.createGetterBoolean(clazz, valueToExpression.get(field));
+      getters[getterIndex] = PojoUtils.createGetter(clazz, valueToExpression.get(field), String.class);
     }
 
-    return gettersBoolean;
+    return getters;
   }
 
   /**
-   * Utility method for creating string getters. This method is useful for creating a {@link GPOGetters} object
+   * Utility method for creating getters. This method is useful for creating a {@link GPOGetters} object
    * which can be used to copy POJOs into GPOMutable objects.
    * @param fields The fields to create getters for. The order of the fields in this list will be the same order
    * that the getters will be returned in.
    * @param valueToExpression A map from field names to the corresponding java expression to be used for getting
    * the fields.
    * @param clazz The Class of the POJO to extract values from.
-   * @return An array of string getters for given fields.
+   * @return An array of boolean getters for given fields.
    */
-  @SuppressWarnings({"unchecked","rawtypes"})
-  public static Getter<Object, String>[] createGetterString(List<String> fields,
-                                                            Map<String, String> valueToExpression,
-                                                            Class<?> clazz)
+  public static Getter<Object, Object>[] createGettersObject(List<String> fields,
+                                                             Map<String, String> valueToExpression,
+                                                             Class<?> clazz)
   {
-    Getter<Object, String>[] gettersString = new Getter[fields.size()];
+    @SuppressWarnings({"unchecked","rawtypes"})
+    Getter<Object, Object>[] getters = new Getter[fields.size()];
 
     for(int getterIndex = 0;
         getterIndex < fields.size();
         getterIndex++) {
       String field = fields.get(getterIndex);
-      gettersString[getterIndex] = PojoUtils.createGetter(clazz, valueToExpression.get(field), String.class);
+      getters[getterIndex] = PojoUtils.createGetter(clazz, valueToExpression.get(field), Object.class);
     }
 
-    return gettersString;
-  }
-
-  /**
-   * Utility method for creating char getters. This method is useful for creating a {@link GPOGetters} object
-   * which can be used to copy POJOs into GPOMutable objects.
-   * @param fields The fields to create getters for. The order of the fields in this list will be the same order
-   * that the getters will be returned in.
-   * @param valueToExpression A map from field names to the corresponding java expression to be used for getting
-   * the fields.
-   * @param clazz The Class of the POJO to extract values from.
-   * @return An array of char getters for given fields.
-   */
-  @SuppressWarnings({"unchecked","rawtypes"})
-  public static GetterChar<Object>[] createGetterChar(List<String> fields,
-                                                      Map<String, String> valueToExpression,
-                                                      Class<?> clazz)
-  {
-    GetterChar<Object>[] gettersChar = new GetterChar[fields.size()];
-
-    for(int getterIndex = 0;
-        getterIndex < fields.size();
-        getterIndex++) {
-      String field = fields.get(getterIndex);
-      gettersChar[getterIndex] = PojoUtils.createGetterChar(clazz, valueToExpression.get(field));
-    }
-
-    return gettersChar;
-  }
-
-  /**
-   * Utility method for creating byte getters. This method is useful for creating a {@link GPOGetters} object
-   * which can be used to copy POJOs into GPOMutable objects.
-   * @param fields The fields to create getters for. The order of the fields in this list will be the same order
-   * that the getters will be returned in.
-   * @param valueToExpression A map from field names to the corresponding java expression to be used for getting
-   * the fields.
-   * @param clazz The Class of the POJO to extract values from.
-   * @return An array of byte getters for given fields.
-   */
-  @SuppressWarnings({"unchecked","rawtypes"})
-  public static GetterByte<Object>[] createGetterByte(List<String> fields,
-                                                      Map<String, String> valueToExpression,
-                                                      Class<?> clazz)
-  {
-    GetterByte<Object>[] gettersByte = new GetterByte[fields.size()];
-
-    for(int getterIndex = 0;
-        getterIndex < fields.size();
-        getterIndex++) {
-      String field = fields.get(getterIndex);
-      gettersByte[getterIndex] = PojoUtils.createGetterByte(clazz, valueToExpression.get(field));
-    }
-
-    return gettersByte;
-  }
-
-  /**
-   * Utility method for creating short getters. This method is useful for creating a {@link GPOGetters} object
-   * which can be used to copy POJOs into GPOMutable objects.
-   * @param fields The fields to create getters for. The order of the fields in this list will be the same order
-   * that the getters will be returned in.
-   * @param valueToExpression A map from field names to the corresponding java expression to be used for getting
-   * the fields.
-   * @param clazz The Class of the POJO to extract values from.
-   * @return An array of short getters for given fields.
-   */
-  @SuppressWarnings({"unchecked","rawtypes"})
-  public static GetterShort<Object>[] createGetterShort(List<String> fields,
-                                                        Map<String, String> valueToExpression,
-                                                        Class<?> clazz)
-  {
-    GetterShort<Object>[] gettersShort = new GetterShort[fields.size()];
-
-    for(int getterIndex = 0;
-        getterIndex < fields.size();
-        getterIndex++) {
-      String field = fields.get(getterIndex);
-      gettersShort[getterIndex] = PojoUtils.createGetterShort(clazz, valueToExpression.get(field));
-    }
-
-    return gettersShort;
-  }
-
-  /**
-   * Utility method for creating integer getters. This method is useful for creating a {@link GPOGetters} object
-   * which can be used to copy POJOs into GPOMutable objects.
-   * @param fields The fields to create getters for. The order of the fields in this list will be the same order
-   * that the getters will be returned in.
-   * @param valueToExpression A map from field names to the corresponding java expression to be used for getting
-   * the fields.
-   * @param clazz The Class of the POJO to extract values from.
-   * @return An array of integer getters for given fields.
-   */
-  @SuppressWarnings({"unchecked","rawtypes"})
-  public static GetterInt<Object>[] createGetterInt(List<String> fields,
-                                                    Map<String, String> valueToExpression,
-                                                    Class<?> clazz)
-  {
-    GetterInt<Object>[] gettersInt = new GetterInt[fields.size()];
-
-    for(int getterIndex = 0;
-        getterIndex < fields.size();
-        getterIndex++) {
-      String field = fields.get(getterIndex);
-      gettersInt[getterIndex] = PojoUtils.createGetterInt(clazz, valueToExpression.get(field));
-    }
-
-    return gettersInt;
-  }
-
-  /**
-   * Utility method for creating long getters. This method is useful for creating a {@link GPOGetters} object
-   * which can be used to copy POJOs into GPOMutable objects.
-   * @param fields The fields to create getters for. The order of the fields in this list will be the same order
-   * that the getters will be returned in.
-   * @param valueToExpression A map from field names to the corresponding java expression to be used for getting
-   * the fields.
-   * @param clazz The Class of the POJO to extract values from.
-   * @return An array of long getters for given fields.
-   */
-  @SuppressWarnings({"unchecked","rawtypes"})
-  public static GetterLong<Object>[] createGetterLong(List<String> fields,
-                                                      Map<String, String> valueToExpression,
-                                                      Class<?> clazz)
-  {
-    GetterLong<Object>[] gettersLong = new GetterLong[fields.size()];
-
-    for(int getterIndex = 0;
-        getterIndex < fields.size();
-        getterIndex++) {
-      String field = fields.get(getterIndex);
-      gettersLong[getterIndex] = PojoUtils.createGetterLong(clazz, valueToExpression.get(field));
-    }
-
-    return gettersLong;
-  }
-
-  /**
-   * Utility method for creating float getters. This method is useful for creating a {@link GPOGetters} object
-   * which can be used to copy POJOs into GPOMutable objects.
-   * @param fields The fields to create getters for. The order of the fields in this list will be the same order
-   * that the getters will be returned in.
-   * @param valueToExpression A map from field names to the corresponding java expression to be used for getting
-   * the fields.
-   * @param clazz The Class of the POJO to extract values from.
-   * @return An array of float getters for given fields.
-   */
-  @SuppressWarnings({"unchecked","rawtypes"})
-  public static GetterFloat<Object>[] createGetterFloat(List<String> fields,
-                                                        Map<String, String> valueToExpression,
-                                                        Class<?> clazz)
-  {
-    GetterFloat<Object>[] gettersFloat = new GetterFloat[fields.size()];
-
-    for(int getterIndex = 0;
-        getterIndex < fields.size();
-        getterIndex++) {
-      String field = fields.get(getterIndex);
-      gettersFloat[getterIndex] = PojoUtils.createGetterFloat(clazz, valueToExpression.get(field));
-    }
-
-    return gettersFloat;
-  }
-
-  /**
-   * Utility method for creating double getters. This method is useful for creating a {@link GPOGetters} object
-   * which can be used to copy POJOs into GPOMutable objects.
-   * @param fields The fields to create getters for. The order of the fields in this list will be the same order
-   * that the getters will be returned in.
-   * @param valueToExpression A map from field names to the corresponding java expression to be used for getting
-   * the fields.
-   * @param clazz The Class of the POJO to extract values from.
-   * @return An array of double getters for given fields.
-   */
-  @SuppressWarnings({"unchecked","rawtypes"})
-  public static GetterDouble<Object>[] createGetterDouble(List<String> fields,
-                                                          Map<String, String> valueToExpression,
-                                                          Class<?> clazz)
-  {
-    GetterDouble<Object>[] gettersDouble = new GetterDouble[fields.size()];
-
-    for(int getterIndex = 0;
-        getterIndex < fields.size();
-        getterIndex++) {
-      String field = fields.get(getterIndex);
-      gettersDouble[getterIndex] = PojoUtils.createGetterDouble(clazz, valueToExpression.get(field));
-    }
-
-    return gettersDouble;
-  }
-
-  /**
-   * Utility method for creating object getters. This method is useful for creating a {@link GPOGetters} object
-   * which can be used to copy POJOs into GPOMutable objects.
-   * @param fields The fields to create getters for. The order of the fields in this list will be the same order
-   * that the getters will be returned in.
-   * @param valueToExpression A map from field names to the corresponding java expression to be used for getting
-   * the fields.
-   * @param clazz The Class of the POJO to extract values from.
-   * @return An array of object getters for given fields.
-   */
-  @SuppressWarnings({"unchecked","rawtypes"})
-  public static Getter<Object, Object>[] createGetterObject(List<String> fields,
-                                                            Map<String, String> valueToExpression,
-                                                            Class<?> clazz)
-  {
-    Getter<Object, Object>[] gettersObject = new Getter[fields.size()];
-
-    for(int getterIndex = 0;
-        getterIndex < fields.size();
-        getterIndex++) {
-      String field = fields.get(getterIndex);
-      gettersObject[getterIndex] = PojoUtils.createGetter(clazz, valueToExpression.get(field), Object.class);
-    }
-
-    return gettersObject;
+    return getters;
   }
 
   /**
@@ -1678,77 +1202,9 @@ public class GPOUtils
 
     for(Map.Entry<Type, List<String>> entry: typeToFields.entrySet()) {
       Type inputType = entry.getKey();
+      GPOType gpoType = GPOType.GPO_TYPE_ARRAY[inputType.ordinal()];
       List<String> fields = entry.getValue();
-
-      switch(inputType) {
-        case BOOLEAN: {
-          gpoGetters.gettersBoolean = createGetterBoolean(fields,
-                                                          fieldToGetter,
-                                                          clazz);
-          break;
-        }
-        case STRING: {
-          gpoGetters.gettersString = createGetterString(fields,
-                                                        fieldToGetter,
-                                                        clazz);
-          break;
-        }
-        case CHAR: {
-          gpoGetters.gettersChar = createGetterChar(fields,
-                                                    fieldToGetter,
-                                                    clazz);
-          break;
-        }
-        case DOUBLE: {
-          gpoGetters.gettersDouble = createGetterDouble(fields,
-                                                        fieldToGetter,
-                                                        clazz);
-          break;
-        }
-        case FLOAT: {
-          gpoGetters.gettersFloat = createGetterFloat(fields,
-                                                      fieldToGetter,
-                                                      clazz);
-          break;
-        }
-        case LONG: {
-          gpoGetters.gettersLong = createGetterLong(fields,
-                                                    fieldToGetter,
-                                                    clazz);
-          break;
-        }
-        case INTEGER: {
-          gpoGetters.gettersInteger = createGetterInt(fields,
-                                                      fieldToGetter,
-                                                      clazz);
-
-          break;
-        }
-        case SHORT: {
-          gpoGetters.gettersShort = createGetterShort(fields,
-                                                      fieldToGetter,
-                                                      clazz);
-
-          break;
-        }
-        case BYTE: {
-          gpoGetters.gettersByte = createGetterByte(fields,
-                                                    fieldToGetter,
-                                                    clazz);
-
-          break;
-        }
-        case OBJECT: {
-          gpoGetters.gettersObject = createGetterObject(fields,
-                                                        fieldToGetter,
-                                                        clazz);
-
-          break;
-        }
-        default: {
-          throw new IllegalArgumentException("The type " + inputType + " is not supported.");
-        }
-      }
+      gpoType.buildGPOGetters(gpoGetters, fields, fieldToGetter, clazz);
     }
 
     return gpoGetters;
@@ -1881,6 +1337,816 @@ public class GPOUtils
           tempString[index] = tempGetterString[index].get(object);
         }
       }
+    }
+  }
+
+  public static void indirectCopy(GPOMutable dest,
+                                  GPOMutable src,
+                                  IndexSubset indexSubset)
+  {
+    {
+      String[] destString = dest.getFieldsString();
+      String[] srcString = src.getFieldsString();
+      int[] srcIndex = indexSubset.fieldsStringIndexSubset;
+      if(destString != null) {
+        for(int index = 0;
+            index < srcIndex.length;
+            index++) {
+          if(srcIndex[index] == -1) {
+            continue;
+          }
+          destString[index] = srcString[srcIndex[index]];
+        }
+      }
+    }
+
+    {
+      boolean[] destBoolean = dest.getFieldsBoolean();
+      boolean[] srcBoolean = src.getFieldsBoolean();
+      int[] srcIndex = indexSubset.fieldsBooleanIndexSubset;
+      if(destBoolean != null) {
+        for(int index = 0;
+            index < srcIndex.length;
+            index++) {
+          if(srcIndex[index] == -1) {
+            continue;
+          }
+          destBoolean[index] = srcBoolean[srcIndex[index]];
+        }
+      }
+    }
+
+    {
+      char[] destChar = dest.getFieldsCharacter();
+      char[] srcChar = src.getFieldsCharacter();
+      int[] srcIndex = indexSubset.fieldsBooleanIndexSubset;
+      if(destChar != null) {
+        for(int index = 0;
+            index < srcIndex.length;
+            index++) {
+          if(srcIndex[index] == -1) {
+            continue;
+          }
+          destChar[index] = srcChar[srcIndex[index]];
+        }
+      }
+    }
+
+    {
+      byte[] destByte = dest.getFieldsByte();
+      byte[] srcByte = src.getFieldsByte();
+      int[] srcIndex = indexSubset.fieldsByteIndexSubset;
+      if(destByte != null) {
+        for(int index = 0;
+            index < srcIndex.length;
+            index++) {
+          if(srcIndex[index] == -1) {
+            continue;
+          }
+          destByte[index] = srcByte[srcIndex[index]];
+        }
+      }
+    }
+
+    {
+      short[] destShort = dest.getFieldsShort();
+      short[] srcShort = src.getFieldsShort();
+      int[] srcIndex = indexSubset.fieldsShortIndexSubset;
+      if(destShort != null) {
+        for(int index = 0;
+            index < srcIndex.length;
+            index++) {
+          if(srcIndex[index] == -1) {
+            continue;
+          }
+          destShort[index] = srcShort[srcIndex[index]];
+        }
+      }
+    }
+
+    {
+      int[] destInteger = dest.getFieldsInteger();
+      int[] srcInteger = src.getFieldsInteger();
+      int[] srcIndex = indexSubset.fieldsIntegerIndexSubset;
+      if(destInteger != null) {
+        for(int index = 0;
+            index < srcIndex.length;
+            index++) {
+          if(srcIndex[index] == -1) {
+            continue;
+          }
+          destInteger[index] = srcInteger[srcIndex[index]];
+        }
+      }
+    }
+
+    {
+      long[] destLong = dest.getFieldsLong();
+      long[] srcLong = src.getFieldsLong();
+      int[] srcIndex = indexSubset.fieldsLongIndexSubset;
+      if(destLong != null) {
+        for(int index = 0;
+            index < srcIndex.length;
+            index++) {
+          if(srcIndex[index] == -1) {
+            continue;
+          }
+
+          destLong[index] = srcLong[srcIndex[index]];
+        }
+      }
+    }
+
+    {
+      float[] destFloat = dest.getFieldsFloat();
+      float[] srcFloat = src.getFieldsFloat();
+      int[] srcIndex = indexSubset.fieldsFloatIndexSubset;
+      if(destFloat != null) {
+        for(int index = 0;
+            index < srcIndex.length;
+            index++) {
+          if(srcIndex[index] == -1) {
+            continue;
+          }
+          destFloat[index] = srcFloat[srcIndex[index]];
+        }
+      }
+    }
+
+    {
+      double[] destDouble = dest.getFieldsDouble();
+      double[] srcDouble = src.getFieldsDouble();
+      int[] srcIndex = indexSubset.fieldsDoubleIndexSubset;
+      if(destDouble != null) {
+        for(int index = 0;
+            index < srcIndex.length;
+            index++) {
+          if(srcIndex[index] == -1) {
+            continue;
+          }
+          destDouble[index] = srcDouble[srcIndex[index]];
+        }
+      }
+    }
+  }
+
+  public static int hashcode(GPOMutable gpo)
+  {
+    int hashCode = 0;
+
+    {
+      String[] stringArray = gpo.getFieldsString();
+      if(stringArray != null) {
+        for(int index = 0;
+            index < stringArray.length;
+            index++) {
+          hashCode ^= stringArray[index].hashCode();
+        }
+      }
+    }
+
+    {
+      boolean[] booleanArray = gpo.getFieldsBoolean();
+      if(booleanArray != null) {
+        for(int index = 0;
+            index < booleanArray.length;
+            index++) {
+          hashCode ^= booleanArray[index] ? 1: 0;
+        }
+      }
+    }
+
+    {
+      char[] charArray = gpo.getFieldsCharacter();
+      if(charArray != null) {
+        for(int index = 0;
+            index < charArray.length;
+            index++) {
+          hashCode ^= Character.getNumericValue(charArray[index]);
+        }
+      }
+    }
+
+    {
+      byte[] byteArray = gpo.getFieldsByte();
+      if(byteArray != null) {
+        for(int index = 0;
+            index < byteArray.length;
+            index++) {
+          hashCode ^= byteArray[index];
+        }
+      }
+    }
+
+    {
+      short[] shortArray = gpo.getFieldsShort();
+      if(shortArray != null) {
+        for(int index = 0;
+            index < shortArray.length;
+            index++) {
+          hashCode ^= shortArray[index];
+        }
+      }
+    }
+
+    {
+      int[] integerArray = gpo.getFieldsInteger();
+      if(integerArray != null) {
+        for(int index = 0;
+            index < integerArray.length;
+            index++) {
+          hashCode ^= integerArray[index];
+        }
+      }
+    }
+
+    {
+      long[] longArray = gpo.getFieldsLong();
+      if(longArray != null) {
+        for(int index = 0;
+            index < longArray.length;
+            index++) {
+          hashCode ^= longArray[index];
+        }
+      }
+    }
+
+    {
+      float[] floatArray = gpo.getFieldsFloat();
+      if(floatArray != null) {
+        for(int index = 0;
+            index < floatArray.length;
+            index++) {
+          hashCode ^= Float.floatToIntBits(floatArray[index]);
+        }
+      }
+    }
+
+    {
+      double[] doubleArray = gpo.getFieldsDouble();
+      if(doubleArray != null) {
+        for(int index = 0;
+            index < doubleArray.length;
+            index++) {
+          hashCode ^= Double.doubleToLongBits(doubleArray[index]);
+        }
+      }
+    }
+
+    return hashCode;
+  }
+
+  public static int indirectHashcode(GPOMutable gpo,
+                                     IndexSubset indexSubset)
+  {
+    int hashCode = 0;
+
+    {
+      String[] stringArray = gpo.getFieldsString();
+      int[] srcIndex = indexSubset.fieldsStringIndexSubset;
+      if(stringArray != null) {
+        for(int index = 0;
+            index < srcIndex.length;
+            index++) {
+          if(srcIndex[index] == -1) {
+            continue;
+          }
+          hashCode ^= stringArray[srcIndex[index]].hashCode();
+        }
+      }
+    }
+
+    {
+      boolean[] booleanArray = gpo.getFieldsBoolean();
+      int[] srcIndex = indexSubset.fieldsBooleanIndexSubset;
+      if(booleanArray != null) {
+        for(int index = 0;
+            index < srcIndex.length;
+            index++) {
+          if(srcIndex[index] == -1) {
+            continue;
+          }
+          hashCode ^= booleanArray[srcIndex[index]] ? 1: 0;
+        }
+      }
+    }
+
+    {
+      char[] charArray = gpo.getFieldsCharacter();
+      int[] srcIndex = indexSubset.fieldsCharacterIndexSubset;
+      if(charArray != null) {
+        for(int index = 0;
+            index < srcIndex.length;
+            index++) {
+          if(srcIndex[index] == -1) {
+            continue;
+          }
+          hashCode ^= Character.getNumericValue(charArray[srcIndex[index]]);
+        }
+      }
+    }
+
+    {
+      byte[] byteArray = gpo.getFieldsByte();
+      int[] srcIndex = indexSubset.fieldsByteIndexSubset;
+      if(byteArray != null) {
+        for(int index = 0;
+            index < srcIndex.length;
+            index++) {
+          if(srcIndex[index] == -1) {
+            continue;
+          }
+          hashCode ^= byteArray[srcIndex[index]];
+        }
+      }
+    }
+
+    {
+      short[] shortArray = gpo.getFieldsShort();
+      int[] srcIndex = indexSubset.fieldsShortIndexSubset;
+      if(shortArray != null) {
+        for(int index = 0;
+            index < srcIndex.length;
+            index++) {
+          if(srcIndex[index] == -1) {
+            continue;
+          }
+          hashCode ^= shortArray[srcIndex[index]];
+        }
+      }
+    }
+
+    {
+      int[] integerArray = gpo.getFieldsInteger();
+      int[] srcIndex = indexSubset.fieldsIntegerIndexSubset;
+      if(integerArray != null) {
+        for(int index = 0;
+            index < srcIndex.length;
+            index++) {
+          if(srcIndex[index] == -1) {
+            continue;
+          }
+          hashCode ^= integerArray[srcIndex[index]];
+        }
+      }
+    }
+
+    {
+      long[] longArray = gpo.getFieldsLong();
+      int[] srcIndex = indexSubset.fieldsLongIndexSubset;
+      if(longArray != null) {
+        for(int index = 0;
+            index < srcIndex.length;
+            index++) {
+          if(srcIndex[index] == -1) {
+            continue;
+          }
+          hashCode ^= longArray[srcIndex[index]];
+        }
+      }
+    }
+
+    {
+      float[] floatArray = gpo.getFieldsFloat();
+      int[] srcIndex = indexSubset.fieldsFloatIndexSubset;
+      if(floatArray != null) {
+        for(int index = 0;
+            index < srcIndex.length;
+            index++) {
+          if(srcIndex[index] == -1) {
+            continue;
+          }
+          hashCode ^= Float.floatToIntBits(floatArray[srcIndex[index]]);
+        }
+      }
+    }
+
+    {
+      double[] doubleArray = gpo.getFieldsDouble();
+      int[] srcIndex = indexSubset.fieldsDoubleIndexSubset;
+      if(doubleArray != null) {
+        for(int index = 0;
+            index < srcIndex.length;
+            index++) {
+          if(srcIndex[index] == -1) {
+            continue;
+          }
+          hashCode ^= Double.doubleToLongBits(doubleArray[srcIndex[index]]);
+        }
+      }
+    }
+
+    return hashCode;
+  }
+
+  public static boolean equals(GPOMutable dest,
+                               GPOMutable src)
+  {
+    {
+      String[] destString = dest.getFieldsString();
+      String[] srcString = src.getFieldsString();
+      if(destString != null) {
+        for(int index = 0;
+            index < srcString.length;
+            index++) {
+          if(!destString[index].equals(srcString[index])) {
+            return false;
+          }
+        }
+      }
+    }
+
+    {
+      boolean[] destBoolean = dest.getFieldsBoolean();
+      boolean[] srcBoolean = src.getFieldsBoolean();
+      if(destBoolean != null) {
+        for(int index = 0;
+            index < srcBoolean.length;
+            index++) {
+          if(destBoolean[index] != srcBoolean[index]) {
+            return false;
+          }
+        }
+      }
+    }
+
+    {
+      char[] destChar = dest.getFieldsCharacter();
+      char[] srcChar = src.getFieldsCharacter();
+      if(destChar != null) {
+        for(int index = 0;
+            index < srcChar.length;
+            index++) {
+          if(destChar[index] != srcChar[index]) {
+            return false;
+          }
+        }
+      }
+    }
+
+    {
+      byte[] destByte = dest.getFieldsByte();
+      byte[] srcByte = src.getFieldsByte();
+      if(destByte != null) {
+        for(int index = 0;
+            index < srcByte.length;
+            index++) {
+          if(destByte[index] != srcByte[index]) {
+            return false;
+          }
+        }
+      }
+    }
+
+    {
+      short[] destShort = dest.getFieldsShort();
+      short[] srcShort = src.getFieldsShort();
+      if(destShort != null) {
+        for(int index = 0;
+            index < srcShort.length;
+            index++) {
+          if(destShort[index] != srcShort[index]) {
+            return false;
+          }
+        }
+      }
+    }
+
+    {
+      int[] destInteger = dest.getFieldsInteger();
+      int[] srcInteger = src.getFieldsInteger();
+      if(destInteger != null) {
+        for(int index = 0;
+            index < srcInteger.length;
+            index++) {
+          if(destInteger[index] != srcInteger[index]) {
+            return false;
+          }
+        }
+      }
+    }
+
+    {
+      long[] destLong = dest.getFieldsLong();
+      long[] srcLong = src.getFieldsLong();
+      if(destLong != null) {
+        for(int index = 0;
+            index < srcLong.length;
+            index++) {
+          if(destLong[index] != srcLong[index]) {
+            return false;
+          }
+        }
+      }
+    }
+
+    {
+      float[] destFloat = dest.getFieldsFloat();
+      float[] srcFloat = src.getFieldsFloat();
+      if(destFloat != null) {
+        for(int index = 0;
+            index < srcFloat.length;
+            index++) {
+          if(destFloat[index] != srcFloat[index]) {
+            return false;
+          }
+        }
+      }
+    }
+
+    {
+      double[] destDouble = dest.getFieldsDouble();
+      double[] srcDouble = src.getFieldsDouble();
+      if(destDouble != null) {
+        for(int index = 0;
+            index < srcDouble.length;
+            index++) {
+          if(destDouble[index] != srcDouble[index]) {
+            return false;
+          }
+        }
+      }
+    }
+
+    return true;
+  }
+
+  public static boolean indirectEquals(GPOMutable dest,
+                                       GPOMutable src,
+                                       IndexSubset indexSubset)
+  {
+    {
+      String[] destString = dest.getFieldsString();
+      String[] srcString = src.getFieldsString();
+      int[] srcIndex = indexSubset.fieldsStringIndexSubset;
+      if(destString != null) {
+        for(int index = 0;
+            index < srcIndex.length;
+            index++) {
+          if(srcIndex[index] == -1) {
+            continue;
+          }
+          if(!destString[index].equals(srcString[srcIndex[index]])) {
+            return false;
+          }
+        }
+      }
+    }
+
+    {
+      boolean[] destBoolean = dest.getFieldsBoolean();
+      boolean[] srcBoolean = src.getFieldsBoolean();
+      int[] srcIndex = indexSubset.fieldsBooleanIndexSubset;
+      if(destBoolean != null) {
+        for(int index = 0;
+            index < srcIndex.length;
+            index++) {
+          if(srcIndex[index] == -1) {
+            continue;
+          }
+          if(destBoolean[index] != srcBoolean[srcIndex[index]]) {
+            return false;
+          }
+        }
+      }
+    }
+
+    {
+      char[] destChar = dest.getFieldsCharacter();
+      char[] srcChar = src.getFieldsCharacter();
+      int[] srcIndex = indexSubset.fieldsBooleanIndexSubset;
+      if(destChar != null) {
+        for(int index = 0;
+            index < srcIndex.length;
+            index++) {
+          if(srcIndex[index] == -1) {
+            continue;
+          }
+          if(destChar[index] != srcChar[srcIndex[index]]) {
+            return false;
+          }
+        }
+      }
+    }
+
+    {
+      byte[] destByte = dest.getFieldsByte();
+      byte[] srcByte = src.getFieldsByte();
+      int[] srcIndex = indexSubset.fieldsByteIndexSubset;
+      if(destByte != null) {
+        for(int index = 0;
+            index < srcIndex.length;
+            index++) {
+          if(srcIndex[index] == -1) {
+            continue;
+          }
+          if(destByte[index] != srcByte[srcIndex[index]]) {
+            return false;
+          }
+        }
+      }
+    }
+
+    {
+      short[] destShort = dest.getFieldsShort();
+      short[] srcShort = src.getFieldsShort();
+      int[] srcIndex = indexSubset.fieldsShortIndexSubset;
+      if(destShort != null) {
+        for(int index = 0;
+            index < srcIndex.length;
+            index++) {
+          if(srcIndex[index] == -1) {
+            continue;
+          }
+          if(destShort[index] != srcShort[srcIndex[index]]) {
+            return false;
+          }
+        }
+      }
+    }
+
+    {
+      int[] destInteger = dest.getFieldsInteger();
+      int[] srcInteger = src.getFieldsInteger();
+      int[] srcIndex = indexSubset.fieldsIntegerIndexSubset;
+      if(destInteger != null) {
+        for(int index = 0;
+            index < srcIndex.length;
+            index++) {
+          if(srcIndex[index] == -1) {
+            continue;
+          }
+          if(destInteger[index] != srcInteger[srcIndex[index]]) {
+            return false;
+          }
+        }
+      }
+    }
+
+    {
+      long[] destLong = dest.getFieldsLong();
+      long[] srcLong = src.getFieldsLong();
+      int[] srcIndex = indexSubset.fieldsLongIndexSubset;
+      if(destLong != null) {
+        for(int index = 0;
+            index < srcIndex.length;
+            index++) {
+          if(srcIndex[index] == -1) {
+            continue;
+          }
+          if(destLong[index] != srcLong[srcIndex[index]]) {
+            return false;
+          }
+        }
+      }
+    }
+
+    {
+      float[] destFloat = dest.getFieldsFloat();
+      float[] srcFloat = src.getFieldsFloat();
+      int[] srcIndex = indexSubset.fieldsFloatIndexSubset;
+      if(destFloat != null) {
+        for(int index = 0;
+            index < srcIndex.length;
+            index++) {
+          if(srcIndex[index] == -1) {
+            continue;
+          }
+          if(destFloat[index] != srcFloat[srcIndex[index]]) {
+            return false;
+          }
+        }
+      }
+    }
+
+    {
+      double[] destDouble = dest.getFieldsDouble();
+      double[] srcDouble = src.getFieldsDouble();
+      int[] srcIndex = indexSubset.fieldsDoubleIndexSubset;
+      if(destDouble != null) {
+        for(int index = 0;
+            index < srcIndex.length;
+            index++) {
+          if(srcIndex[index] == -1) {
+            continue;
+          }
+          if(destDouble[index] != srcDouble[srcIndex[index]]) {
+            return false;
+          }
+        }
+      }
+    }
+
+    return true;
+  }
+
+  public static IndexSubset computeSubIndices(FieldsDescriptor child,
+                                              FieldsDescriptor parent)
+  {
+    IndexSubset indexSubset = new IndexSubset();
+
+    for(Map.Entry<Type, List<String>> entry: child.getTypeToFields().entrySet()) {
+      Type type = entry.getKey();
+      List<String> childFields = entry.getValue();
+      List<String> parentFields = parent.getTypeToFields().get(type);
+
+      int size = child.getTypeToSize().get(type);
+      int[] indices;
+      if(child.getTypeToFields().get(type) != null &&
+         child.getCompressedTypes().contains(type)) {
+        indices = new int[1];
+      }
+      else {
+        indices = new int[size];
+
+        for(int index = 0;
+            index < size;
+            index++) {
+          if(parentFields == null) {
+            indices[index] = -1;
+          }
+          else {
+            indices[index] = parentFields.indexOf(childFields.get(index));
+          }
+        }
+      }
+
+      switch(type) {
+        case BOOLEAN: {
+          indexSubset.fieldsBooleanIndexSubset = indices;
+          break;
+        }
+        case CHAR: {
+          indexSubset.fieldsCharacterIndexSubset = indices;
+          break;
+        }
+        case STRING: {
+          indexSubset.fieldsStringIndexSubset = indices;
+          break;
+        }
+        case BYTE: {
+          indexSubset.fieldsByteIndexSubset = indices;
+          break;
+        }
+        case SHORT: {
+          indexSubset.fieldsShortIndexSubset = indices;
+          break;
+        }
+        case INTEGER: {
+          indexSubset.fieldsIntegerIndexSubset = indices;
+          break;
+        }
+        case LONG: {
+          indexSubset.fieldsLongIndexSubset = indices;
+          break;
+        }
+        case FLOAT: {
+          indexSubset.fieldsFloatIndexSubset = indices;
+          break;
+        }
+        case DOUBLE: {
+          indexSubset.fieldsDoubleIndexSubset = indices;
+          break;
+        }
+        default: {
+          throw new UnsupportedOperationException("Type " + type);
+        }
+      }
+    }
+
+    return indexSubset;
+  }
+
+  /**
+   * The subset of indices to pull data out of.
+   */
+  public static class IndexSubset implements Serializable
+  {
+    private static final long serialVersionUID = 201506251015L;
+
+    public DimensionsDescriptor dd;
+    public int[] fieldsBooleanIndexSubset;
+    public int[] fieldsCharacterIndexSubset;
+
+    public int[] fieldsByteIndexSubset;
+    public int[] fieldsShortIndexSubset;
+    public int[] fieldsIntegerIndexSubset;
+    public int[] fieldsLongIndexSubset;
+
+    public int[] fieldsFloatIndexSubset;
+    public int[] fieldsDoubleIndexSubset;
+
+    public int[] fieldsStringIndexSubset;
+
+    public IndexSubset()
+    {
+      //Do nothing
+    }
+
+    @Override
+    public String toString()
+    {
+      return "IndexSubset{" + "fieldsBooleanIndexSubset=" + fieldsBooleanIndexSubset + ", fieldsCharacterIndexSubset=" + fieldsCharacterIndexSubset + ", fieldsByteIndexSubset=" + fieldsByteIndexSubset + ", fieldsShortIndexSubset=" + fieldsShortIndexSubset + ", fieldsIntegerIndexSubset=" + fieldsIntegerIndexSubset + ", fieldsLongIndexSubset=" + fieldsLongIndexSubset + ", fieldsFloatIndexSubset=" + fieldsFloatIndexSubset + ", fieldsDoubleIndexSubset=" + fieldsDoubleIndexSubset + ", fieldsStringIndexSubset=" + fieldsStringIndexSubset + '}';
     }
   }
 

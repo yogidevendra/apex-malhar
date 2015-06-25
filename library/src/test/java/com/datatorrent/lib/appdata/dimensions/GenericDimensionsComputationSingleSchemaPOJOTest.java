@@ -21,13 +21,12 @@ import com.datatorrent.lib.appdata.schemas.DimensionalConfigurationSchema;
 import com.datatorrent.lib.appdata.schemas.FieldsDescriptor;
 import com.datatorrent.lib.appdata.schemas.SchemaUtils;
 import com.datatorrent.lib.appdata.schemas.TimeBucket;
-import com.datatorrent.lib.dimensions.AbstractDimensionsComputationFlexibleSingleSchema;
-import com.datatorrent.lib.dimensions.aggregator.AggregatorIncrementalType;
-import com.datatorrent.lib.dimensions.DimensionsComputationFlexibleSingleSchemaPOJO;
 import com.datatorrent.lib.dimensions.DimensionsDescriptor;
-import com.datatorrent.lib.dimensions.DimensionsEvent;
 import com.datatorrent.lib.dimensions.DimensionsEvent.Aggregate;
 import com.datatorrent.lib.dimensions.DimensionsEvent.EventKey;
+import com.datatorrent.lib.dimensions.GenericDimensionsComputationSingleSchema;
+import com.datatorrent.lib.dimensions.GenericDimensionsComputationSingleSchemaPOJO;
+import com.datatorrent.lib.dimensions.aggregator.AggregatorIncrementalType;
 import com.datatorrent.lib.dimensions.aggregator.AggregatorRegistry;
 import com.datatorrent.lib.testbench.CollectorTestSink;
 import com.datatorrent.lib.util.TestUtils;
@@ -41,9 +40,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
-public class DimensionsComputationFlexibleSingleSchemaPOJOTest
+public class GenericDimensionsComputationSingleSchemaPOJOTest
 {
-  private static final Logger logger = LoggerFactory.getLogger(DimensionsComputationFlexibleSingleSchemaPOJOTest.class);
+  private static final Logger LOG = LoggerFactory.getLogger(GenericDimensionsComputationSingleSchemaPOJOTest.class);
 
   @Before
   public void setup()
@@ -57,7 +56,7 @@ public class DimensionsComputationFlexibleSingleSchemaPOJOTest
     AdInfo ai = createTestAdInfoEvent1();
     AdInfo ai2 = createTestAdInfoEvent2();
 
-    int schemaID = AbstractDimensionsComputationFlexibleSingleSchema.DEFAULT_SCHEMA_ID;
+    int schemaID = GenericDimensionsComputationSingleSchema.DEFAULT_SCHEMA_ID;
     int dimensionsDescriptorID = 0;
     int aggregatorID = AggregatorRegistry.DEFAULT_AGGREGATOR_REGISTRY.
                        getIncrementalAggregatorNameToID().
@@ -66,7 +65,6 @@ public class DimensionsComputationFlexibleSingleSchemaPOJOTest
     String eventSchema = SchemaUtils.jarResourceFileToString("adsGenericEventSimple.json");
     DimensionalConfigurationSchema schema = new DimensionalConfigurationSchema(eventSchema,
                                                                AggregatorRegistry.DEFAULT_AGGREGATOR_REGISTRY);
-
     FieldsDescriptor keyFD = schema.getDimensionsDescriptorIDToKeyDescriptor().get(0);
     FieldsDescriptor valueFD = schema.getDimensionsDescriptorIDToAggregatorIDToInputAggregatorDescriptor().get(0).get(aggregatorID);
 
@@ -91,22 +89,28 @@ public class DimensionsComputationFlexibleSingleSchemaPOJOTest
 
     Aggregate expectedAE = new Aggregate(eventKey, valueGPO);
 
-    DimensionsComputationFlexibleSingleSchemaPOJO dimensions = createDimensionsComputationOperator("adsGenericEventSimple.json");
+    GenericDimensionsComputationSingleSchemaPOJO dimensions = createDimensionsComputationOperator("adsGenericEventSimple.json");
 
-    CollectorTestSink<DimensionsEvent> sink = new CollectorTestSink<DimensionsEvent>();
+    CollectorTestSink<Aggregate> sink = new CollectorTestSink<Aggregate>();
     TestUtils.setSink(dimensions.output, sink);
 
-    DimensionsComputationFlexibleSingleSchemaPOJO dimensionsClone =
+    GenericDimensionsComputationSingleSchemaPOJO dimensionsClone =
     TestUtils.clone(new Kryo(), dimensions);
 
     dimensions.setup(null);
 
     dimensions.beginWindow(0L);
-    dimensions.inputEvent.put(ai);
-    dimensions.inputEvent.put(ai2);
+    dimensions.input.put(ai);
+    dimensions.input.put(ai2);
     dimensions.endWindow();
 
     Assert.assertEquals("Expected only 1 tuple", 1, sink.collectedTuples.size());
+
+    LOG.debug("{}", sink.collectedTuples.get(0).getKeys().toString());
+    LOG.debug("{}", expectedAE.getKeys());
+    LOG.debug("{}", sink.collectedTuples.get(0).getAggregates().toString());
+    LOG.debug("{}", expectedAE.getAggregates().toString());
+
     Assert.assertEquals(expectedAE, sink.collectedTuples.get(0));
   }
 
@@ -114,15 +118,17 @@ public class DimensionsComputationFlexibleSingleSchemaPOJOTest
   public void complexOutputTest()
   {
     AdInfo ai = createTestAdInfoEvent1();
+    AdInfo ai2 = createTestAdInfoEvent2();
 
-    DimensionsComputationFlexibleSingleSchemaPOJO dcss = createDimensionsComputationOperator("adsGenericEventSchemaAdditional.json");
+    GenericDimensionsComputationSingleSchemaPOJO dcss = createDimensionsComputationOperator("adsGenericEventSchemaAdditional.json");
 
-    CollectorTestSink<DimensionsEvent> sink = new CollectorTestSink<DimensionsEvent>();
+    CollectorTestSink<Aggregate> sink = new CollectorTestSink<Aggregate>();
     TestUtils.setSink(dcss.output, sink);
 
     dcss.setup(null);
     dcss.beginWindow(0L);
-    dcss.inputEvent.put(ai);
+    dcss.input.put(ai);
+    dcss.input.put(ai2);
     dcss.endWindow();
 
     Assert.assertEquals(60, sink.collectedTuples.size());
@@ -132,38 +138,40 @@ public class DimensionsComputationFlexibleSingleSchemaPOJOTest
   public void aggregationsTest()
   {
     AdInfo ai = createTestAdInfoEvent1();
+    AdInfo ai2 = createTestAdInfoEvent2();
 
-    DimensionsComputationFlexibleSingleSchemaPOJO dcss = createDimensionsComputationOperator("adsGenericEventSchemaAggregations.json");
+    GenericDimensionsComputationSingleSchemaPOJO dcss = createDimensionsComputationOperator("adsGenericEventSchemaAggregations.json");
 
-    CollectorTestSink<DimensionsEvent> sink = new CollectorTestSink<DimensionsEvent>();
+    CollectorTestSink<Aggregate> sink = new CollectorTestSink<Aggregate>();
     TestUtils.setSink(dcss.output, sink);
 
     dcss.setup(null);
     dcss.beginWindow(0L);
-    dcss.inputEvent.put(ai);
+    dcss.input.put(ai);
+    dcss.input.put(ai2);
     dcss.endWindow();
 
     Assert.assertEquals(6, sink.collectedTuples.size());
   }
 
-  public static DimensionsComputationFlexibleSingleSchemaPOJO createDimensionsComputationOperator(String eventSchema)
+  public static GenericDimensionsComputationSingleSchemaPOJO createDimensionsComputationOperator(String eventSchema)
   {
-    DimensionsComputationFlexibleSingleSchemaPOJO dimensions = new DimensionsComputationFlexibleSingleSchemaPOJO();
+    GenericDimensionsComputationSingleSchemaPOJO dimensions = new GenericDimensionsComputationSingleSchemaPOJO();
     dimensions.setConfigurationSchemaJSON(SchemaUtils.jarResourceFileToString(eventSchema));
 
     Map<String, String> fieldToExpressionKey = Maps.newHashMap();
-    fieldToExpressionKey.put("publisher", "getPublisher()");
-    fieldToExpressionKey.put("advertiser", "getAdvertiser()");
-    fieldToExpressionKey.put("location", "getLocation()");
-    fieldToExpressionKey.put("time", "getTime()");
+    fieldToExpressionKey.put("publisher", "publisher");
+    fieldToExpressionKey.put("advertiser", "advertiser");
+    fieldToExpressionKey.put("location", "location");
+    fieldToExpressionKey.put("time", "time");
 
     dimensions.setKeyToExpression(fieldToExpressionKey);
 
     Map<String, String> fieldToExpressionAggregate = Maps.newHashMap();
-    fieldToExpressionAggregate.put("cost", "getCost()");
-    fieldToExpressionAggregate.put("revenue", "getRevenue()");
-    fieldToExpressionAggregate.put("impressions", "getImpressions()");
-    fieldToExpressionAggregate.put("clicks", "getClicks()");
+    fieldToExpressionAggregate.put("cost", "cost");
+    fieldToExpressionAggregate.put("revenue", "revenue");
+    fieldToExpressionAggregate.put("impressions", "impressions");
+    fieldToExpressionAggregate.put("clicks", "clicks");
 
     dimensions.setAggregateToExpression(fieldToExpressionAggregate);
 

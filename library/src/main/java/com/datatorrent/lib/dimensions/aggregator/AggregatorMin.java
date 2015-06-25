@@ -15,36 +15,22 @@
  */
 package com.datatorrent.lib.dimensions.aggregator;
 
-import com.datatorrent.lib.dimensions.DimensionsEvent.Aggregate;
-import com.datatorrent.lib.dimensions.DimensionsEvent.InputEvent;
 import com.datatorrent.lib.appdata.gpo.GPOMutable;
 import com.datatorrent.lib.appdata.schemas.Type;
 import com.datatorrent.lib.dimensions.DimensionsEvent;
+import com.datatorrent.lib.dimensions.DimensionsEvent.Aggregate;
+import com.datatorrent.lib.dimensions.DimensionsEvent.InputEvent;
 
 /**
  * This {@link IncrementalAggregator} takes the min of the fields provided in the {@link InputEvent}.
  */
-public class AggregatorMin implements IncrementalAggregator
+public class AggregatorMin extends AbstractIncrementalAggregator
 {
   private static final long serialVersionUID = 20154301648L;
 
-  /**
-   * The singleton instance of this class.
-   */
-  public static final AggregatorMin INSTANCE = new AggregatorMin();
-
-  /**
-   * Singleton constructor.
-   */
-  private AggregatorMin()
+  public AggregatorMin()
   {
     //Do nothing
-  }
-
-  @Override
-  public Aggregate createDest(InputEvent first)
-  {
-    return new Aggregate(first.getEventKey(), first.getAggregates());
   }
 
   @Override
@@ -59,19 +45,7 @@ public class AggregatorMin implements IncrementalAggregator
     aggregateHelper(dest, src);
   }
 
-  @Override
-  public Type getOutputType(Type inputType)
-  {
-    return AggregatorUtils.IDENTITY_NUMBER_TYPE_MAP.get(inputType);
-  }
-
-  /**
-   * This is a helper method which takes the minimum of fields in the given dest and src events,
-   * and stores the minimum value of each field in the dest event.
-   * @param dest The destination of the min aggregation.
-   * @param src Another value to take the min of.
-   */
-  public void aggregateHelper(DimensionsEvent dest, DimensionsEvent src)
+  private void aggregateHelper(DimensionsEvent dest, DimensionsEvent src)
   {
     GPOMutable destAggs = dest.getAggregates();
     GPOMutable srcAggs = src.getAggregates();
@@ -165,5 +139,11 @@ public class AggregatorMin implements IncrementalAggregator
         }
       }
     }
+  }
+
+  @Override
+  public Type getOutputType(Type inputType)
+  {
+    return AggregatorUtils.IDENTITY_NUMBER_TYPE_MAP.get(inputType);
   }
 }

@@ -25,14 +25,12 @@ import java.util.Map;
 
 public enum AggregatorIncrementalType
 {
-  SUM(AggregatorSum.INSTANCE),
-  MIN(AggregatorMin.INSTANCE),
-  MAX(AggregatorMax.INSTANCE),
-  COUNT(AggregatorCount.INSTANCE),
-  LAST(AggregatorLast.INSTANCE),
-  FIRST(AggregatorFirst.INSTANCE);
-
-  private static final Logger logger = LoggerFactory.getLogger(AggregatorIncrementalType.class);
+  SUM(new AggregatorSum()),
+  MIN(new AggregatorMin()),
+  MAX(new AggregatorMax()),
+  COUNT(new AggregatorCount()),
+  LAST(new AggregatorLast()),
+  FIRST(new AggregatorFirst());
 
   public static final Map<String, Integer> NAME_TO_ORDINAL;
   public static final Map<String, IncrementalAggregator> NAME_TO_AGGREGATOR;
@@ -67,4 +65,6 @@ public enum AggregatorIncrementalType
   {
     return aggregator;
   }
+  
+  private static final Logger LOG = LoggerFactory.getLogger(AggregatorIncrementalType.class);
 }

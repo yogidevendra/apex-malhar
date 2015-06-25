@@ -23,8 +23,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.Serializable;
 
 import java.util.Collections;
 import java.util.Map;
@@ -61,9 +60,9 @@ import java.util.concurrent.TimeUnit;
  * dimensionsDescriptorID is used for storage in order to prevent key conflicts.
  * </p>
  */
-public class DimensionsDescriptor
+public class DimensionsDescriptor implements Serializable
 {
-  private static final Logger logger = LoggerFactory.getLogger(DimensionsDescriptor.class);
+  private static final long serialVersionUID = 201506251237L;
 
   /**
    * Name of the reserved time field.

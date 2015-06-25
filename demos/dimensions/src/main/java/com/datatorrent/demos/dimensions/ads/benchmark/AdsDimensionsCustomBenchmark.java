@@ -22,22 +22,14 @@ import com.datatorrent.api.DAG.Locality;
 import com.datatorrent.api.StreamingApplication;
 import com.datatorrent.api.annotation.ApplicationAnnotation;
 import com.datatorrent.demos.dimensions.ads.AdInfo;
-import com.datatorrent.demos.dimensions.ads.AdInfo.AdInfoHashingStrategy;
-import com.datatorrent.demos.dimensions.ads.AdInfo.AdInfoSumAggregator;
-import com.datatorrent.demos.dimensions.ads.AdInfo.AdsDimensionsCombination;
+import com.datatorrent.demos.dimensions.ads.AdInfo.AdInfoAggregator;
 import com.datatorrent.demos.dimensions.ads.InputItemGenerator;
 import com.datatorrent.lib.appdata.schemas.SchemaUtils;
-import com.datatorrent.lib.dimensions.AbstractDimensionsComputation.DimensionsCombination;
-import com.datatorrent.lib.dimensions.DimensionsComputationCustom;
-import com.datatorrent.lib.dimensions.DimensionsComputationUnifierImpl;
-import com.datatorrent.lib.dimensions.aggregator.Aggregator;
+import com.datatorrent.lib.statistics.DimensionsComputation;
+import com.datatorrent.lib.statistics.DimensionsComputationUnifierImpl;
 import com.datatorrent.lib.stream.DevNull;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import org.apache.hadoop.conf.Configuration;
 
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @ApplicationAnnotation(name="AdsDimensionsCustomBenchmark")
@@ -47,7 +39,8 @@ public class AdsDimensionsCustomBenchmark implements StreamingApplication
   public void populateDAG(DAG dag, Configuration conf)
   {
     InputItemGenerator input = dag.addOperator("InputGenerator", InputItemGenerator.class);
-    DimensionsComputationCustom<AdInfo, AdInfo.AdInfoAggregateEvent> dimensions = dag.addOperator("DimensionsComputation", new DimensionsComputationCustom<AdInfo, AdInfo.AdInfoAggregateEvent>());
+    DimensionsComputation<AdInfo, AdInfo.AdInfoAggregateEvent> dimensions = dag.addOperator("DimensionsComputation",
+                                                                                            new DimensionsComputation<AdInfo, AdInfo.AdInfoAggregateEvent>());
     dag.getMeta(dimensions).getAttributes().put(Context.OperatorContext.APPLICATION_WINDOW_COUNT, 10);
     DevNull<Object> devNull = dag.addOperator("DevNull", new DevNull<Object>());
 
@@ -64,31 +57,18 @@ public class AdsDimensionsCustomBenchmark implements StreamingApplication
       "time=" + TimeUnit.MINUTES + ":publisher:advertiser:location"
     };
 
-    LinkedHashMap<String, DimensionsCombination<AdInfo, AdInfo.AdInfoAggregateEvent>> dimensionsCombinations =
-    Maps.newLinkedHashMap();
+    AdInfoAggregator[] aggregators = new AdInfoAggregator[dimensionSpecs.length];
 
-    LinkedHashMap<String, List<Aggregator<AdInfo, AdInfo.AdInfoAggregateEvent>>> dimensionsAggregators =
-    Maps.newLinkedHashMap();
-
-    for(int index = 0;
-        index < dimensionSpecs.length;
-        index++) {
-      String dimensionSpec = dimensionSpecs[index];
-      AdsDimensionsCombination dimensionsCombination = new AdsDimensionsCombination();
-      dimensionsCombination.init(dimensionSpec, index);
-      dimensionsCombinations.put(dimensionSpec, dimensionsCombination);
-
-      List<Aggregator<AdInfo, AdInfo.AdInfoAggregateEvent>> aggregators = Lists.newArrayList();
-      AdInfoSumAggregator adInfoSumAggregator = new AdInfoSumAggregator();
-      aggregators.add(adInfoSumAggregator);
-      dimensionsAggregators.put(dimensionSpec, aggregators);
+    for(int dimensionIndex = 0;
+        dimensionIndex < dimensionSpecs.length;
+        dimensionIndex++) {
+      aggregators[dimensionIndex] = new AdInfoAggregator();
+      aggregators[dimensionIndex].init(dimensionSpecs[dimensionIndex], dimensionIndex);
     }
 
+    dimensions.setAggregators(aggregators);
     DimensionsComputationUnifierImpl<AdInfo, AdInfo.AdInfoAggregateEvent> unifier = new DimensionsComputationUnifierImpl<AdInfo, AdInfo.AdInfoAggregateEvent>();
-    unifier.setHashingStrategy(new AdInfoHashingStrategy());
     dimensions.setUnifier(unifier);
-    dimensions.setDimensionsCombinations(dimensionsCombinations);
-    dimensions.setAggregators(dimensionsAggregators);
 
     dag.addStream("InputStream", input.outputPort, dimensions.data).setLocality(Locality.CONTAINER_LOCAL);
     dag.addStream("DimensionalData", dimensions.output, devNull.data);

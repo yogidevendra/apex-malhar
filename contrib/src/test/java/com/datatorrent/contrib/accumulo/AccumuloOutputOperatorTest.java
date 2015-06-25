@@ -15,6 +15,9 @@
  */
 package com.datatorrent.contrib.accumulo;
 
+import com.datatorrent.api.Attribute;
+import com.datatorrent.api.Attribute.AttributeMap;
+import com.datatorrent.api.Context.OperatorContext;
 
 import org.apache.accumulo.core.data.Mutation;
 import org.junit.Assert;
@@ -22,11 +25,8 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.datatorrent.api.Attribute;
-import com.datatorrent.api.Attribute.AttributeMap;
-import com.datatorrent.api.Context.OperatorContext;
+import java.util.Collection;
 
-import com.datatorrent.lib.helper.OperatorContextTestHelper;
 
 public class AccumuloOutputOperatorTest {
   private static final Logger logger = LoggerFactory
@@ -45,7 +45,37 @@ public class AccumuloOutputOperatorTest {
     atleastOper.getStore().setUserName("root");
     atleastOper.getStore().setPassword("pass");
 
-    atleastOper.setup(new OperatorContextTestHelper.TestIdOperatorContext(0));
+    atleastOper.setup(new OperatorContext() {
+
+      @Override
+      public <T> T getValue(Attribute<T> key) {
+        return null;
+      }
+
+      @Override
+      public AttributeMap getAttributes() {
+        return null;
+      }
+
+      @Override
+      public int getId() {
+        // TODO Auto-generated method stub
+        return 0;
+      }
+
+      @Override
+      public void sendCustomMetrics(Collection<String> metricNames)
+      {
+        throw new UnsupportedOperationException("not supported");
+      }
+
+      @Override
+      public void setCounters(Object counters) {
+        // TODO Auto-generated method stub
+
+      }
+    });
+
     atleastOper.beginWindow(0);
     AccumuloTuple a=new AccumuloTuple();
     a.setRow("john");a.setColFamily("colfam0");a.setColName("street");a.setColValue("patrick");

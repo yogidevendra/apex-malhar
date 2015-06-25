@@ -33,10 +33,8 @@ import com.datatorrent.api.Operator;
  * @category Statistics
  * @tags event, dimension, aggregation, computation
  * @param <EVENT>
- * @deprecated Use {@link com.datatorrent.lib.dimensions.DimensionsComputationUnifierImpl} instead.
  * @since 0.9.4
  */
-@Deprecated
 public class DimensionsComputationUnifierImpl<EVENT, AGGREGATE extends DimensionsComputation.AggregateEvent> extends BaseOperator implements Operator.Unifier<AGGREGATE>
 {
   @NotNull

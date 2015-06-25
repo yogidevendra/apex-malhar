@@ -16,7 +16,7 @@ import com.datatorrent.contrib.dimensions.AppDataSingleSchemaDimensionStoreHDHT;
 import com.datatorrent.contrib.hdht.tfile.TFileImpl;
 import com.datatorrent.lib.appdata.schemas.SchemaUtils;
 import com.datatorrent.lib.counters.BasicCounters;
-import com.datatorrent.lib.dimensions.DimensionsComputationFlexibleSingleSchemaMap;
+import com.datatorrent.lib.dimensions.GenericDimensionsComputationSingleSchemaMap;
 import com.datatorrent.lib.io.PubSubWebSocketAppDataQuery;
 import com.datatorrent.lib.io.PubSubWebSocketAppDataResult;
 import com.google.common.collect.Maps;
@@ -48,8 +48,8 @@ public class SalesDemo implements StreamingApplication
   {
     JsonSalesGenerator input = dag.addOperator("InputGenerator", JsonSalesGenerator.class);
     JsonToMapConverter converter = dag.addOperator("Converter", JsonToMapConverter.class);
-    DimensionsComputationFlexibleSingleSchemaMap dimensions =
-    dag.addOperator("DimensionsComputation", DimensionsComputationFlexibleSingleSchemaMap.class);
+    GenericDimensionsComputationSingleSchemaMap dimensions =
+    dag.addOperator("DimensionsComputation", GenericDimensionsComputationSingleSchemaMap.class);
     dag.getMeta(dimensions).getAttributes().put(Context.OperatorContext.APPLICATION_WINDOW_COUNT, 4);
     AppDataSingleSchemaDimensionStoreHDHT store = dag.addOperator("Store", AppDataSingleSchemaDimensionStoreHDHT.class);
 
@@ -66,7 +66,7 @@ public class SalesDemo implements StreamingApplication
     dimensions.setConfigurationSchemaJSON(eventSchema);
     Map<String, String> fieldToMapField = Maps.newHashMap();
     fieldToMapField.put("sales", "amount");
-    dimensions.setFieldToMapField(fieldToMapField);
+    dimensions.setValueNameAliases(fieldToMapField);
     dag.getMeta(dimensions).getMeta(dimensions.output).getUnifierMeta().getAttributes().put(OperatorContext.MEMORY_MB, 8092);
 
     store.setConfigurationSchemaJSON(eventSchema);
@@ -82,22 +82,15 @@ public class SalesDemo implements StreamingApplication
     wsIn.setUri(uri);
     queryPort = wsIn.outputPort;
 
-    if(conf.getBoolean(PROP_EMBEDD_QUERY, false)) {
-      //store.setEmbeddableQuery(wsIn);
-    }
-    else {
-      dag.addOperator("Query", wsIn);
-      dag.addStream("Query", queryPort, store.query).setLocality(Locality.CONTAINER_LOCAL);
-    }
-
-    //store.setEmbeddableQuery(wsIn);
+    dag.addOperator("Query", wsIn);
+    dag.addStream("Query", queryPort, store.query).setLocality(Locality.CONTAINER_LOCAL);
 
     PubSubWebSocketAppDataResult wsOut = dag.addOperator("QueryResult", new PubSubWebSocketAppDataResult());
     wsOut.setUri(uri);
     queryResultPort = wsOut.input;
 
     dag.addStream("InputStream", input.jsonBytes, converter.input);
-    dag.addStream("ConvertStream", converter.outputMap, dimensions.inputEvent);
+    dag.addStream("ConvertStream", converter.outputMap, dimensions.input);
     dag.addStream("DimensionalData", dimensions.output, store.input);
     dag.addStream("QueryResult", store.queryResult, queryResultPort).setLocality(Locality.CONTAINER_LOCAL);
   }

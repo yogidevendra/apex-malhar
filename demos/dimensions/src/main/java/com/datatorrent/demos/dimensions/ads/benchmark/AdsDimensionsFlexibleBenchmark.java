@@ -23,10 +23,10 @@ import com.datatorrent.api.StreamingApplication;
 import com.datatorrent.api.annotation.ApplicationAnnotation;
 import com.datatorrent.demos.dimensions.ads.InputItemGenerator;
 import com.datatorrent.lib.appdata.schemas.SchemaUtils;
-import com.datatorrent.lib.dimensions.DimensionsComputationFlexibleSingleSchemaPOJO;
-import com.datatorrent.lib.dimensions.DimensionsComputationUnifierImpl;
 import com.datatorrent.lib.dimensions.DimensionsEvent.Aggregate;
 import com.datatorrent.lib.dimensions.DimensionsEvent.InputEvent;
+import com.datatorrent.lib.dimensions.GenericDimensionsComputationSingleSchemaPOJO;
+import com.datatorrent.lib.statistics.DimensionsComputationUnifierImpl;
 import com.datatorrent.lib.stream.DevNull;
 import com.google.common.collect.Maps;
 import org.apache.hadoop.conf.Configuration;
@@ -40,7 +40,7 @@ public class AdsDimensionsFlexibleBenchmark implements StreamingApplication
   public void populateDAG(DAG dag, Configuration conf)
   {
     InputItemGenerator input = dag.addOperator("InputGenerator", InputItemGenerator.class);
-    DimensionsComputationFlexibleSingleSchemaPOJO dimensions = dag.addOperator("DimensionsComputation", DimensionsComputationFlexibleSingleSchemaPOJO.class);
+    GenericDimensionsComputationSingleSchemaPOJO dimensions = dag.addOperator("DimensionsComputation", GenericDimensionsComputationSingleSchemaPOJO.class);
     dag.getMeta(dimensions).getAttributes().put(Context.OperatorContext.APPLICATION_WINDOW_COUNT, 10);
     DevNull<Object> devNull = dag.addOperator("DevNull", new DevNull<Object>());
 
@@ -66,7 +66,7 @@ public class AdsDimensionsFlexibleBenchmark implements StreamingApplication
     dimensions.setAggregateToExpression(aggregateToExpression);
     dimensions.setConfigurationSchemaJSON(eventSchema);
 
-    dag.addStream("InputStream", input.outputPort, dimensions.inputEvent).setLocality(Locality.CONTAINER_LOCAL);
+    dag.addStream("InputStream", input.outputPort, dimensions.input).setLocality(Locality.CONTAINER_LOCAL);
     dag.addStream("DimensionalData", dimensions.output, devNull.data);
   }
 }

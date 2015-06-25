@@ -16,10 +16,10 @@
 
 package com.datatorrent.lib.dimensions.aggregator;
 
-import com.datatorrent.lib.dimensions.DimensionsEvent.Aggregate;
-import com.datatorrent.lib.dimensions.DimensionsEvent.InputEvent;
 import com.datatorrent.lib.appdata.schemas.Type;
 import com.datatorrent.lib.dimensions.DimensionsEvent;
+import com.datatorrent.lib.dimensions.DimensionsEvent.Aggregate;
+import com.datatorrent.lib.dimensions.DimensionsEvent.InputEvent;
 
 /**
  * <p>
@@ -31,19 +31,11 @@ import com.datatorrent.lib.dimensions.DimensionsEvent;
  * one is picked arbitrarily to be the last.
  * </p>
  */
-public class AggregatorLast implements IncrementalAggregator
+public class AggregatorLast extends AbstractIncrementalAggregator
 {
   private static final long serialVersionUID = 20154301647L;
 
-  /**
-   * The singleton instance of this class.
-   */
-  public static final AggregatorLast INSTANCE = new AggregatorLast();
-
-  /**
-   * Singleton constructor.
-   */
-  private AggregatorLast()
+  public AggregatorLast()
   {
     //Do nothing
   }
@@ -52,12 +44,6 @@ public class AggregatorLast implements IncrementalAggregator
   public Type getOutputType(Type inputType)
   {
     return AggregatorUtils.IDENTITY_TYPE_MAP.get(inputType);
-  }
-
-  @Override
-  public Aggregate createDest(InputEvent first)
-  {
-    return new Aggregate(first.getEventKey(), first.getAggregates());
   }
 
   @Override

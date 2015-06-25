@@ -20,6 +20,7 @@ import com.datatorrent.lib.appdata.schemas.*;
 
 import com.datatorrent.lib.dimensions.DimensionsDescriptor;
 import com.datatorrent.lib.dimensions.DimensionsEvent.Aggregate;
+import com.datatorrent.lib.dimensions.GenericDimensionsComputationSingleSchema;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -28,8 +29,6 @@ import javax.validation.constraints.NotNull;
 
 import java.util.Map;
 import java.util.Set;
-
-import static com.datatorrent.lib.dimensions.AbstractDimensionsComputationFlexibleSingleSchema.DEFAULT_SCHEMA_ID;
 
 /**
  * This is a dimensions store which stores data corresponding to one {@link DimensionalSchema} into an HDHT bucket.
@@ -68,7 +67,7 @@ public class AppDataSingleSchemaDimensionStoreHDHT extends AbstractAppDataDimens
   /**
    * The {@link schemaID} of for data stored by this operator.
    */
-  private int schemaID = DEFAULT_SCHEMA_ID;
+  private int schemaID = GenericDimensionsComputationSingleSchema.DEFAULT_SCHEMA_ID;
   /**
    * The ID of the HDHT bucket that this operator stores data in.
    */

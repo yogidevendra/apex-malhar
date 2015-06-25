@@ -15,12 +15,12 @@
  */
 package com.datatorrent.lib.dimensions.aggregator;
 
-import com.datatorrent.lib.appdata.gpo.GPOMutable;
-import com.datatorrent.lib.appdata.schemas.FieldsDescriptor;
 import com.datatorrent.lib.appdata.schemas.Type;
 import com.datatorrent.lib.dimensions.DimensionsEvent.Aggregate;
 import com.datatorrent.lib.dimensions.DimensionsEvent.InputEvent;
 import com.google.common.collect.Maps;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.Map;
@@ -28,7 +28,7 @@ import java.util.Map;
 /**
  * This {@link IncrementalAggregator} performs a count of the number of times an input is encountered.
  */
-public class AggregatorCount implements IncrementalAggregator
+public class AggregatorCount extends AbstractIncrementalAggregator
 {
   private static final long serialVersionUID = 20154301645L;
 
@@ -37,11 +37,6 @@ public class AggregatorCount implements IncrementalAggregator
    * represent the corresponding output types.
    */
   public static transient final Map<Type, Type> TYPE_CONVERSION_MAP;
-
-  /**
-   * Singleton.
-   */
-  public static final AggregatorCount INSTANCE = new AggregatorCount();
 
   static {
     Map<Type, Type> typeConversionMap = Maps.newHashMap();
@@ -53,12 +48,29 @@ public class AggregatorCount implements IncrementalAggregator
     TYPE_CONVERSION_MAP = Collections.unmodifiableMap(typeConversionMap);
   }
 
-  /**
-   * This constructor is not exposed for singleton pattern.
-   */
-  private AggregatorCount()
+  public AggregatorCount()
   {
     //Do nothing
+  }
+
+  @Override
+  public Aggregate getGroup(InputEvent src, int aggregatorIndex)
+  {
+    Aggregate aggregate = createAggregate(src,
+                                          context,
+                                          indexSubsetAggregates,
+                                          indexSubsetKeys,
+                                          aggregatorIndex);
+
+    long[] longFields = aggregate.getAggregates().getFieldsLong();
+
+    for(int index = 0;
+        index < longFields.length;
+        index++) {
+      longFields[index] = 0;
+    }
+
+    return aggregate;
   }
 
   @Override
@@ -94,21 +106,5 @@ public class AggregatorCount implements IncrementalAggregator
     return TYPE_CONVERSION_MAP.get(inputType);
   }
 
-  @Override
-  public Aggregate createDest(InputEvent first)
-  {
-    FieldsDescriptor outputFD = AggregatorUtils.getOutputFieldsDescriptor(first.getAggregates().getFieldDescriptor(),
-                                                                          this);
-    GPOMutable aggregates = new GPOMutable(outputFD);
-
-    long[] aggLongs = aggregates.getFieldsLong();
-
-    for(int index = 0;
-        index < aggLongs.length;
-        index++) {
-      aggLongs[index] = 1L;
-    }
-
-    return new Aggregate(first.getEventKey(), aggregates);
-  }
+  private static final Logger LOG = LoggerFactory.getLogger(AggregatorCount.class);
 }

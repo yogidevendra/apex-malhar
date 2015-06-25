@@ -44,8 +44,8 @@ public class AggregatorRegistryTest
   public void metaDataTest()
   {
     Map<String, IncrementalAggregator> nameToIncrementalAggregator = Maps.newHashMap();
-    nameToIncrementalAggregator.put("SUM", AggregatorSum.INSTANCE);
-    nameToIncrementalAggregator.put("COUNT", AggregatorCount.INSTANCE);
+    nameToIncrementalAggregator.put("SUM", new AggregatorSum());
+    nameToIncrementalAggregator.put("COUNT", new AggregatorCount());
 
     Map<String, OTFAggregator> nameToOTFAggregator = Maps.newHashMap();
     nameToOTFAggregator.put("AVG", AggregatorAverage.INSTANCE);

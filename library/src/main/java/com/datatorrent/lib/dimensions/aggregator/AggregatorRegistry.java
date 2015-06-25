@@ -223,6 +223,7 @@ public class AggregatorRegistry implements Serializable
    * This method is called to initialize various internal datastructures of the {@link AggregatorRegistry}.
    * This method should be called before the {@link AggregatorRegistry} is used.
    */
+  @SuppressWarnings({"unchecked","rawtypes"})
   public void setup()
   {
     if(setup) {
@@ -235,7 +236,7 @@ public class AggregatorRegistry implements Serializable
     classToIncrementalAggregatorName = Maps.newHashMap();
 
     for(Map.Entry<String, IncrementalAggregator> entry: nameToIncrementalAggregator.entrySet()) {
-      classToIncrementalAggregatorName.put(entry.getValue().getClass(), entry.getKey());
+      classToIncrementalAggregatorName.put((Class) entry.getValue().getClass(), entry.getKey());
     }
 
     incrementalAggregatorIDToAggregator = Maps.newHashMap();
@@ -255,7 +256,7 @@ public class AggregatorRegistry implements Serializable
 
       OTFAggregator dotfAggregator = nameToOTFAggregator.get(name);
 
-      for(Class<? extends IncrementalAggregator> clazz: dotfAggregator.getChildAggregators()) {
+      for(Class clazz: dotfAggregator.getChildAggregators()) {
         staticAggregators.add(classToIncrementalAggregatorName.get(clazz));
       }
 

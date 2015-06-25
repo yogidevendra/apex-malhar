@@ -20,6 +20,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import it.unimi.dsi.fastutil.objects.Object2IntLinkedOpenHashMap;
+import java.io.Serializable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,8 +37,10 @@ import java.util.Set;
  * used in the serialization of {@link GPOMutable} objects in order to ensure consistent serialization
  * and deserialization of data.
  */
-public class FieldsDescriptor
+public class FieldsDescriptor implements Serializable
 {
+  private static final long serialVersionUID = 201506251228L;
+
   /**
    * This is a list of all of the fields managed by this {@link FieldsDescriptor} object.
    */

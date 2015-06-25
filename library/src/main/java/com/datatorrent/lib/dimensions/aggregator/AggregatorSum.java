@@ -21,24 +21,58 @@ import com.datatorrent.lib.dimensions.DimensionsEvent;
 import com.datatorrent.lib.dimensions.DimensionsEvent.Aggregate;
 import com.datatorrent.lib.dimensions.DimensionsEvent.InputEvent;
 
+import java.util.Arrays;
+
+import static com.datatorrent.lib.dimensions.aggregator.AbstractIncrementalAggregator.createAggregate;
+
 /**
  * This {@link IncrementalAggregator} performs a sum operation over the fields in the given {@link InputEvent}.
  */
-public class AggregatorSum implements IncrementalAggregator
+public class AggregatorSum extends AbstractIncrementalAggregator
 {
   private static final long serialVersionUID = 20154301649L;
 
-  /**
-   * The singleton instance of this class.
-   */
-  public static final AggregatorSum INSTANCE = new AggregatorSum();
-
-  /**
-   * Singleton constructor.
-   */
-  private AggregatorSum()
+  public AggregatorSum()
   {
     //Do nothing
+  }
+
+  @Override
+  public Aggregate getGroup(InputEvent src, int aggregatorIndex)
+  {
+    Aggregate aggregate = createAggregate(src,
+                                          context,
+                                          indexSubsetAggregates,
+                                          indexSubsetKeys,
+                                          aggregatorIndex);
+
+    GPOMutable value = aggregate.getAggregates();
+
+    if(value.getFieldsByte() != null) {
+      Arrays.fill(value.getFieldsByte(), (byte) 0);
+    }
+
+    if(value.getFieldsShort() != null) {
+      Arrays.fill(value.getFieldsShort(), (short) 0);
+    }
+
+    if(value.getFieldsInteger() != null) {
+      Arrays.fill(value.getFieldsInteger(), 0);
+    }
+
+    if(value.getFieldsLong() != null) {
+      Arrays.fill(value.getFieldsLong(), 0L);
+    }
+
+    if(value.getFieldsFloat() != null) {
+      Arrays.fill(value.getFieldsFloat(), 0.0f);
+    }
+
+    if(value.getFieldsDouble() != null) {
+      Arrays.fill(value.getFieldsDouble(), 0.0);
+    }
+
+    return aggregate;
   }
 
   @Override
@@ -53,23 +87,6 @@ public class AggregatorSum implements IncrementalAggregator
     aggregateHelper(dest, src);
   }
 
-  @Override
-  public Type getOutputType(Type inputType)
-  {
-    return AggregatorUtils.IDENTITY_NUMBER_TYPE_MAP.get(inputType);
-  }
-
-  @Override
-  public Aggregate createDest(InputEvent inputEvent)
-  {
-    return new Aggregate(inputEvent.getEventKey(), inputEvent.getAggregates());
-  }
-
-  /**
-   * This is a helper method which performs the sum operation.
-   * @param dest The destination of the sum aggregate.
-   * @param src The new values to add to the existing sum aggregation.
-   */
   private void aggregateHelper(DimensionsEvent dest, DimensionsEvent src)
   {
     GPOMutable destAggs = dest.getAggregates();
@@ -152,5 +169,10 @@ public class AggregatorSum implements IncrementalAggregator
         }
       }
     }
+  }
+  @Override
+  public Type getOutputType(Type inputType)
+  {
+    return AggregatorUtils.IDENTITY_NUMBER_TYPE_MAP.get(inputType);
   }
 }

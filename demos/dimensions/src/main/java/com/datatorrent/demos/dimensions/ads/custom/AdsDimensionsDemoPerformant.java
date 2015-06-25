@@ -26,20 +26,15 @@ import com.datatorrent.api.annotation.ApplicationAnnotation;
 import com.datatorrent.contrib.dimensions.AppDataSingleSchemaDimensionStoreHDHT;
 import com.datatorrent.contrib.hdht.tfile.TFileImpl;
 import com.datatorrent.demos.dimensions.ads.AdInfo;
-import com.datatorrent.demos.dimensions.ads.AdInfo.AdInfoSumAggregator;
-import com.datatorrent.demos.dimensions.ads.AdInfo.AdsDimensionsCombination;
+import com.datatorrent.demos.dimensions.ads.AdInfo.AdInfoAggregator;
 import com.datatorrent.demos.dimensions.ads.InputItemGenerator;
 import com.datatorrent.lib.appdata.schemas.SchemaUtils;
 import com.datatorrent.lib.counters.BasicCounters;
-import com.datatorrent.lib.dimensions.AbstractDimensionsComputation.DimensionsCombination;
-import com.datatorrent.lib.dimensions.DimensionsComputationCustom;
-import com.datatorrent.lib.dimensions.DimensionsComputationUnifierImpl;
-import com.datatorrent.lib.dimensions.aggregator.Aggregator;
 import com.datatorrent.lib.io.PubSubWebSocketAppDataQuery;
 import com.datatorrent.lib.io.PubSubWebSocketAppDataResult;
+import com.datatorrent.lib.statistics.DimensionsComputation;
+import com.datatorrent.lib.statistics.DimensionsComputationUnifierImpl;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import java.net.URI;
 import org.apache.commons.lang.mutable.MutableLong;
 import org.apache.hadoop.conf.Configuration;
@@ -47,8 +42,6 @@ import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @ApplicationAnnotation(name=AdsDimensionsDemoPerformant.APP_NAME)
@@ -66,7 +59,7 @@ public class AdsDimensionsDemoPerformant implements StreamingApplication
     //Declare operators
 
     InputItemGenerator input = dag.addOperator("InputGenerator", InputItemGenerator.class);
-    DimensionsComputationCustom<AdInfo, AdInfo.AdInfoAggregateEvent> dimensions = dag.addOperator("DimensionsComputation", new DimensionsComputationCustom<AdInfo, AdInfo.AdInfoAggregateEvent>());
+    DimensionsComputation<AdInfo, AdInfo.AdInfoAggregateEvent> dimensions = dag.addOperator("DimensionsComputation", new DimensionsComputation<AdInfo, AdInfo.AdInfoAggregateEvent>());
     DimensionsComputationUnifierImpl<AdInfo, AdInfo.AdInfoAggregateEvent> unifier = new DimensionsComputationUnifierImpl<AdInfo, AdInfo.AdInfoAggregateEvent>();
     dimensions.setUnifier(unifier);
 
@@ -89,33 +82,21 @@ public class AdsDimensionsDemoPerformant implements StreamingApplication
     };
 
     //Set operator properties
+    AdInfoAggregator[] aggregators = new AdInfoAggregator[dimensionSpecs.length];
 
     //Set input properties
     input.setEventSchemaJSON(eventSchema);
-
-    //Set Dimensions properties
-    LinkedHashMap<String, DimensionsCombination<AdInfo, AdInfo.AdInfoAggregateEvent>> dimensionsCombinations =
-    Maps.newLinkedHashMap();
-
-    LinkedHashMap<String, List<Aggregator<AdInfo, AdInfo.AdInfoAggregateEvent>>> dimensionsAggregators =
-    Maps.newLinkedHashMap();
 
     for(int index = 0;
         index < dimensionSpecs.length;
         index++) {
       String dimensionSpec = dimensionSpecs[index];
-      AdsDimensionsCombination dimensionsCombination = new AdsDimensionsCombination();
-      dimensionsCombination.init(dimensionSpec, index);
-      dimensionsCombinations.put(dimensionSpec, dimensionsCombination);
-
-      List<Aggregator<AdInfo, AdInfo.AdInfoAggregateEvent>> aggregators = Lists.newArrayList();
-      AdInfoSumAggregator adInfoSumAggregator = new AdInfoSumAggregator();
-      aggregators.add(adInfoSumAggregator);
-      dimensionsAggregators.put(dimensionSpec, aggregators);
+      AdInfoAggregator aggregator = new AdInfoAggregator();
+      aggregator.init(dimensionSpec, index);
+      aggregators[index] = aggregator;
     }
 
-    dimensions.setDimensionsCombinations(dimensionsCombinations);
-    dimensions.setAggregators(dimensionsAggregators);
+    dimensions.setAggregators(aggregators);
     dag.getMeta(dimensions).getMeta(dimensions.output).getUnifierMeta().getAttributes().put(OperatorContext.MEMORY_MB, 8092);
 
     //Configuring the converter
@@ -126,7 +107,6 @@ public class AdsDimensionsDemoPerformant implements StreamingApplication
     String basePath = Preconditions.checkNotNull(conf.get(PROP_STORE_PATH),
                                                  "a base path should be specified in the properties.xml");
     TFileImpl hdsFile = new TFileImpl.DTFileImpl();
-    System.out.println(dag.getAttributes().get(DAG.APPLICATION_ID));
     basePath += Path.SEPARATOR + System.currentTimeMillis();
     hdsFile.setBasePath(basePath);
     store.setFileStore(hdsFile);
@@ -144,13 +124,8 @@ public class AdsDimensionsDemoPerformant implements StreamingApplication
     wsIn.setUri(uri);
     queryPort = wsIn.outputPort;
 
-    if(conf.getBoolean(PROP_EMBEDD_QUERY, false)) {
-      //store.setEmbeddableQuery(wsIn);
-    }
-    else {
-      dag.addOperator("Query", wsIn);
-      dag.addStream("Query", queryPort, store.query).setLocality(Locality.CONTAINER_LOCAL);
-    }
+    dag.addOperator("Query", wsIn);
+    dag.addStream("Query", queryPort, store.query).setLocality(Locality.CONTAINER_LOCAL);
 
     PubSubWebSocketAppDataResult wsOut = dag.addOperator("QueryResult", new PubSubWebSocketAppDataResult());
     wsOut.setUri(uri);

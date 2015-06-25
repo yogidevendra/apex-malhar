@@ -16,9 +16,11 @@
 
 package com.datatorrent.lib.dimensions.aggregator;
 
+import com.datatorrent.lib.appdata.gpo.GPOUtils.IndexSubset;
 import com.datatorrent.lib.appdata.schemas.Type;
 import com.datatorrent.lib.dimensions.DimensionsEvent.Aggregate;
 import com.datatorrent.lib.dimensions.DimensionsEvent.InputEvent;
+import com.datatorrent.lib.dimensions.GenericDimensionsComputationSingleSchema.DimensionsConversionContext;
 
 /**
  * <p>
@@ -30,12 +32,12 @@ import com.datatorrent.lib.dimensions.DimensionsEvent.InputEvent;
  * {@link IncrementalAggregator}s are intended to be used with subclasses of {@link AbstractiDimensionsComputationFlexibleSingleSchema}. The
  * way in which {@link IncrementalAggregator}s are used in this context is that a batch of fields to be aggregated by the aggregator are provided in the
  * form of an {@link InputEvent}. For example, if there are two fields (cost and revenue), which will be aggregated by a sum aggregator, both
- * of those fields will be included in the {@link InputEvent} passed to the sum aggregator. And the {@link Aggregate} event produced by the
+ * of those fields will be included in the {@link InputEvent} passed to the sum aggregator. And the {DimensionsEventregate} event produced by the
  * sum aggregator will contain two fields, one for cost and one for revenue.
  * </p>
  *
  */
-public interface IncrementalAggregator extends Aggregator<InputEvent, Aggregate>
+public interface IncrementalAggregator extends com.datatorrent.lib.statistics.DimensionsComputation.Aggregator<InputEvent, Aggregate>
 {
   /**
    * This method defines the type mapping for the {@link IncrementalAggregator}. The type mapping defines the relationship
@@ -46,4 +48,9 @@ public interface IncrementalAggregator extends Aggregator<InputEvent, Aggregate>
    * @return The type of the aggregate corresponding to an input field of the given type.
    */
   public Type getOutputType(Type inputType);
+
+  public void setDimensionsConversionContext(DimensionsConversionContext context);
+  public void setIndexSubsetKeys(IndexSubset indexSubsetKeys);
+  public void setIndexSubsetAggregates(IndexSubset indexSubsetAggregates);
+
 }

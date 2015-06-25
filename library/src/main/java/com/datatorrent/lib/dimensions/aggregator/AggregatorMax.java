@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.datatorrent.lib.dimensions.aggregator;
 
 import com.datatorrent.lib.appdata.gpo.GPOMutable;
@@ -24,33 +25,13 @@ import com.datatorrent.lib.dimensions.DimensionsEvent.InputEvent;
 /**
  * This {@link IncrementalAggregator} takes the max of the fields provided in the {@link InputEvent}.
  */
-public class AggregatorMax implements IncrementalAggregator
+public class AggregatorMax extends AbstractIncrementalAggregator
 {
   private static final long serialVersionUID = 201503120332L;
 
-  /**
-   * The singleton instance of this class.
-   */
-  public static final AggregatorMax INSTANCE = new AggregatorMax();
-
-  /**
-   * Singleton constructor.
-   */
-  private AggregatorMax()
+  public AggregatorMax()
   {
     //Do nothing
-  }
-
-  @Override
-  public Aggregate createDest(InputEvent first)
-  {
-    return new Aggregate(first.getEventKey(), first.getAggregates());
-  }
-
-  @Override
-  public void aggregate(Aggregate dest, Aggregate src)
-  {
-    aggregateHelper(dest, src);
   }
 
   @Override
@@ -60,9 +41,9 @@ public class AggregatorMax implements IncrementalAggregator
   }
 
   @Override
-  public Type getOutputType(Type inputType)
+  public void aggregate(Aggregate dest, Aggregate src)
   {
-    return AggregatorUtils.IDENTITY_NUMBER_TYPE_MAP.get(inputType);
+    aggregateHelper(dest, src);
   }
 
   private void aggregateHelper(DimensionsEvent dest, DimensionsEvent src)
@@ -159,5 +140,11 @@ public class AggregatorMax implements IncrementalAggregator
         }
       }
     }
+  }
+
+  @Override
+  public Type getOutputType(Type inputType)
+  {
+    return AggregatorUtils.IDENTITY_NUMBER_TYPE_MAP.get(inputType);
   }
 }
