@@ -143,6 +143,7 @@ public abstract class GenericDimensionsComputationSingleSchema<EVENT> implements
                                                                       (dimensionsDescriptorID).get(aggID),
                                                                       this.configurationSchema.getInputValuesDescriptor());
 
+        indexSubsetKey.dd = dd;
         conversionContext.schemaID = schemaID;
         conversionContext.dimensionsDescriptorID = dimensionsDescriptorID;
         conversionContext.aggregatorID = aggID;

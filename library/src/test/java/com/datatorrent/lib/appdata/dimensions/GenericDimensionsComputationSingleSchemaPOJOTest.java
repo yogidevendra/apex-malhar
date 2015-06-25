@@ -118,6 +118,7 @@ public class GenericDimensionsComputationSingleSchemaPOJOTest
   public void complexOutputTest()
   {
     AdInfo ai = createTestAdInfoEvent1();
+    AdInfo ai2 = createTestAdInfoEvent2();
 
     GenericDimensionsComputationSingleSchemaPOJO dcss = createDimensionsComputationOperator("adsGenericEventSchemaAdditional.json");
 
@@ -127,6 +128,7 @@ public class GenericDimensionsComputationSingleSchemaPOJOTest
     dcss.setup(null);
     dcss.beginWindow(0L);
     dcss.input.put(ai);
+    dcss.input.put(ai2);
     dcss.endWindow();
 
     Assert.assertEquals(60, sink.collectedTuples.size());
@@ -136,6 +138,7 @@ public class GenericDimensionsComputationSingleSchemaPOJOTest
   public void aggregationsTest()
   {
     AdInfo ai = createTestAdInfoEvent1();
+    AdInfo ai2 = createTestAdInfoEvent2();
 
     GenericDimensionsComputationSingleSchemaPOJO dcss = createDimensionsComputationOperator("adsGenericEventSchemaAggregations.json");
 
@@ -145,6 +148,7 @@ public class GenericDimensionsComputationSingleSchemaPOJOTest
     dcss.setup(null);
     dcss.beginWindow(0L);
     dcss.input.put(ai);
+    dcss.input.put(ai2);
     dcss.endWindow();
 
     Assert.assertEquals(6, sink.collectedTuples.size());

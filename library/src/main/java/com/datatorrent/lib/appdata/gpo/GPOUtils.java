@@ -20,6 +20,7 @@ import com.datatorrent.lib.appdata.schemas.Fields;
 import com.datatorrent.lib.appdata.schemas.FieldsDescriptor;
 import com.datatorrent.lib.appdata.schemas.ResultFormatter;
 import com.datatorrent.lib.appdata.schemas.Type;
+import com.datatorrent.lib.dimensions.DimensionsDescriptor;
 import com.datatorrent.lib.util.PojoUtils;
 import com.datatorrent.lib.util.PojoUtils.Getter;
 import com.datatorrent.lib.util.PojoUtils.GetterBoolean;
@@ -2120,6 +2121,7 @@ public class GPOUtils
    */
   public static class IndexSubset
   {
+    public DimensionsDescriptor dd;
     public int[] fieldsBooleanIndexSubset;
     public int[] fieldsCharacterIndexSubset;
 
