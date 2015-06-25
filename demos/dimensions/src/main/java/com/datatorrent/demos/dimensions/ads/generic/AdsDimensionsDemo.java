@@ -176,7 +176,6 @@ public class AdsDimensionsDemo implements StreamingApplication
     String basePath = Preconditions.checkNotNull(conf.get(propStorePath),
                                                  "a base path should be specified in the properties.xml");
     TFileImpl hdsFile = new TFileImpl.DTFileImpl();
-    System.out.println(dag.getAttributes().get(DAG.APPLICATION_ID));
     basePath += Path.SEPARATOR + System.currentTimeMillis();
     hdsFile.setBasePath(basePath);
     System.out.println("Setting basePath " + basePath);
