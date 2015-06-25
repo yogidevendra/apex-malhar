@@ -74,6 +74,12 @@ public class HBaseTransactionalPutOperatorTest {
         }
 
         @Override
+        public void sendCustomMetrics(Collection<String> metricNames)
+        {
+          throw new UnsupportedOperationException("not supported");
+        }
+
+        @Override
         public void setCounters(Object counters) {
           // TODO Auto-generated method stub
 
@@ -130,6 +136,12 @@ public class HBaseTransactionalPutOperatorTest {
         public int getId() {
           // TODO Auto-generated method stub
           return 0;
+        }
+
+        @Override
+        public void sendCustomMetrics(Collection<String> metricNames)
+        {
+          throw new UnsupportedOperationException("not supported");
         }
 
         @Override
@@ -193,6 +205,12 @@ public class HBaseTransactionalPutOperatorTest {
         public int getId() {
           // TODO Auto-generated method stub
           return 0;
+        }
+
+        @Override
+        public void sendCustomMetrics(Collection<String> metricNames)
+        {
+          throw new UnsupportedOperationException("not supported");
         }
 
         @Override
