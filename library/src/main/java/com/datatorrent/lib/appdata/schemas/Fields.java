@@ -18,6 +18,7 @@ package com.datatorrent.lib.appdata.schemas;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import java.io.Serializable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,8 +31,10 @@ import java.util.Set;
  * Its function is to maintain a set of field names with no null values. It also maintains a list
  * of field names to increase iteration speed.
  */
-public class Fields
+public class Fields implements Serializable
 {
+  private static final long serialVersionUID = 201506251241L;
+
   /**
    * Set of field names.
    */
