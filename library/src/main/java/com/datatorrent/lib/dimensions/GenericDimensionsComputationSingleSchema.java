@@ -201,6 +201,7 @@ public abstract class GenericDimensionsComputationSingleSchema<EVENT> implements
 
     dimensionsComputation.output.setSink((Sink) sink);
     dimensionsComputation.setup(context);
+    unifier.setAggregators(aggregatorArray);
   }
 
   @Override
