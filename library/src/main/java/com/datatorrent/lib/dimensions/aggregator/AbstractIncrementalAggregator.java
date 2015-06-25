@@ -123,7 +123,7 @@ public abstract class AbstractIncrementalAggregator implements IncrementalAggreg
                                           IndexSubset indexSubsetKeys,
                                           int aggregatorIndex)
   {
-    GPOMutable aggregates = new GPOMutable(context.aggregateDescriptor);
+    GPOMutable aggregates = new GPOMutable(context.aggregateOutputDescriptor);
     GPOMutable keys = new GPOMutable(context.keyDescriptor);
 
     GPOUtils.indirectCopy(aggregates, inputEvent.getAggregates(), indexSubsetAggregates);

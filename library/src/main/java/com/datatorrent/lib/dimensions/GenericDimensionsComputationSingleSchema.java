@@ -153,7 +153,7 @@ public abstract class GenericDimensionsComputationSingleSchema<EVENT> implements
       IntArrayList aggIDList = configurationSchema.getDimensionsDescriptorIDToAggregatorIDs().get(dimensionsDescriptorID);
       numIncrementalAggregators += aggIDList.size();
     }
-    
+
     IncrementalAggregator[] aggregatorArray = new IncrementalAggregator[numIncrementalAggregators];
     int incrementalAggregatorIndex = 0;
 
@@ -163,6 +163,7 @@ public abstract class GenericDimensionsComputationSingleSchema<EVENT> implements
       //Create the conversion context for the conversion.
       FieldsDescriptor keyFieldsDescriptor = keyFieldsDescriptors.get(dimensionsDescriptorID);
       Int2ObjectMap<FieldsDescriptor> map = configurationSchema.getDimensionsDescriptorIDToAggregatorIDToInputAggregatorDescriptor().get(dimensionsDescriptorID);
+      Int2ObjectMap<FieldsDescriptor> mapOutput = configurationSchema.getDimensionsDescriptorIDToAggregatorIDToOutputAggregatorDescriptor().get(dimensionsDescriptorID);
       IntArrayList aggIDList = configurationSchema.getDimensionsDescriptorIDToAggregatorIDs().get(dimensionsDescriptorID);
       DimensionsDescriptor dd = configurationSchema.getDimensionsDescriptorIDToDimensionsDescriptor().get(dimensionsDescriptorID);
 
@@ -185,6 +186,7 @@ public abstract class GenericDimensionsComputationSingleSchema<EVENT> implements
         conversionContext.dd = dd;
         conversionContext.keyDescriptor = keyFieldsDescriptor;
         conversionContext.aggregateDescriptor = map.get(aggID);
+        conversionContext.aggregateOutputDescriptor = mapOutput.get(aggID);
         conversionContext.inputTimestampIndex =
                 masterKeyFieldsDescriptor.getTypeToFields().get(DimensionsDescriptor.DIMENSION_TIME_TYPE).indexOf(DimensionsDescriptor.DIMENSION_TIME);
         conversionContext.outputTimebucketIndex =
@@ -304,6 +306,7 @@ public abstract class GenericDimensionsComputationSingleSchema<EVENT> implements
      * The {@link FieldsDescriptor} for the aggregate of a new {@link InputEvent}.
      */
     public FieldsDescriptor aggregateDescriptor;
+    public FieldsDescriptor aggregateOutputDescriptor;
     public FieldsDescriptor keyDescriptor;
 
     public int inputTimestampIndex;
