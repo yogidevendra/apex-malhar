@@ -19,6 +19,8 @@ import com.datatorrent.lib.appdata.schemas.Type;
 import com.datatorrent.lib.dimensions.DimensionsEvent.Aggregate;
 import com.datatorrent.lib.dimensions.DimensionsEvent.InputEvent;
 import com.google.common.collect.Maps;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.Map;
@@ -90,6 +92,16 @@ public class AggregatorCount extends AbstractIncrementalAggregator
     long[] destLongs = destAgg.getAggregates().getFieldsLong();
     long[] srcLongs = srcAgg.getAggregates().getFieldsLong();
 
+    if(destLongs.length != srcLongs.length) {
+      LOG.debug("{} {} schemaID {} {} ddID {} {} aggregatorID {} {}",
+                destLongs.length, srcLongs.length, destAgg.getEventKey().getSchemaID(),
+                srcAgg.getEventKey().getSchemaID(),
+                destAgg.getEventKey().getDimensionDescriptorID(),
+                srcAgg.getEventKey().getDimensionDescriptorID(),
+                destAgg.getEventKey().getAggregatorID(),
+                srcAgg.getEventKey().getAggregatorID());
+    }
+
     for(int index = 0;
         index < destLongs.length;
         index++) {
@@ -103,4 +115,6 @@ public class AggregatorCount extends AbstractIncrementalAggregator
   {
     return TYPE_CONVERSION_MAP.get(inputType);
   }
+
+  private static final Logger LOG = LoggerFactory.getLogger(AggregatorCount.class);
 }
