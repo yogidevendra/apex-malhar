@@ -40,6 +40,11 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
+/**
+ *
+ *
+ * @param <EVENT>
+ */
 public abstract class GenericDimensionsComputationSingleSchema<EVENT> implements Operator
 {
   /**
@@ -148,7 +153,7 @@ public abstract class GenericDimensionsComputationSingleSchema<EVENT> implements
       IntArrayList aggIDList = configurationSchema.getDimensionsDescriptorIDToAggregatorIDs().get(dimensionsDescriptorID);
       numIncrementalAggregators += aggIDList.size();
     }
-
+    
     IncrementalAggregator[] aggregatorArray = new IncrementalAggregator[numIncrementalAggregators];
     int incrementalAggregatorIndex = 0;
 

@@ -24,6 +24,12 @@ import javax.validation.constraints.NotNull;
 
 import java.util.Map;
 
+/**
+ * This operator performs dimensions computation on a map.
+ * @displayName Dimension Computation
+ * @category Statistics
+ * @tags event, dimension, aggregation, computation
+ */
 public class GenericDimensionsComputationSingleSchemaMap extends GenericDimensionsComputationSingleSchema<Map<String, Object>>
 {
   @NotNull

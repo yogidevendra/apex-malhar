@@ -63,6 +63,7 @@ public class AggregatorCount extends AbstractIncrementalAggregator
                                           aggregatorIndex);
 
     long[] longFields = aggregate.getAggregates().getFieldsLong();
+    LOG.debug("longFields length {}", longFields.length);
 
     for(int index = 0;
         index < longFields.length;
