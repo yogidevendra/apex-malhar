@@ -19,6 +19,9 @@ package com.datatorrent.lib.appdata.gpo;
 import com.datatorrent.lib.appdata.schemas.ResultFormatter;
 import com.datatorrent.lib.appdata.schemas.Type;
 import com.datatorrent.lib.util.PojoUtils;
+import com.datatorrent.lib.util.PojoUtils.GetterBoolean;
+import com.datatorrent.lib.util.PojoUtils.GetterByte;
+import com.datatorrent.lib.util.PojoUtils.GetterChar;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -148,7 +151,8 @@ public abstract class GPOType
       gpoGetters.gettersBoolean = createGetters(fields,
                                                 fieldToGetter,
                                                 clazz,
-                                                PojoUtils.GetterBoolean.class);
+                                                boolean.class,
+                                                GetterBoolean.class);
     }
   }
 
@@ -205,7 +209,8 @@ public abstract class GPOType
       gpoGetters.gettersChar = createGetters(fields,
                                              fieldToGetter,
                                              clazz,
-                                             PojoUtils.GetterChar.class);
+                                             char.class,
+                                             GetterChar.class);
     }
   }
 
@@ -259,10 +264,9 @@ public abstract class GPOType
     @Override
     public void buildGPOGetters(GPOGetters gpoGetters, List<String> fields, Map<String, String> fieldToGetter, Class<?> clazz)
     {
-      gpoGetters.gettersString = createGetters(fields,
-                                               fieldToGetter,
-                                               clazz,
-                                               PojoUtils.Getter.class);
+      gpoGetters.gettersString = createGettersString(fields,
+                                                     fieldToGetter,
+                                                     clazz);
     }
   }
 
@@ -301,10 +305,9 @@ public abstract class GPOType
     @Override
     public void buildGPOGetters(GPOGetters gpoGetters, List<String> fields, Map<String, String> fieldToGetter, Class<?> clazz)
     {
-      gpoGetters.gettersObject = createGetters(fields,
-                                               fieldToGetter,
-                                               clazz,
-                                               PojoUtils.Getter.class);
+      gpoGetters.gettersObject = createGettersObject(fields,
+                                                     fieldToGetter,
+                                                     clazz);
     }
   }
 
@@ -376,7 +379,8 @@ public abstract class GPOType
       gpoGetters.gettersByte = createGetters(fields,
                                              fieldToGetter,
                                              clazz,
-                                             PojoUtils.GetterByte.class);
+                                             byte.class,
+                                             GetterByte.class);
     }
   }
 
@@ -449,6 +453,7 @@ public abstract class GPOType
       gpoGetters.gettersShort = createGetters(fields,
                                               fieldToGetter,
                                               clazz,
+                                              short.class,
                                               PojoUtils.GetterShort.class);
     }
   }
@@ -506,6 +511,7 @@ public abstract class GPOType
       gpoGetters.gettersInteger = createGetters(fields,
                                                 fieldToGetter,
                                                 clazz,
+                                                int.class,
                                                 PojoUtils.GetterInt.class);
     }
   }
@@ -563,6 +569,7 @@ public abstract class GPOType
       gpoGetters.gettersLong = createGetters(fields,
                                              fieldToGetter,
                                              clazz,
+                                             long.class,
                                              PojoUtils.GetterLong.class);
     }
   }
@@ -620,6 +627,7 @@ public abstract class GPOType
       gpoGetters.gettersFloat = createGetters(fields,
                                               fieldToGetter,
                                               clazz,
+                                              float.class,
                                               PojoUtils.GetterFloat.class);
     }
   }
@@ -677,6 +685,7 @@ public abstract class GPOType
       gpoGetters.gettersDouble = createGetters(fields,
                                                fieldToGetter,
                                                clazz,
+                                               double.class,
                                                PojoUtils.GetterDouble.class);
     }
   }

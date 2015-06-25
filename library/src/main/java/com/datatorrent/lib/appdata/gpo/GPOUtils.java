@@ -1110,10 +1110,11 @@ public class GPOUtils
   public static <T> T[] createGetters(List<String> fields,
                                       Map<String, String> valueToExpression,
                                       Class<?> clazz,
-                                      Class<?> getterClazz)
+                                      Class<?> getterClazz,
+                                      Class<?> getterMethodClazz)
   {
     @SuppressWarnings("unchecked")
-    T[] getters = (T[])Array.newInstance(getterClazz, fields.size());
+    T[] getters = (T[])Array.newInstance(getterMethodClazz, fields.size());
 
     for(int getterIndex = 0;
         getterIndex < fields.size();
@@ -1121,6 +1122,60 @@ public class GPOUtils
       String field = fields.get(getterIndex);
       getters[getterIndex] = (T) PojoUtils.constructGetter(clazz, valueToExpression.get(field), getterClazz);
       //PojoUtils.createGetterBoolean(clazz, valueToExpression.get(field));
+    }
+
+    return getters;
+  }
+
+  /**
+   * Utility method for creating getters. This method is useful for creating a {@link GPOGetters} object
+   * which can be used to copy POJOs into GPOMutable objects.
+   * @param fields The fields to create getters for. The order of the fields in this list will be the same order
+   * that the getters will be returned in.
+   * @param valueToExpression A map from field names to the corresponding java expression to be used for getting
+   * the fields.
+   * @param clazz The Class of the POJO to extract values from.
+   * @return An array of boolean getters for given fields.
+   */
+  public static Getter<Object, String>[] createGettersString(List<String> fields,
+                                                             Map<String, String> valueToExpression,
+                                                             Class<?> clazz)
+  {
+    @SuppressWarnings({"unchecked","rawtypes"})
+    Getter<Object, String>[] getters = new Getter[fields.size()];
+
+    for(int getterIndex = 0;
+        getterIndex < fields.size();
+        getterIndex++) {
+      String field = fields.get(getterIndex);
+      getters[getterIndex] = PojoUtils.createGetter(clazz, valueToExpression.get(field), String.class);
+    }
+
+    return getters;
+  }
+
+  /**
+   * Utility method for creating getters. This method is useful for creating a {@link GPOGetters} object
+   * which can be used to copy POJOs into GPOMutable objects.
+   * @param fields The fields to create getters for. The order of the fields in this list will be the same order
+   * that the getters will be returned in.
+   * @param valueToExpression A map from field names to the corresponding java expression to be used for getting
+   * the fields.
+   * @param clazz The Class of the POJO to extract values from.
+   * @return An array of boolean getters for given fields.
+   */
+  public static Getter<Object, Object>[] createGettersObject(List<String> fields,
+                                                             Map<String, String> valueToExpression,
+                                                             Class<?> clazz)
+  {
+    @SuppressWarnings({"unchecked","rawtypes"})
+    Getter<Object, Object>[] getters = new Getter[fields.size()];
+
+    for(int getterIndex = 0;
+        getterIndex < fields.size();
+        getterIndex++) {
+      String field = fields.get(getterIndex);
+      getters[getterIndex] = PojoUtils.createGetter(clazz, valueToExpression.get(field), Object.class);
     }
 
     return getters;

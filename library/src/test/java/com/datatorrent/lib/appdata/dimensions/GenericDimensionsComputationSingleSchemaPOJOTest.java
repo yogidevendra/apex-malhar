@@ -156,18 +156,18 @@ public class GenericDimensionsComputationSingleSchemaPOJOTest
     dimensions.setConfigurationSchemaJSON(SchemaUtils.jarResourceFileToString(eventSchema));
 
     Map<String, String> fieldToExpressionKey = Maps.newHashMap();
-    fieldToExpressionKey.put("publisher", "getPublisher()");
-    fieldToExpressionKey.put("advertiser", "getAdvertiser()");
-    fieldToExpressionKey.put("location", "getLocation()");
-    fieldToExpressionKey.put("time", "getTime()");
+    fieldToExpressionKey.put("publisher", "publisher");
+    fieldToExpressionKey.put("advertiser", "advertiser");
+    fieldToExpressionKey.put("location", "location");
+    fieldToExpressionKey.put("time", "time");
 
     dimensions.setKeyToExpression(fieldToExpressionKey);
 
     Map<String, String> fieldToExpressionAggregate = Maps.newHashMap();
-    fieldToExpressionAggregate.put("cost", "getCost()");
-    fieldToExpressionAggregate.put("revenue", "getRevenue()");
-    fieldToExpressionAggregate.put("impressions", "getImpressions()");
-    fieldToExpressionAggregate.put("clicks", "getClicks()");
+    fieldToExpressionAggregate.put("cost", "cost");
+    fieldToExpressionAggregate.put("revenue", "revenue");
+    fieldToExpressionAggregate.put("impressions", "impressions");
+    fieldToExpressionAggregate.put("clicks", "clicks");
 
     dimensions.setAggregateToExpression(fieldToExpressionAggregate);
 
