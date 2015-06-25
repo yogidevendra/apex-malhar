@@ -33,6 +33,7 @@ import com.datatorrent.lib.statistics.DimensionsComputation;
 import com.datatorrent.lib.statistics.DimensionsComputationUnifierImpl;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
+import java.io.Serializable;
 import javax.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -275,8 +276,10 @@ public abstract class GenericDimensionsComputationSingleSchema<EVENT> implements
     this.unifier = unifier;
   }
 
-  public static class DimensionsConversionContext
+  public static class DimensionsConversionContext implements Serializable
   {
+    private static final long serialVersionUID = 201506151157L;
+
     public int schemaID;
     public int dimensionsDescriptorID;
     public int aggregatorID;

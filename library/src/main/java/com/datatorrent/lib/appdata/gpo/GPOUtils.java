@@ -33,6 +33,7 @@ import com.datatorrent.lib.util.PojoUtils.GetterLong;
 import com.datatorrent.lib.util.PojoUtils.GetterShort;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
+import java.io.Serializable;
 import java.lang.reflect.Array;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.codehaus.jettison.json.JSONArray;
@@ -2119,8 +2120,10 @@ public class GPOUtils
   /**
    * The subset of indices to pull data out of.
    */
-  public static class IndexSubset
+  public static class IndexSubset implements Serializable
   {
+    private static final long serialVersionUID = 201506251015L;
+
     public DimensionsDescriptor dd;
     public int[] fieldsBooleanIndexSubset;
     public int[] fieldsCharacterIndexSubset;

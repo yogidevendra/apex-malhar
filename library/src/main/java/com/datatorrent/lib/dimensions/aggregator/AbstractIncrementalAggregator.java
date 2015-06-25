@@ -104,11 +104,8 @@ public abstract class AbstractIncrementalAggregator implements IncrementalAggreg
     }
     else {
       if(!inputEvent2.isTypeInputEvent()) {
-        return inputEvent1.getEventKey().getSchemaID() == inputEvent2.getEventKey().getSchemaID()
-               && inputEvent1.getEventKey().getDimensionDescriptorID() == inputEvent2.getEventKey().getDimensionDescriptorID()
-               && inputEvent1.getEventKey().getAggregatorID() == inputEvent2.getEventKey().getAggregatorID()
-               && GPOUtils.equals(inputEvent1.getKeys(),
-                                  inputEvent2.getKeys());
+        return GPOUtils.equals(inputEvent1.getKeys(),
+                               inputEvent2.getKeys());
       }
 
       inputEvent = inputEvent2;
