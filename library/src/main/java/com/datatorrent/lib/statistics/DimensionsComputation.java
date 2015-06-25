@@ -35,6 +35,8 @@ import gnu.trove.strategy.HashingStrategy;
 
 import com.datatorrent.api.*;
 import com.datatorrent.api.Context.OperatorContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * <p>An implementation of an operator that computes dimensions of events. </p>
@@ -176,6 +178,7 @@ public class DimensionsComputation<EVENT, AGGREGATE extends DimensionsComputatio
   @Override
   public void setup(OperatorContext context)
   {
+    LOG.debug("Aggregator maps length {}", aggregatorMaps.length);
     for(int i = aggregatorMaps.length; i-- > 0;) {
       aggregatorMaps[i].setUseAggregatesAsKeys(useAggregatesAsKeys);
     }
@@ -466,4 +469,6 @@ public class DimensionsComputation<EVENT, AGGREGATE extends DimensionsComputatio
   {
     return aggregatorMaps != null ? Arrays.hashCode(aggregatorMaps) : 0;
   }
+
+  private static final Logger LOG = LoggerFactory.getLogger(DimensionsComputation.class);
 }
