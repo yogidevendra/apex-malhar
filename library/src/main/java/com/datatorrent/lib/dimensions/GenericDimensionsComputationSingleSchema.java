@@ -79,7 +79,7 @@ public abstract class GenericDimensionsComputationSingleSchema<EVENT> implements
     @Override
     public Unifier<Aggregate> getUnifier()
     {
-      setup(null);
+      unifier.setAggregators(createAggregators());
       return unifier;
     }
   };
@@ -109,77 +109,7 @@ public abstract class GenericDimensionsComputationSingleSchema<EVENT> implements
     new DimensionalConfigurationSchema(configurationSchemaJSON,
                                        aggregatorRegistry);
 
-    //Num incremental aggregators
-    int numIncrementalAggregators = 0;
-
-    FieldsDescriptor masterKeyFieldsDescriptor = configurationSchema.getKeyDescriptorWithTime();
-    List<FieldsDescriptor> keyFieldsDescriptors = configurationSchema.getDimensionsDescriptorIDToKeyDescriptor();
-
-    for(int dimensionsDescriptorID = 0;
-        dimensionsDescriptorID < configurationSchema.getDimensionsDescriptorIDToAggregatorIDs().size();
-        dimensionsDescriptorID++) {
-      IntArrayList aggIDList = configurationSchema.getDimensionsDescriptorIDToAggregatorIDs().get(dimensionsDescriptorID);
-      numIncrementalAggregators += aggIDList.size();
-    }
-
-    int incrementalAggregatorIndex = 0;
-    IncrementalAggregator[] aggregatorArray = new IncrementalAggregator[numIncrementalAggregators];
-
-    for(int dimensionsDescriptorID = 0;
-        dimensionsDescriptorID < keyFieldsDescriptors.size();
-        dimensionsDescriptorID++) {
-      //Create the conversion context for the conversion.
-      FieldsDescriptor keyFieldsDescriptor = keyFieldsDescriptors.get(dimensionsDescriptorID);
-      Int2ObjectMap<FieldsDescriptor> map = configurationSchema.getDimensionsDescriptorIDToAggregatorIDToInputAggregatorDescriptor().get(dimensionsDescriptorID);
-      IntArrayList aggIDList = configurationSchema.getDimensionsDescriptorIDToAggregatorIDs().get(dimensionsDescriptorID);
-      DimensionsDescriptor dd = configurationSchema.getDimensionsDescriptorIDToDimensionsDescriptor().get(dimensionsDescriptorID);
-
-      for(int aggIDIndex = 0;
-          aggIDIndex < aggIDList.size();
-          aggIDIndex++, incrementalAggregatorIndex++) {
-        int aggID = aggIDList.get(aggIDIndex);
-
-        DimensionsConversionContext conversionContext = new DimensionsConversionContext();
-        IndexSubset indexSubsetKey = GPOUtils.computeSubIndices(keyFieldsDescriptor, masterKeyFieldsDescriptor);
-        IndexSubset indexSubsetAggregate = GPOUtils.computeSubIndices(this.configurationSchema.getDimensionsDescriptorIDToAggregatorIDToInputAggregatorDescriptor().get
-                                                                      (dimensionsDescriptorID).get(aggID),
-                                                                      this.configurationSchema.getInputValuesDescriptor());
-
-        indexSubsetKey.dd = dd;
-        conversionContext.schemaID = schemaID;
-        conversionContext.dimensionsDescriptorID = dimensionsDescriptorID;
-        conversionContext.aggregatorID = aggID;
-
-        conversionContext.dd = dd;
-        conversionContext.keyDescriptor = keyFieldsDescriptor;
-        conversionContext.aggregateDescriptor = map.get(aggID);
-        conversionContext.inputTimestampIndex =
-        masterKeyFieldsDescriptor.getTypeToFields().get(DimensionsDescriptor.DIMENSION_TIME_TYPE).indexOf(DimensionsDescriptor.DIMENSION_TIME);
-        conversionContext.outputTimebucketIndex =
-        keyFieldsDescriptor.getTypeToFields().get(DimensionsDescriptor.DIMENSION_TIME_BUCKET_TYPE).indexOf(DimensionsDescriptor.DIMENSION_TIME_BUCKET);
-        conversionContext.outputTimestampIndex =
-        keyFieldsDescriptor.getTypeToFields().get(DimensionsDescriptor.DIMENSION_TIME_TYPE).indexOf(DimensionsDescriptor.DIMENSION_TIME);
-
-        IncrementalAggregator aggregator;
-
-        try {
-          aggregator = this.aggregatorRegistry.getIncrementalAggregatorIDToAggregator().get(aggID).getClass().newInstance();
-        }
-        catch(InstantiationException ex) {
-          throw new RuntimeException(ex);
-        }
-        catch(IllegalAccessException ex) {
-          throw new RuntimeException(ex);
-        }
-
-        aggregator.setDimensionsConversionContext(conversionContext);
-
-        aggregator.setIndexSubsetKeys(indexSubsetKey);
-        aggregator.setIndexSubsetAggregates(indexSubsetAggregate);
-
-        aggregatorArray[incrementalAggregatorIndex] = aggregator;
-      }
-    }
+    IncrementalAggregator[] aggregatorArray = createAggregators();
 
     dimensionsComputation = new DimensionsComputation<InputEvent, Aggregate>();
     dimensionsComputation.setUseAggregatesAsKeys(true);
@@ -202,7 +132,83 @@ public abstract class GenericDimensionsComputationSingleSchema<EVENT> implements
 
     dimensionsComputation.output.setSink((Sink) sink);
     dimensionsComputation.setup(context);
-    unifier.setAggregators(aggregatorArray);
+  }
+
+  private IncrementalAggregator[] createAggregators() throws RuntimeException
+  {
+    //Num incremental aggregators
+    int numIncrementalAggregators = 0;
+
+    FieldsDescriptor masterKeyFieldsDescriptor = configurationSchema.getKeyDescriptorWithTime();
+    List<FieldsDescriptor> keyFieldsDescriptors = configurationSchema.getDimensionsDescriptorIDToKeyDescriptor();
+
+    for(int dimensionsDescriptorID = 0;
+        dimensionsDescriptorID < configurationSchema.getDimensionsDescriptorIDToAggregatorIDs().size();
+        dimensionsDescriptorID++) {
+      IntArrayList aggIDList = configurationSchema.getDimensionsDescriptorIDToAggregatorIDs().get(dimensionsDescriptorID);
+      numIncrementalAggregators += aggIDList.size();
+    }
+
+    IncrementalAggregator[] aggregatorArray = new IncrementalAggregator[numIncrementalAggregators];
+    int incrementalAggregatorIndex = 0;
+
+    for(int dimensionsDescriptorID = 0;
+        dimensionsDescriptorID < keyFieldsDescriptors.size();
+        dimensionsDescriptorID++) {
+      //Create the conversion context for the conversion.
+      FieldsDescriptor keyFieldsDescriptor = keyFieldsDescriptors.get(dimensionsDescriptorID);
+      Int2ObjectMap<FieldsDescriptor> map = configurationSchema.getDimensionsDescriptorIDToAggregatorIDToInputAggregatorDescriptor().get(dimensionsDescriptorID);
+      IntArrayList aggIDList = configurationSchema.getDimensionsDescriptorIDToAggregatorIDs().get(dimensionsDescriptorID);
+      DimensionsDescriptor dd = configurationSchema.getDimensionsDescriptorIDToDimensionsDescriptor().get(dimensionsDescriptorID);
+
+      for(int aggIDIndex = 0;
+          aggIDIndex < aggIDList.size();
+          aggIDIndex++, incrementalAggregatorIndex++) {
+        int aggID = aggIDList.get(aggIDIndex);
+
+        DimensionsConversionContext conversionContext = new DimensionsConversionContext();
+        IndexSubset indexSubsetKey = GPOUtils.computeSubIndices(keyFieldsDescriptor, masterKeyFieldsDescriptor);
+        IndexSubset indexSubsetAggregate = GPOUtils.computeSubIndices(this.configurationSchema.getDimensionsDescriptorIDToAggregatorIDToInputAggregatorDescriptor().get
+                                                                              (dimensionsDescriptorID).get(aggID),
+                                                                      this.configurationSchema.getInputValuesDescriptor());
+
+        indexSubsetKey.dd = dd;
+        conversionContext.schemaID = schemaID;
+        conversionContext.dimensionsDescriptorID = dimensionsDescriptorID;
+        conversionContext.aggregatorID = aggID;
+
+        conversionContext.dd = dd;
+        conversionContext.keyDescriptor = keyFieldsDescriptor;
+        conversionContext.aggregateDescriptor = map.get(aggID);
+        conversionContext.inputTimestampIndex =
+                masterKeyFieldsDescriptor.getTypeToFields().get(DimensionsDescriptor.DIMENSION_TIME_TYPE).indexOf(DimensionsDescriptor.DIMENSION_TIME);
+        conversionContext.outputTimebucketIndex =
+                keyFieldsDescriptor.getTypeToFields().get(DimensionsDescriptor.DIMENSION_TIME_BUCKET_TYPE).indexOf(DimensionsDescriptor.DIMENSION_TIME_BUCKET);
+        conversionContext.outputTimestampIndex =
+                keyFieldsDescriptor.getTypeToFields().get(DimensionsDescriptor.DIMENSION_TIME_TYPE).indexOf(DimensionsDescriptor.DIMENSION_TIME);
+
+        IncrementalAggregator aggregator;
+
+        try {
+          aggregator = this.aggregatorRegistry.getIncrementalAggregatorIDToAggregator().get(aggID).getClass().newInstance();
+        }
+        catch(InstantiationException ex) {
+          throw new RuntimeException(ex);
+        }
+        catch(IllegalAccessException ex) {
+          throw new RuntimeException(ex);
+        }
+
+        aggregator.setDimensionsConversionContext(conversionContext);
+
+        aggregator.setIndexSubsetKeys(indexSubsetKey);
+        aggregator.setIndexSubsetAggregates(indexSubsetAggregate);
+
+        aggregatorArray[incrementalAggregatorIndex] = aggregator;
+      }
+    }
+
+    return aggregatorArray;
   }
 
   @Override
