@@ -78,7 +78,7 @@ public abstract class GenericDimensionsComputationSingleSchema<EVENT> implements
     @Override
     public Unifier<Aggregate> getUnifier()
     {
-      return getUnifier();
+      return unifier;
     }
   };
 
