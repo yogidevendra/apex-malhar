@@ -16,6 +16,7 @@
 package com.datatorrent.contrib.hbase;
 
 import java.io.IOException;
+
 import java.util.Collection;
 
 import org.junit.Assert;
@@ -26,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import com.datatorrent.api.Attribute;
 import com.datatorrent.api.Attribute.AttributeMap;
 import com.datatorrent.api.Context.OperatorContext;
+
 
 public class HBaseNameValueCsvPutOperatorTest
 {
@@ -80,6 +82,7 @@ public class HBaseNameValueCsvPutOperatorTest
 
         }
       });
+
       propPutOperator.beginWindow(0);
       propPutOperator.input.process(s);
       propPutOperator.input.process(s1);

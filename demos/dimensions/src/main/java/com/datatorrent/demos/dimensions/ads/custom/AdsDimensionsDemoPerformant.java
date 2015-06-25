@@ -26,6 +26,7 @@ import com.datatorrent.api.annotation.ApplicationAnnotation;
 import com.datatorrent.contrib.dimensions.AppDataSingleSchemaDimensionStoreHDHT;
 import com.datatorrent.contrib.hdht.tfile.TFileImpl;
 import com.datatorrent.demos.dimensions.ads.AdInfo;
+import com.datatorrent.demos.dimensions.ads.AdInfo.AdInfoAggregator;
 import com.datatorrent.demos.dimensions.ads.InputItemGenerator;
 import com.datatorrent.lib.appdata.schemas.SchemaUtils;
 import com.datatorrent.lib.counters.BasicCounters;
@@ -34,8 +35,6 @@ import com.datatorrent.lib.io.PubSubWebSocketAppDataResult;
 import com.datatorrent.lib.statistics.DimensionsComputation;
 import com.datatorrent.lib.statistics.DimensionsComputationUnifierImpl;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import java.net.URI;
 import org.apache.commons.lang.mutable.MutableLong;
 import org.apache.hadoop.conf.Configuration;
@@ -43,8 +42,6 @@ import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @ApplicationAnnotation(name=AdsDimensionsDemoPerformant.APP_NAME)
@@ -85,33 +82,21 @@ public class AdsDimensionsDemoPerformant implements StreamingApplication
     };
 
     //Set operator properties
+    AdInfoAggregator[] aggregators = new AdInfoAggregator[dimensionSpecs.length];
 
     //Set input properties
     input.setEventSchemaJSON(eventSchema);
-
-    //Set Dimensions properties
-    LinkedHashMap<String, DimensionsCombination<AdInfo, AdInfo.AdInfoAggregateEvent>> dimensionsCombinations =
-    Maps.newLinkedHashMap();
-
-    LinkedHashMap<String, List<Aggregator<AdInfo, AdInfo.AdInfoAggregateEvent>>> dimensionsAggregators =
-    Maps.newLinkedHashMap();
 
     for(int index = 0;
         index < dimensionSpecs.length;
         index++) {
       String dimensionSpec = dimensionSpecs[index];
-      AdsDimensionsCombination dimensionsCombination = new AdsDimensionsCombination();
-      dimensionsCombination.init(dimensionSpec, index);
-      dimensionsCombinations.put(dimensionSpec, dimensionsCombination);
-
-      List<Aggregator<AdInfo, AdInfo.AdInfoAggregateEvent>> aggregators = Lists.newArrayList();
-      AdInfoSumAggregator adInfoSumAggregator = new AdInfoSumAggregator();
-      aggregators.add(adInfoSumAggregator);
-      dimensionsAggregators.put(dimensionSpec, aggregators);
+      AdInfoAggregator aggregator = new AdInfoAggregator();
+      aggregator.init(dimensionSpec, index);
+      aggregators[index] = aggregator;
     }
 
-    dimensions.setDimensionsCombinations(dimensionsCombinations);
-    dimensions.setAggregators(dimensionsAggregators);
+    dimensions.setAggregators(aggregators);
     dag.getMeta(dimensions).getMeta(dimensions.output).getUnifierMeta().getAttributes().put(OperatorContext.MEMORY_MB, 8092);
 
     //Configuring the converter

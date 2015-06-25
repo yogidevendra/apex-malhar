@@ -16,6 +16,7 @@
 package com.datatorrent.contrib.hbase;
 
 import java.io.IOException;
+
 import java.util.Collection;
 
 import org.junit.Assert;
@@ -26,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import com.datatorrent.api.Attribute;
 import com.datatorrent.api.Attribute.AttributeMap;
 import com.datatorrent.api.Context.OperatorContext;
+
 
 public class HBaseCsvMappingPutOperatorTest {
   private static final Logger logger = LoggerFactory
@@ -75,6 +77,7 @@ public class HBaseCsvMappingPutOperatorTest {
 
         }
       });
+
       csvMappingPutOperator.beginWindow(0);
       csvMappingPutOperator.input.process(s);
       csvMappingPutOperator.input.process(s1);

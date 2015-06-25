@@ -24,6 +24,15 @@ import com.datatorrent.lib.appdata.schemas.FieldsDescriptor;
 import com.datatorrent.lib.appdata.schemas.Type;
 import com.datatorrent.lib.dimensions.DimensionsEvent.EventKey;
 import com.datatorrent.lib.dimensions.DimensionsEvent.InputEvent;
+import com.datatorrent.lib.util.PojoUtils.Getter;
+import com.datatorrent.lib.util.PojoUtils.GetterBoolean;
+import com.datatorrent.lib.util.PojoUtils.GetterByte;
+import com.datatorrent.lib.util.PojoUtils.GetterChar;
+import com.datatorrent.lib.util.PojoUtils.GetterDouble;
+import com.datatorrent.lib.util.PojoUtils.GetterFloat;
+import com.datatorrent.lib.util.PojoUtils.GetterInt;
+import com.datatorrent.lib.util.PojoUtils.GetterLong;
+import com.datatorrent.lib.util.PojoUtils.GetterShort;
 
 import java.util.List;
 import java.util.Map;
@@ -85,71 +94,81 @@ public class GenericDimensionsComputationSingleSchemaPOJO extends GenericDimensi
 
       switch(inputType) {
         case BOOLEAN: {
-          gpoGetters.gettersBoolean = GPOUtils.createGetterBoolean(fields,
-                                                                   valueToExpression,
-                                                                   event.getClass());
+          gpoGetters.gettersBoolean = GPOUtils.createGetters(fields,
+                                                             valueToExpression,
+                                                             event.getClass(),
+                                                             GetterBoolean.class);
 
           break;
         }
         case STRING: {
-          gpoGetters.gettersString = GPOUtils.createGetterString(fields,
-                                                                 valueToExpression,
-                                                                 event.getClass());
+          gpoGetters.gettersString = GPOUtils.createGetters(fields,
+                                                            valueToExpression,
+                                                            event.getClass(),
+                                                            Getter.class);
 
           break;
         }
         case CHAR: {
-          gpoGetters.gettersChar = GPOUtils.createGetterChar(fields,
-                                                             valueToExpression,
-                                                             event.getClass());
+          gpoGetters.gettersChar = GPOUtils.createGetters(fields,
+                                                          valueToExpression,
+                                                          event.getClass(),
+                                                          GetterChar.class);
 
           break;
         }
         case DOUBLE: {
-          gpoGetters.gettersDouble = GPOUtils.createGetterDouble(fields,
-                                                                 valueToExpression,
-                                                                 event.getClass());
+          gpoGetters.gettersDouble = GPOUtils.createGetters(fields,
+                                                            valueToExpression,
+                                                            event.getClass(),
+                                                            GetterDouble.class);
 
           break;
         }
         case FLOAT: {
-          gpoGetters.gettersFloat = GPOUtils.createGetterFloat(fields,
-                                                               valueToExpression,
-                                                               event.getClass());
+          gpoGetters.gettersFloat = GPOUtils.createGetters(fields,
+                                                           valueToExpression,
+                                                           event.getClass(),
+                                                           GetterFloat.class);
           break;
         }
         case LONG: {
-          gpoGetters.gettersLong = GPOUtils.createGetterLong(fields,
-                                                             valueToExpression,
-                                                             event.getClass());
+          gpoGetters.gettersLong = GPOUtils.createGetters(fields,
+                                                          valueToExpression,
+                                                          event.getClass(),
+                                                          GetterLong.class);
 
           break;
         }
         case INTEGER: {
-          gpoGetters.gettersInteger = GPOUtils.createGetterInt(fields,
-                                                               valueToExpression,
-                                                               event.getClass());
+          gpoGetters.gettersInteger = GPOUtils.createGetters(fields,
+                                                             valueToExpression,
+                                                             event.getClass(),
+                                                             GetterInt.class);
 
           break;
         }
         case SHORT: {
-          gpoGetters.gettersShort = GPOUtils.createGetterShort(fields,
-                                                               valueToExpression,
-                                                               event.getClass());
+          gpoGetters.gettersShort = GPOUtils.createGetters(fields,
+                                                           valueToExpression,
+                                                           event.getClass(),
+                                                           GetterShort.class);
 
           break;
         }
         case BYTE: {
-          gpoGetters.gettersByte = GPOUtils.createGetterByte(fields,
-                                                             valueToExpression,
-                                                             event.getClass());
+          gpoGetters.gettersByte = GPOUtils.createGetters(fields,
+                                                          valueToExpression,
+                                                          event.getClass(),
+                                                          GetterByte.class);
 
           break;
         }
         case OBJECT: {
-          gpoGetters.gettersObject = GPOUtils.createGetterObject(fields,
-                                                                 valueToExpression,
-                                                                 event.getClass());
+          gpoGetters.gettersObject = GPOUtils.createGetters(fields,
+                                                            valueToExpression,
+                                                            event.getClass(),
+                                                            Getter.class);
 
           break;
         }

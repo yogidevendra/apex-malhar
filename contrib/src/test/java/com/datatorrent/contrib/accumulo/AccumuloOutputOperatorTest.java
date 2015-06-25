@@ -16,17 +16,17 @@
 package com.datatorrent.contrib.accumulo;
 
 
-import java.util.Collection;
-
+import com.datatorrent.api.Attribute;
+import com.datatorrent.api.Attribute.AttributeMap;
+import com.datatorrent.api.Context.OperatorContext;
 import org.apache.accumulo.core.data.Mutation;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.datatorrent.api.Attribute;
-import com.datatorrent.api.Attribute.AttributeMap;
-import com.datatorrent.api.Context.OperatorContext;
+import java.util.Collection;
+
 
 public class AccumuloOutputOperatorTest {
   private static final Logger logger = LoggerFactory
@@ -75,6 +75,7 @@ public class AccumuloOutputOperatorTest {
 
       }
     });
+
     atleastOper.beginWindow(0);
     AccumuloTuple a=new AccumuloTuple();
     a.setRow("john");a.setColFamily("colfam0");a.setColName("street");a.setColValue("patrick");

@@ -16,16 +16,95 @@
 
 package com.datatorrent.lib.dimensions;
 
+import com.datatorrent.lib.appdata.gpo.GPOMutable;
+import com.datatorrent.lib.appdata.schemas.FieldsDescriptor;
 import com.datatorrent.lib.dimensions.DimensionsEvent.InputEvent;
+import com.google.common.collect.Maps;
+import javax.validation.constraints.NotNull;
 
 import java.util.Map;
 
 public class GenericDimensionsComputationSingleSchemaMap extends GenericDimensionsComputationSingleSchema<Map<String, Object>>
 {
+  @NotNull
+  private Map<String, String> keyNameAliases = Maps.newHashMap();
+  @NotNull
+  private Map<String, String> valueNameAliases = Maps.newHashMap();
 
   @Override
   public void convert(InputEvent inputEvent, Map<String, Object> event)
   {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    populateGPO(inputEvent.getKeys(),
+                event,
+                keyNameAliases);
+
+    populateGPO(inputEvent.getAggregates(),
+                event,
+                valueNameAliases);
+  }
+
+  private void populateGPO(GPOMutable gpoMutable,
+                           Map<String, Object> event,
+                           Map<String, String> aliasMap)
+  {
+    FieldsDescriptor fd = gpoMutable.getFieldDescriptor();
+
+    for(int index = 0;
+        index < fd.getFieldList().size();
+        index++) {
+      String field = fd.getFieldList().get(index);
+      gpoMutable.setField(field, event.get(getMapAlias(aliasMap,
+                                                     field)));
+    }
+  }
+
+  private String getMapAlias(Map<String, String> map,
+                             String name)
+  {
+    String aliasName = map.get(name);
+
+    if(aliasName == null) {
+      aliasName = name;
+    }
+
+    return aliasName;
+  }
+
+  /**
+   * Gets the keyNameAliases.
+   * @return The keyNameAliases.
+   */
+  public Map<String, String> getKeyNameAliases()
+  {
+    return keyNameAliases;
+  }
+
+  /**
+   * Sets a map from key names as defined in the {@link DimensionalConfigurationSchema} to the
+   * corresponding key names in input maps.
+   * @param keyNameAliases The keyNameAliases to set.
+   */
+  public void setKeyNameAliases(Map<String, String> keyNameAliases)
+  {
+    this.keyNameAliases = keyNameAliases;
+  }
+
+  /**
+   * Gets the valueNameAliases.
+   * @return The valueNameAliases.
+   */
+  public Map<String, String> getValueNameAliases()
+  {
+    return valueNameAliases;
+  }
+
+  /**
+   * Sets a map from value names as defined in the {@link DimensionalConfigurationSchema} to the
+   * corresponding value names in input maps.
+   * @param valueNameAliases The valueNameAliases to set.
+   */
+  public void setValueNameAliases(Map<String, String> valueNameAliases)
+  {
+    this.valueNameAliases = valueNameAliases;
   }
 }

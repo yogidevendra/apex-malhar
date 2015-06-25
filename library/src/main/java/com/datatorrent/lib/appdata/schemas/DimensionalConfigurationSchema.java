@@ -315,9 +315,9 @@ public class DimensionalConfigurationSchema
     try {
       initialize(json);
     }
-    catch(Exception e) {
-      LOG.error("{}", e);
-      throw new IllegalArgumentException(e);
+    catch(JSONException ex) {
+      LOG.error("{}", ex);
+      throw new IllegalArgumentException(ex);
     }
   }
 
@@ -646,7 +646,7 @@ public class DimensionalConfigurationSchema
    * @param json The json with which to initialize the {@link DimensionalConfigurationSchema}.
    * @throws Exception
    */
-  private void initialize(String json) throws Exception
+  private void initialize(String json) throws JSONException
   {
     JSONObject jo = new JSONObject(json);
 

@@ -1,6 +1,17 @@
 /*
- *  Copyright (c) 2012-2015 Malhar, Inc.
- *  All Rights Reserved.
+ * Copyright (c) 2015 DataTorrent, Inc. ALL Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.datatorrent.lib.appdata.gpo;
@@ -21,6 +32,7 @@ import com.datatorrent.lib.util.PojoUtils.GetterLong;
 import com.datatorrent.lib.util.PojoUtils.GetterShort;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
+import java.lang.reflect.Array;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -136,190 +148,8 @@ public class GPOUtils
    */
   public static void setFieldFromJSON(GPOMutable gpo, Type type, String field, JSONArray jo, int index)
   {
-    switch(type) {
-      case BOOLEAN: {
-        Boolean val;
-
-        try {
-          val = jo.getBoolean(index);
-        }
-        catch(JSONException ex) {
-          throw new IllegalArgumentException("The key " + field + " does not have a valid bool value.", ex);
-        }
-
-        gpo.setField(field, val);
-        break;
-      }
-      case BYTE: {
-        int val;
-
-        try {
-          val = jo.getInt(index);
-        }
-        catch(JSONException ex) {
-          throw new IllegalArgumentException("The key "
-                                             + field
-                                             + " does not have a valid byte value.", ex);
-        }
-
-        if(val < (int)Byte.MIN_VALUE) {
-          throw new IllegalArgumentException("The key "
-                                             + field
-                                             + " has a value "
-                                             + val
-                                             + " which is too small to fit into a byte.");
-        }
-
-        if(val > (int)Byte.MAX_VALUE) {
-          throw new IllegalArgumentException("The key "
-                                             + field
-                                             + " has a value "
-                                             + val
-                                             + " which is too larg to fit into a byte.");
-        }
-
-        gpo.setField(field, (byte)val);
-        break;
-      }
-      case SHORT: {
-        int val;
-
-        try {
-          val = jo.getInt(index);
-        }
-        catch(JSONException ex) {
-          throw new IllegalArgumentException("The key "
-                                             + field
-                                             + " does not have a valid short value.",
-                                             ex);
-        }
-
-        if(val < (int)Short.MIN_VALUE) {
-          throw new IllegalArgumentException("The key "
-                                             + field
-                                             + " has a value "
-                                             + val
-                                             + " which is too small to fit into a short.");
-        }
-
-        if(val > (int)Short.MAX_VALUE) {
-          throw new IllegalArgumentException("The key "
-                                             + field
-                                             + " has a value "
-                                             + val
-                                             + " which is too large to fit into a short.");
-        }
-
-        gpo.setField(field, (short)val);
-        break;
-      }
-      case INTEGER: {
-        int val;
-
-        try {
-          val = jo.getInt(index);
-        }
-        catch(JSONException ex) {
-          throw new IllegalArgumentException("The key "
-                                             + field
-                                             + " does not have a valid int value.",
-                                             ex);
-        }
-
-        gpo.setField(field, val);
-        break;
-      }
-      case LONG: {
-        long val;
-
-        try {
-          val = jo.getLong(index);
-        }
-        catch(JSONException ex) {
-          throw new IllegalArgumentException("The key "
-                                             + field
-                                             + " does not have a valid long value.",
-                                             ex);
-        }
-
-        gpo.setField(field, val);
-        break;
-      }
-      case CHAR: {
-        String val;
-
-        try {
-          val = jo.getString(index);
-        }
-        catch(JSONException ex) {
-          throw new IllegalArgumentException("The key "
-                                             + field
-                                             + " does not have a valid character value.",
-                                             ex);
-        }
-
-        if(val.length() != 1) {
-          throw new IllegalArgumentException("The key "
-                                             + field
-                                             + " has a value "
-                                             + val
-                                             + " that is not one character long.");
-        }
-
-        gpo.setField(field, val.charAt(0));
-        break;
-      }
-      case STRING: {
-        String val;
-
-        try {
-          val = jo.getString(index);
-        }
-        catch(JSONException ex) {
-          throw new IllegalArgumentException("The key "
-                                             + field
-                                             + " does not have a valid string value.",
-                                             ex);
-        }
-
-        gpo.setField(field, val);
-        break;
-      }
-      case DOUBLE: {
-        Double val;
-
-        try {
-          val = jo.getDouble(index);
-        }
-        catch(JSONException ex) {
-          throw new IllegalArgumentException("The key "
-                                             + field
-                                             + " does not have a valid double value.",
-                                             ex);
-        }
-
-        gpo.setField(field, val);
-        break;
-      }
-      case FLOAT: {
-        Float val;
-
-        try {
-          val = (float)jo.getDouble(index);
-        }
-        catch(JSONException ex) {
-          throw new IllegalArgumentException("The key "
-                                             + field
-                                             + " does not have a valid double value.",
-                                             ex);
-        }
-
-        gpo.setField(field, val);
-        break;
-      }
-      default:
-          throw new UnsupportedOperationException("Type " + type);
-    }
+    GPOType gpoType = GPOType.GPO_TYPE_ARRAY[type.ordinal()];
+    gpoType.setFieldFromJSON(gpo, field, jo, index);
   }
 
   /**
@@ -532,37 +362,8 @@ public class GPOUtils
 
     for(String field: fields.getFields()) {
       Type fieldType = fd.getType(field);
-
-      if(fieldType == Type.BOOLEAN) {
-        jo.put(field, gpo.getFieldBool(field));
-      }
-      else if(fieldType == Type.CHAR) {
-        jo.put(field, ((Character) gpo.getFieldChar(field)).toString());
-      }
-      else if(fieldType == Type.STRING) {
-        jo.put(field, gpo.getFieldString(field));
-      }
-      else if(fieldType == Type.BYTE) {
-        jo.put(field, resultFormatter.format(gpo.getFieldByte(field)));
-      }
-      else if(fieldType == Type.SHORT) {
-        jo.put(field, resultFormatter.format(gpo.getFieldShort(field)));
-      }
-      else if(fieldType == Type.INTEGER) {
-        jo.put(field, resultFormatter.format(gpo.getFieldInt(field)));
-      }
-      else if(fieldType == Type.LONG) {
-        jo.put(field, resultFormatter.format(gpo.getFieldLong(field)));
-      }
-      else if(fieldType == Type.FLOAT) {
-        jo.put(field, resultFormatter.format(gpo.getFieldFloat(field)));
-      }
-      else if(fieldType == Type.DOUBLE) {
-        jo.put(field, resultFormatter.format(gpo.getFieldDouble(field)));
-      }
-      else {
-          throw new UnsupportedOperationException("Type " + fieldType);
-      }
+      GPOType gpoType = GPOType.GPO_TYPE_ARRAY[fieldType.ordinal()];
+      gpoType.serializeJSONObject(jo, gpo, field, resultFormatter);
     }
 
     return jo;
@@ -749,65 +550,8 @@ public class GPOUtils
       }
 
       Type type = gpo.getFieldDescriptor().getType(field);
-
-      switch(type) {
-      case BOOLEAN: {
-        serializeBoolean(gpo.getFieldBool(field),
-                         sbytes,
-                         offset);
-        break;
-      }
-      case BYTE: {
-        serializeByte(gpo.getFieldByte(field),
-                      sbytes,
-                      offset);
-        break;
-      }
-      case SHORT: {
-        serializeShort(gpo.getFieldShort(field),
-                      sbytes,
-                      offset);
-        break;
-      }
-      case INTEGER: {
-        serializeInt(gpo.getFieldInt(field),
-                     sbytes,
-                     offset);
-        break;
-      }
-      case LONG: {
-        serializeLong(gpo.getFieldLong(field),
-                     sbytes,
-                     offset);
-        break;
-      }
-      case CHAR: {
-        serializeChar(gpo.getFieldChar(field),
-                      sbytes,
-                      offset);
-        break;
-      }
-      case STRING: {
-        serializeString(gpo.getFieldString(field),
-                        sbytes,
-                        offset);
-        break;
-      }
-      case FLOAT: {
-        serializeFloat(gpo.getFieldFloat(field),
-                       sbytes,
-                       offset);
-        break;
-      }
-      case DOUBLE: {
-        serializeDouble(gpo.getFieldDouble(field),
-                        sbytes,
-                        offset);
-        break;
-      }
-      default:
-          throw new UnsupportedOperationException("Type " + type);
-      }
+      GPOType gpoType = GPOType.GPO_TYPE_ARRAY[type.ordinal()];
+      gpoType.serialize(gpo, field, sbytes, offset);
     }
 
     return sbytes;
@@ -938,57 +682,8 @@ public class GPOUtils
       }
 
       Type type = fieldsDescriptor.getType(field);
-
-      switch(type)
-      {
-        case BOOLEAN: {
-          boolean val = deserializeBoolean(serializedGPO, offsetM);
-          gpo.setField(field, val);
-          break;
-        }
-        case BYTE: {
-          byte val = deserializeByte(serializedGPO, offsetM);
-          gpo.setField(field, val);
-          break;
-        }
-        case CHAR: {
-          char val = deserializeChar(serializedGPO, offsetM);
-          gpo.setField(field, val);
-          break;
-        }
-        case SHORT: {
-          short val = deserializeShort(serializedGPO, offsetM);
-          gpo.setField(field, val);
-          break;
-        }
-        case INTEGER: {
-          int val = deserializeInt(serializedGPO, offsetM);
-          gpo.setField(field, val);
-          break;
-        }
-        case LONG: {
-          long val = deserializeLong(serializedGPO, offsetM);
-          gpo.setField(field, val);
-          break;
-        }
-        case FLOAT: {
-          float val = deserializeFloat(serializedGPO, offsetM);
-          gpo.setField(field, val);
-          break;
-        }
-        case DOUBLE: {
-          double val = deserializeDouble(serializedGPO, offsetM);
-          gpo.setField(field, val);
-          break;
-        }
-        case STRING: {
-          String val = deserializeString(serializedGPO, offsetM);
-          gpo.setField(field, val);
-          break;
-        }
-        default:
-          throw new UnsupportedOperationException("Type " + type);
-      }
+      GPOType gpoType = GPOType.GPO_TYPE_ARRAY[type.ordinal()];
+      gpoType.deserialize(gpo, field, serializedGPO, offsetM);
     }
 
     return gpo;
@@ -1402,274 +1097,33 @@ public class GPOUtils
   }
 
   /**
-   * Utility method for creating boolean getters. This method is useful for creating a {@link GPOGetters} object
+   * Utility method for creating getters. This method is useful for creating a {@link GPOGetters} object
    * which can be used to copy POJOs into GPOMutable objects.
    * @param fields The fields to create getters for. The order of the fields in this list will be the same order
    * that the getters will be returned in.
    * @param valueToExpression A map from field names to the corresponding java expression to be used for getting
    * the fields.
    * @param clazz The Class of the POJO to extract values from.
+   * @param getterClazz The class of the getter object to create.
    * @return An array of boolean getters for given fields.
    */
-  public static GetterBoolean<Object>[] createGetterBoolean(List<String> fields,
-                                                            Map<String, String> valueToExpression,
-                                                            Class<?> clazz)
+  public static <T> T[] createGetters(List<String> fields,
+                                      Map<String, String> valueToExpression,
+                                      Class<?> clazz,
+                                      Class<?> getterClazz)
   {
-    @SuppressWarnings({"unchecked","rawtypes"})
-    GetterBoolean<Object>[] gettersBoolean = new GetterBoolean[fields.size()];
+    @SuppressWarnings("unchecked")
+    T[] getters = (T[])Array.newInstance(getterClazz, fields.size());
 
     for(int getterIndex = 0;
         getterIndex < fields.size();
         getterIndex++) {
       String field = fields.get(getterIndex);
-      PojoUtils.
-      gettersBoolean[getterIndex] = PojoUtils.createGetterBoolean(clazz, valueToExpression.get(field));
+      getters[getterIndex] = (T) PojoUtils.constructGetter(clazz, valueToExpression.get(field), getterClazz);
+      //PojoUtils.createGetterBoolean(clazz, valueToExpression.get(field));
     }
 
-    return gettersBoolean;
-  }
-
-  /**
-   * Utility method for creating string getters. This method is useful for creating a {@link GPOGetters} object
-   * which can be used to copy POJOs into GPOMutable objects.
-   * @param fields The fields to create getters for. The order of the fields in this list will be the same order
-   * that the getters will be returned in.
-   * @param valueToExpression A map from field names to the corresponding java expression to be used for getting
-   * the fields.
-   * @param clazz The Class of the POJO to extract values from.
-   * @return An array of string getters for given fields.
-   */
-  public static Getter<Object, String>[] createGetterString(List<String> fields,
-                                                            Map<String, String> valueToExpression,
-                                                            Class<?> clazz)
-  {
-    @SuppressWarnings({"unchecked","rawtypes"})
-    Getter<Object, String>[] gettersString = new Getter[fields.size()];
-
-    for(int getterIndex = 0;
-        getterIndex < fields.size();
-        getterIndex++) {
-      String field = fields.get(getterIndex);
-      gettersString[getterIndex] = PojoUtils.createGetter(clazz, valueToExpression.get(field), String.class);
-    }
-
-    return gettersString;
-  }
-
-  /**
-   * Utility method for creating char getters. This method is useful for creating a {@link GPOGetters} object
-   * which can be used to copy POJOs into GPOMutable objects.
-   * @param fields The fields to create getters for. The order of the fields in this list will be the same order
-   * that the getters will be returned in.
-   * @param valueToExpression A map from field names to the corresponding java expression to be used for getting
-   * the fields.
-   * @param clazz The Class of the POJO to extract values from.
-   * @return An array of char getters for given fields.
-   */
-  public static GetterChar<Object>[] createGetterChar(List<String> fields,
-                                                      Map<String, String> valueToExpression,
-                                                      Class<?> clazz)
-  {
-    @SuppressWarnings({"unchecked","rawtypes"})
-    GetterChar<Object>[] gettersChar = new GetterChar[fields.size()];
-
-    for(int getterIndex = 0;
-        getterIndex < fields.size();
-        getterIndex++) {
-      String field = fields.get(getterIndex);
-      gettersChar[getterIndex] = PojoUtils.createGetterChar(clazz, valueToExpression.get(field));
-    }
-
-    return gettersChar;
-  }
-
-  /**
-   * Utility method for creating byte getters. This method is useful for creating a {@link GPOGetters} object
-   * which can be used to copy POJOs into GPOMutable objects.
-   * @param fields The fields to create getters for. The order of the fields in this list will be the same order
-   * that the getters will be returned in.
-   * @param valueToExpression A map from field names to the corresponding java expression to be used for getting
-   * the fields.
-   * @param clazz The Class of the POJO to extract values from.
-   * @return An array of byte getters for given fields.
-   */
-  public static GetterByte<Object>[] createGetterByte(List<String> fields,
-                                                      Map<String, String> valueToExpression,
-                                                      Class<?> clazz)
-  {
-    @SuppressWarnings({"unchecked","rawtypes"})
-    GetterByte<Object>[] gettersByte = new GetterByte[fields.size()];
-
-    for(int getterIndex = 0;
-        getterIndex < fields.size();
-        getterIndex++) {
-      String field = fields.get(getterIndex);
-      gettersByte[getterIndex] = PojoUtils.createGetterByte(clazz, valueToExpression.get(field));
-    }
-
-    return gettersByte;
-  }
-
-  /**
-   * Utility method for creating short getters. This method is useful for creating a {@link GPOGetters} object
-   * which can be used to copy POJOs into GPOMutable objects.
-   * @param fields The fields to create getters for. The order of the fields in this list will be the same order
-   * that the getters will be returned in.
-   * @param valueToExpression A map from field names to the corresponding java expression to be used for getting
-   * the fields.
-   * @param clazz The Class of the POJO to extract values from.
-   * @return An array of short getters for given fields.
-   */
-  public static GetterShort<Object>[] createGetterShort(List<String> fields,
-                                                        Map<String, String> valueToExpression,
-                                                        Class<?> clazz)
-  {
-    @SuppressWarnings({"unchecked","rawtypes"})
-    GetterShort<Object>[] gettersShort = new GetterShort[fields.size()];
-
-    for(int getterIndex = 0;
-        getterIndex < fields.size();
-        getterIndex++) {
-      String field = fields.get(getterIndex);
-      gettersShort[getterIndex] = PojoUtils.createGetterShort(clazz, valueToExpression.get(field));
-    }
-
-    return gettersShort;
-  }
-
-  /**
-   * Utility method for creating integer getters. This method is useful for creating a {@link GPOGetters} object
-   * which can be used to copy POJOs into GPOMutable objects.
-   * @param fields The fields to create getters for. The order of the fields in this list will be the same order
-   * that the getters will be returned in.
-   * @param valueToExpression A map from field names to the corresponding java expression to be used for getting
-   * the fields.
-   * @param clazz The Class of the POJO to extract values from.
-   * @return An array of integer getters for given fields.
-   */
-  public static GetterInt<Object>[] createGetterInt(List<String> fields,
-                                                    Map<String, String> valueToExpression,
-                                                    Class<?> clazz)
-  {
-    @SuppressWarnings({"unchecked","rawtypes"})
-    GetterInt<Object>[] gettersInt = new GetterInt[fields.size()];
-
-    for(int getterIndex = 0;
-        getterIndex < fields.size();
-        getterIndex++) {
-      String field = fields.get(getterIndex);
-      gettersInt[getterIndex] = PojoUtils.createGetterInt(clazz, valueToExpression.get(field));
-    }
-
-    return gettersInt;
-  }
-
-  /**
-   * Utility method for creating long getters. This method is useful for creating a {@link GPOGetters} object
-   * which can be used to copy POJOs into GPOMutable objects.
-   * @param fields The fields to create getters for. The order of the fields in this list will be the same order
-   * that the getters will be returned in.
-   * @param valueToExpression A map from field names to the corresponding java expression to be used for getting
-   * the fields.
-   * @param clazz The Class of the POJO to extract values from.
-   * @return An array of long getters for given fields.
-   */
-  public static GetterLong<Object>[] createGetterLong(List<String> fields,
-                                                      Map<String, String> valueToExpression,
-                                                      Class<?> clazz)
-  {
-    @SuppressWarnings({"unchecked","rawtypes"})
-    GetterLong<Object>[] gettersLong = new GetterLong[fields.size()];
-
-    for(int getterIndex = 0;
-        getterIndex < fields.size();
-        getterIndex++) {
-      String field = fields.get(getterIndex);
-      gettersLong[getterIndex] = PojoUtils.createGetterLong(clazz, valueToExpression.get(field));
-    }
-
-    return gettersLong;
-  }
-
-  /**
-   * Utility method for creating float getters. This method is useful for creating a {@link GPOGetters} object
-   * which can be used to copy POJOs into GPOMutable objects.
-   * @param fields The fields to create getters for. The order of the fields in this list will be the same order
-   * that the getters will be returned in.
-   * @param valueToExpression A map from field names to the corresponding java expression to be used for getting
-   * the fields.
-   * @param clazz The Class of the POJO to extract values from.
-   * @return An array of float getters for given fields.
-   */
-  public static GetterFloat<Object>[] createGetterFloat(List<String> fields,
-                                                        Map<String, String> valueToExpression,
-                                                        Class<?> clazz)
-  {
-    @SuppressWarnings({"unchecked","rawtypes"})
-    GetterFloat<Object>[] gettersFloat = new GetterFloat[fields.size()];
-
-    for(int getterIndex = 0;
-        getterIndex < fields.size();
-        getterIndex++) {
-      String field = fields.get(getterIndex);
-      gettersFloat[getterIndex] = PojoUtils.createGetterFloat(clazz, valueToExpression.get(field));
-    }
-
-    return gettersFloat;
-  }
-
-  /**
-   * Utility method for creating double getters. This method is useful for creating a {@link GPOGetters} object
-   * which can be used to copy POJOs into GPOMutable objects.
-   * @param fields The fields to create getters for. The order of the fields in this list will be the same order
-   * that the getters will be returned in.
-   * @param valueToExpression A map from field names to the corresponding java expression to be used for getting
-   * the fields.
-   * @param clazz The Class of the POJO to extract values from.
-   * @return An array of double getters for given fields.
-   */
-  public static GetterDouble<Object>[] createGetterDouble(List<String> fields,
-                                                          Map<String, String> valueToExpression,
-                                                          Class<?> clazz)
-  {
-    @SuppressWarnings({"unchecked","rawtypes"})
-    GetterDouble<Object>[] gettersDouble = new GetterDouble[fields.size()];
-
-    for(int getterIndex = 0;
-        getterIndex < fields.size();
-        getterIndex++) {
-      String field = fields.get(getterIndex);
-      gettersDouble[getterIndex] = PojoUtils.createGetterDouble(clazz, valueToExpression.get(field));
-    }
-
-    return gettersDouble;
-  }
-
-  /**
-   * Utility method for creating object getters. This method is useful for creating a {@link GPOGetters} object
-   * which can be used to copy POJOs into GPOMutable objects.
-   * @param fields The fields to create getters for. The order of the fields in this list will be the same order
-   * that the getters will be returned in.
-   * @param valueToExpression A map from field names to the corresponding java expression to be used for getting
-   * the fields.
-   * @param clazz The Class of the POJO to extract values from.
-   * @return An array of object getters for given fields.
-   */
-  public static Getter<Object, Object>[] createGetterObject(List<String> fields,
-                                                            Map<String, String> valueToExpression,
-                                                            Class<?> clazz)
-  {
-    @SuppressWarnings({"unchecked","rawtypes"})
-    Getter<Object, Object>[] gettersObject = new Getter[fields.size()];
-
-    for(int getterIndex = 0;
-        getterIndex < fields.size();
-        getterIndex++) {
-      String field = fields.get(getterIndex);
-      gettersObject[getterIndex] = PojoUtils.createGetter(clazz, valueToExpression.get(field), Object.class);
-    }
-
-    return gettersObject;
+    return getters;
   }
 
   /**
@@ -1691,77 +1145,9 @@ public class GPOUtils
 
     for(Map.Entry<Type, List<String>> entry: typeToFields.entrySet()) {
       Type inputType = entry.getKey();
+      GPOType gpoType = GPOType.GPO_TYPE_ARRAY[inputType.ordinal()];
       List<String> fields = entry.getValue();
-
-      switch(inputType) {
-        case BOOLEAN: {
-          gpoGetters.gettersBoolean = createGetterBoolean(fields,
-                                                          fieldToGetter,
-                                                          clazz);
-          break;
-        }
-        case STRING: {
-          gpoGetters.gettersString = createGetterString(fields,
-                                                        fieldToGetter,
-                                                        clazz);
-          break;
-        }
-        case CHAR: {
-          gpoGetters.gettersChar = createGetterChar(fields,
-                                                    fieldToGetter,
-                                                    clazz);
-          break;
-        }
-        case DOUBLE: {
-          gpoGetters.gettersDouble = createGetterDouble(fields,
-                                                        fieldToGetter,
-                                                        clazz);
-          break;
-        }
-        case FLOAT: {
-          gpoGetters.gettersFloat = createGetterFloat(fields,
-                                                      fieldToGetter,
-                                                      clazz);
-          break;
-        }
-        case LONG: {
-          gpoGetters.gettersLong = createGetterLong(fields,
-                                                    fieldToGetter,
-                                                    clazz);
-          break;
-        }
-        case INTEGER: {
-          gpoGetters.gettersInteger = createGetterInt(fields,
-                                                      fieldToGetter,
-                                                      clazz);
-
-          break;
-        }
-        case SHORT: {
-          gpoGetters.gettersShort = createGetterShort(fields,
-                                                      fieldToGetter,
-                                                      clazz);
-
-          break;
-        }
-        case BYTE: {
-          gpoGetters.gettersByte = createGetterByte(fields,
-                                                    fieldToGetter,
-                                                    clazz);
-
-          break;
-        }
-        case OBJECT: {
-          gpoGetters.gettersObject = createGetterObject(fields,
-                                                        fieldToGetter,
-                                                        clazz);
-
-          break;
-        }
-        default: {
-          throw new IllegalArgumentException("The type " + inputType + " is not supported.");
-        }
-      }
+      gpoType.buildGPOGetters(gpoGetters, fields, fieldToGetter, clazz);
     }
 
     return gpoGetters;
