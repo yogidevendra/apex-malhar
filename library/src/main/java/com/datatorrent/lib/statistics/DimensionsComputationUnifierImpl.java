@@ -25,8 +25,6 @@ import com.google.common.collect.Maps;
 import com.datatorrent.api.BaseOperator;
 import com.datatorrent.api.DefaultOutputPort;
 import com.datatorrent.api.Operator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * A {@link Unifier} implementation for {@link DimensionsComputation}.<br/>
@@ -75,11 +73,6 @@ public class DimensionsComputationUnifierImpl<EVENT, AGGREGATE extends Dimension
     }
     else {
       int aggregatorIndex = tuple.getAggregatorIndex();
-
-      if(aggregators[aggregatorIndex] == null) {
-        LOG.info("{}", aggregators);
-      }
-
       aggregators[aggregatorIndex].aggregate(destination, tuple);
     }
   }
@@ -91,6 +84,4 @@ public class DimensionsComputationUnifierImpl<EVENT, AGGREGATE extends Dimension
     }
     aggregates.clear();
   }
-
-  private static final Logger LOG = LoggerFactory.getLogger(DimensionsComputationUnifierImpl.class);
 }

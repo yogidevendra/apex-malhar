@@ -63,7 +63,6 @@ public class AggregatorCount extends AbstractIncrementalAggregator
                                           aggregatorIndex);
 
     long[] longFields = aggregate.getAggregates().getFieldsLong();
-    LOG.debug("longFields length {}", longFields.length);
 
     for(int index = 0;
         index < longFields.length;
@@ -92,16 +91,6 @@ public class AggregatorCount extends AbstractIncrementalAggregator
   {
     long[] destLongs = destAgg.getAggregates().getFieldsLong();
     long[] srcLongs = srcAgg.getAggregates().getFieldsLong();
-
-    if(destLongs.length != srcLongs.length) {
-      LOG.debug("{} {} schemaID {} {} ddID {} {} aggregatorID {} {}",
-                destLongs.length, srcLongs.length, destAgg.getEventKey().getSchemaID(),
-                srcAgg.getEventKey().getSchemaID(),
-                destAgg.getEventKey().getDimensionDescriptorID(),
-                srcAgg.getEventKey().getDimensionDescriptorID(),
-                destAgg.getEventKey().getAggregatorID(),
-                srcAgg.getEventKey().getAggregatorID());
-    }
 
     for(int index = 0;
         index < destLongs.length;
