@@ -103,12 +103,6 @@ public abstract class GenericDimensionsComputationSingleSchema<EVENT> implements
   @SuppressWarnings({"unchecked","rawtypes"})
   public void setup(OperatorContext context)
   {
-    aggregatorRegistry.setup();
-
-    configurationSchema =
-    new DimensionalConfigurationSchema(configurationSchemaJSON,
-                                       aggregatorRegistry);
-
     IncrementalAggregator[] aggregatorArray = createAggregators();
 
     dimensionsComputation = new DimensionsComputation<InputEvent, Aggregate>();
@@ -136,6 +130,12 @@ public abstract class GenericDimensionsComputationSingleSchema<EVENT> implements
 
   private IncrementalAggregator[] createAggregators() throws RuntimeException
   {
+    aggregatorRegistry.setup();
+
+    configurationSchema =
+    new DimensionalConfigurationSchema(configurationSchemaJSON,
+                                       aggregatorRegistry);
+
     //Num incremental aggregators
     int numIncrementalAggregators = 0;
 
