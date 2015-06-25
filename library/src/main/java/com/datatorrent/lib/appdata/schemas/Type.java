@@ -18,6 +18,7 @@ package com.datatorrent.lib.appdata.schemas;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
+import java.io.Serializable;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -27,7 +28,7 @@ import java.util.Set;
 /**
  * This enum is used to represent data types throughout AppData Framework.
  */
-public enum Type
+public enum Type implements Serializable
 {
   /**
    * Boolean data type.
