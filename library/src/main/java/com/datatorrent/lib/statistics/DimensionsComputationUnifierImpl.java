@@ -15,14 +15,16 @@
  */
 package com.datatorrent.lib.statistics;
 
-import com.datatorrent.api.BaseOperator;
-import com.datatorrent.api.DefaultOutputPort;
-import com.datatorrent.api.Operator;
-import com.google.common.collect.Maps;
+import java.util.Map;
+
 import javax.annotation.Nonnull;
 import javax.validation.constraints.NotNull;
 
-import java.util.Map;
+import com.google.common.collect.Maps;
+
+import com.datatorrent.api.BaseOperator;
+import com.datatorrent.api.DefaultOutputPort;
+import com.datatorrent.api.Operator;
 
 /**
  * A {@link Unifier} implementation for {@link DimensionsComputation}.<br/>
@@ -31,7 +33,6 @@ import java.util.Map;
  * @category Statistics
  * @tags event, dimension, aggregation, computation
  * @param <EVENT>
- * @deprecated Use {@link com.datatorrent.lib.dimensions.DimensionsComputationUnifierImpl} instead.
  * @since 0.9.4
  */
 public class DimensionsComputationUnifierImpl<EVENT, AGGREGATE extends DimensionsComputation.AggregateEvent> extends BaseOperator implements Operator.Unifier<AGGREGATE>
@@ -40,7 +41,7 @@ public class DimensionsComputationUnifierImpl<EVENT, AGGREGATE extends Dimension
   private DimensionsComputation.Aggregator<EVENT, AGGREGATE>[] aggregators;
   @NotNull
   private final Map<AGGREGATE, AGGREGATE> aggregates;
-
+  
   /**
    * Output port that emits an aggregate of events.
    */
