@@ -21,6 +21,7 @@ import com.datatorrent.lib.dimensions.DimensionsEvent.InputEvent;
 import com.datatorrent.lib.dimensions.GenericDimensionsComputationSingleSchemaMap;
 import com.datatorrent.lib.io.PubSubWebSocketAppDataQuery;
 import com.datatorrent.lib.io.PubSubWebSocketAppDataResult;
+import com.datatorrent.lib.statistics.DimensionsComputationUnifierImpl;
 import com.google.common.collect.Maps;
 import java.net.URI;
 import org.apache.commons.lang.mutable.MutableLong;
