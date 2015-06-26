@@ -87,10 +87,10 @@ public class SchemaUtils
   }
 
   /**
-   * This is a utility
-   * @param jo
-   * @param fields
-   * @return
+   * This is a utility method to check that the given JSONObject has the given keys.
+   * @param jo The {@link JSONObject} to check.
+   * @param fields The keys in the {@link JSONObject} to check.
+   * @return True if the given {@link JSONObject} contains all the given keys. False otherwise.
    */
   public static boolean checkValidKeys(JSONObject jo,
                                        Fields fields)
@@ -110,6 +110,12 @@ public class SchemaUtils
     return true;
   }
 
+  /**
+   * This is a utility method to check that the given JSONObject has the given keys.
+   * It throws an {@link IllegalArgumentException} if it doesn't contain all the given keys.
+   * @param jo The {@link JSONObject} to check.
+   * @param fields The keys in the {@link JSONObject} to check.
+   */
   public static void checkValidKeysEx(JSONObject jo,
                                       Fields fields)
   {
@@ -127,6 +133,12 @@ public class SchemaUtils
     }
   }
 
+  /**
+   * This is a utility method to check that the given JSONObject has the given keys.
+   * @param jo The {@link JSONObject} to check.
+   * @param fieldsList The keys in the {@link JSONObject} to check.
+   * @return True if the given {@link JSONObject} contains all the given keys. False otherwise.
+   */
   public static boolean checkValidKeys(JSONObject jo,
                                        List<Fields> fieldsList)
   {
@@ -139,6 +151,13 @@ public class SchemaUtils
     return false;
   }
 
+  /**
+   * This is a utility method to check that the given JSONObject has the given keys.
+   * It throws an {@link IllegalArgumentException} if it doesn't contain all the given keys.
+   * @param jo The {@link JSONObject} to check.
+   * @param fieldsList The keys in the {@link JSONObject} to check.
+   * @return True if the given {@link JSONObject} contains all the given keys. False otherwise.
+   */
   public static boolean checkValidKeysEx(JSONObject jo,
                                          List<Fields> fieldsList)
   {
@@ -338,12 +357,6 @@ public class SchemaUtils
     return null;
   }
 
-  /**
-   * This is a utility method which
-   * @param ja
-   * @param key
-   * @return
-   */
   public static JSONObject findFirstKeyJSONObject(JSONArray ja, String key)
   {
     for(int index = 0;

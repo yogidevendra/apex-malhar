@@ -85,8 +85,8 @@ public class DataResultTabular extends Result
   }
 
   /**
-   *
-   * @return
+   * Gets the values for this result.
+   * @return The values for this result.
    */
   public List<GPOMutable> getValues()
   {

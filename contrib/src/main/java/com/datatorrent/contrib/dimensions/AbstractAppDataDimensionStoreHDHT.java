@@ -105,11 +105,11 @@ public abstract class AbstractAppDataDimensionStoreHDHT extends DimensionsStoreH
       }
 
       if (query instanceof SchemaQuery) {
-        //If the query is a {@link SchemaQuery} add it to the schemaQuery queue.
+        //If the query is a SchemaQuery add it to the schemaQuery queue.
         schemaQueueManager.enqueue((SchemaQuery) query, null, null);
       }
       else if (query instanceof DataQueryDimensional) {
-        //If the query is a {@link DataQueryDimensional} add it to the dataQuery queue.
+        //If the query is a DataQueryDimensional add it to the dataQuery queue.
         dimensionsQueueManager.enqueue((DataQueryDimensional) query, null, null);
       }
       else {

@@ -305,7 +305,7 @@ public class FieldsDescriptor implements Serializable
    * Returns the list of types of all the fields managed by this {@link FieldsDescriptor} object.
    * The content of this list will be the same as the set, this method is provided because iterating
    * over lists is faster than iterating over sets.
-   * @return
+   * @return The list of types of all the fields managed by this {@link FieldsDescriptor} object.
    */
   public List<Type> getTypesList()
   {

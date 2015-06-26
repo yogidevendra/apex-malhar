@@ -32,9 +32,10 @@ import java.util.Map;
 
 import static com.datatorrent.lib.appdata.gpo.GPOUtils.*;
 
-
-
-public abstract class GPOType
+/**
+ * This is a helper class that reduces the need for switch statements in may utility method in {@link GPOUtils}.
+ */
+abstract class GPOType
 {
   public static GPOType[] GPO_TYPE_ARRAY;
 

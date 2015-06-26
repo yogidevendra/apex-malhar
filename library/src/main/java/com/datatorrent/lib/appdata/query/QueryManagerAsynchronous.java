@@ -34,8 +34,8 @@ public class QueryManagerAsynchronous<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT, RES
 {
   private DefaultOutputPort<String> resultPort = null;
 
-  private transient Semaphore inWindowSemaphore = new Semaphore(0);
-  private ConcurrentLinkedQueue<String> queue = new ConcurrentLinkedQueue<String>();
+  private transient final Semaphore inWindowSemaphore = new Semaphore(0);
+  private final ConcurrentLinkedQueue<String> queue = new ConcurrentLinkedQueue<String>();
   private QueueManager<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT> queueManager;
   private QueryExecutor<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT, RESULT> queryExecutor;
   private MessageSerializerFactory messageSerializerFactory;
@@ -99,6 +99,7 @@ public class QueryManagerAsynchronous<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT, RES
     queueManager.resumeEnqueue();
   }
 
+  @SuppressWarnings("CallToThreadYield")
   public void endWindow()
   {
     queueManager.haltEnqueue();
@@ -130,6 +131,7 @@ public class QueryManagerAsynchronous<QUERY_TYPE, META_QUERY, QUEUE_CONTEXT, RES
   }
 
   @Override
+  @SuppressWarnings({"CallToThreadStopSuspendOrResumeManager", "deprecation"})
   public void teardown()
   {
     processingThread.stop();

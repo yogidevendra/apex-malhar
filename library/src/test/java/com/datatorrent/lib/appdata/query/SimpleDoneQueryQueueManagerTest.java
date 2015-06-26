@@ -418,6 +418,7 @@ public class SimpleDoneQueryQueueManagerTest
     sdqqm.teardown();
   }
 
+  @SuppressWarnings({"deprecation", "CallToThreadStopSuspendOrResumeManager"})
   private void testBlocking(SimpleDoneQueueManager<Query, Void> sdqqm) throws InterruptedException
   {
     Thread thread = new Thread(new BlockedThread<Query, Void, MutableBoolean>(sdqqm));

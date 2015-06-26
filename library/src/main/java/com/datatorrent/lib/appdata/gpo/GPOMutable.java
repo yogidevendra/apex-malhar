@@ -422,9 +422,9 @@ public class GPOMutable implements Serializable
   }
 
   /**
-   *
-   * @param field
-   * @param val
+   * Sets the given field to the given boolean value.
+   * @param field The field.
+   * @param val The value.
    */
   public void setField(String field, boolean val)
   {
@@ -432,108 +432,199 @@ public class GPOMutable implements Serializable
     fieldsBoolean[fieldDescriptor.getTypeToFieldToIndex().get(Type.BOOLEAN).get(field)] = val;
   }
 
+  /**
+   * Gets the boolean value of the given field.
+   * @param field The field.
+   * @return The value.
+   */
   public boolean getFieldBool(String field)
   {
     throwInvalidField(field, Type.BOOLEAN);
     return fieldsBoolean[fieldDescriptor.getTypeToFieldToIndex().get(Type.BOOLEAN).get(field)];
   }
 
+  /**
+   * Set the char value of the given field.
+   * @param field The field.
+   * @param val The value.
+   */
   public void setField(String field, char val)
   {
     throwInvalidField(field, Type.CHAR);
     fieldsCharacter[fieldDescriptor.getTypeToFieldToIndex().get(Type.CHAR).get(field)] = val;
   }
 
+  /**
+   * Gets the char value of the given field.
+   * @param field The field.
+   * @return The value.
+   */
   public char getFieldChar(String field)
   {
     throwInvalidField(field, Type.CHAR);
     return fieldsCharacter[fieldDescriptor.getTypeToFieldToIndex().get(Type.CHAR).get(field)];
   }
 
+  /**
+   * Sets the byte value of the givne field.
+   * @param field The field.
+   * @param val The value.
+   */
   public void setField(String field, byte val)
   {
     throwInvalidField(field, Type.BYTE);
     fieldsByte[fieldDescriptor.getTypeToFieldToIndex().get(Type.BYTE).get(field)] = val;
   }
 
+  /**
+   * Gets the byte value of the given field.
+   * @param field The field.
+   * @return The value.
+   */
   public byte getFieldByte(String field)
   {
     throwInvalidField(field, Type.BYTE);
     return fieldsByte[fieldDescriptor.getTypeToFieldToIndex().get(Type.BYTE).get(field)];
   }
 
+  /**
+   * Set the string value of the given field.
+   * @param field The field.
+   * @param val The value.
+   */
   public void setField(String field, String val)
   {
     throwInvalidField(field, Type.STRING);
     fieldsString[fieldDescriptor.getTypeToFieldToIndex().get(Type.STRING).get(field)] = val;
   }
 
+  /**
+   * Gets the string value of the given field.
+   * @param field The field.
+   * @return The value.
+   */
   public String getFieldString(String field)
   {
     throwInvalidField(field, Type.STRING);
     return fieldsString[fieldDescriptor.getTypeToFieldToIndex().get(Type.STRING).get(field)];
   }
 
+  /**
+   * Sets the short value of the given field.
+   * @param field The field.
+   * @param val The value.
+   */
   public void setField(String field, short val)
   {
     throwInvalidField(field, Type.SHORT);
     fieldsShort[fieldDescriptor.getTypeToFieldToIndex().get(Type.SHORT).get(field)] = val;
   }
 
+  /**
+   * Gets the short value of the given field.
+   * @param field The field.
+   * @return The value.
+   */
   public short getFieldShort(String field)
   {
     throwInvalidField(field, Type.SHORT);
     return fieldsShort[fieldDescriptor.getTypeToFieldToIndex().get(Type.SHORT).get(field)];
   }
 
+  /**
+   * Sets the int value of the given field.
+   * @param field The field.
+   * @param val The value.
+   */
   public void setField(String field, int val)
   {
     throwInvalidField(field, Type.INTEGER);
     fieldsInteger[fieldDescriptor.getTypeToFieldToIndex().get(Type.INTEGER).get(field)] = val;
   }
 
+  /**
+   * Gets the int value of the given field.
+   * @param field The field.
+   * @return The value.
+   */
   public int getFieldInt(String field)
   {
     throwInvalidField(field, Type.INTEGER);
     return fieldsInteger[fieldDescriptor.getTypeToFieldToIndex().get(Type.INTEGER).get(field)];
   }
 
+  /**
+   * Sets the long value of the given field.
+   * @param field The field.
+   * @param val The value.
+   */
   public void setField(String field, long val)
   {
     throwInvalidField(field, Type.LONG);
     fieldsLong[fieldDescriptor.getTypeToFieldToIndex().get(Type.LONG).get(field)] = val;
   }
 
+  /**
+   * Gets the long value of the given field.
+   * @param field The field.
+   * @return The value.
+   */
   public long getFieldLong(String field)
   {
     throwInvalidField(field, Type.LONG);
     return fieldsLong[fieldDescriptor.getTypeToFieldToIndex().get(Type.LONG).get(field)];
   }
 
+  /**
+   * Sets the float value of the given field.
+   * @param field The field.
+   * @param val The float value.
+   */
   public void setField(String field, float val)
   {
     throwInvalidField(field, Type.FLOAT);
     fieldsFloat[fieldDescriptor.getTypeToFieldToIndex().get(Type.FLOAT).get(field)] = val;
   }
 
+  /**
+   * Gets the float value of the given field.
+   * @param field The field.
+   * @return The value.
+   */
   public float getFieldFloat(String field)
   {
     throwInvalidField(field, Type.FLOAT);
     return fieldsFloat[fieldDescriptor.getTypeToFieldToIndex().get(Type.FLOAT).get(field)];
   }
 
+  /**
+   * Sets the double value of the given field.
+   * @param field The field.
+   * @param val The value.
+   */
   public void setField(String field, double val)
   {
     throwInvalidField(field, Type.DOUBLE);
     fieldsDouble[fieldDescriptor.getTypeToFieldToIndex().get(Type.DOUBLE).get(field)] = val;
   }
 
+  /**
+   * Gets the double value of the given field.
+   * @param field The field.
+   * @return The value.
+   */
   public double getFieldDouble(String field)
   {
     throwInvalidField(field, Type.DOUBLE);
     return fieldsDouble[fieldDescriptor.getTypeToFieldToIndex().get(Type.DOUBLE).get(field)];
   }
 
+  /**
+   * This is a helper method which throws an exception if the given field of the
+   * given type doesn't exist for this {@link GPOMutable} object.
+   * @param field The name of the field.
+   * @param type The type of the field.
+   */
   private void throwInvalidField(String field, Type type)
   {
     Type fieldType = fieldDescriptor.getType(field);
