@@ -99,8 +99,6 @@ public abstract class AbstractIncrementalAggregator implements IncrementalAggreg
         hashCode ^= inputEvent.getKeys().getFieldsLong()[this.context.inputTimestampIndex];
         hashCode ^= this.context.dd.getTimeBucket().roundDown(inputEvent.getKeys().getFieldsLong()[this.context.inputTimestampIndex]);
       }
-
-      LOG.debug("Input Event");
     }
     else {
       hashCode = GPOUtils.hashcode(inputEvent.getKeys());
@@ -108,11 +106,7 @@ public abstract class AbstractIncrementalAggregator implements IncrementalAggreg
       if(this.context.outputTimebucketIndex != -1) {
         hashCode ^= this.context.dd.getTimeBucket().ordinal();
       }
-
-      LOG.debug("Aggregate Event");
     }
-
-    LOG.debug("Hash Code: {}", hashCode);
 
     return hashCode;
   }

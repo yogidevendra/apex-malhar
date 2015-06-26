@@ -19,7 +19,6 @@ package com.datatorrent.lib.dimensions;
 import com.datatorrent.api.Context.OperatorContext;
 import com.datatorrent.lib.appdata.gpo.GPOMutable;
 import com.datatorrent.lib.appdata.schemas.FieldsDescriptor;
-import com.datatorrent.lib.dimensions.DimensionsEvent.EventKey;
 import com.datatorrent.lib.dimensions.DimensionsEvent.InputEvent;
 import com.google.common.collect.Maps;
 import javax.validation.constraints.NotNull;
@@ -51,13 +50,6 @@ public class DimensionsComputationFlexibleSingleSchemaMap extends DimensionsComp
   public void setup(OperatorContext context)
   {
     super.setup(context);
-
-    inputEvent = new InputEvent(
-            new EventKey(0,
-                         0,
-                         0,
-                         new GPOMutable(this.configurationSchema.getKeyDescriptorWithTime())),
-            new GPOMutable(this.configurationSchema.getInputValuesDescriptor()));
   }
 
   @Override

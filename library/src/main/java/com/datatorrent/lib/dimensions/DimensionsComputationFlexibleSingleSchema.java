@@ -21,11 +21,13 @@ import com.datatorrent.api.DefaultInputPort;
 import com.datatorrent.api.DefaultOutputPort;
 import com.datatorrent.api.Operator;
 import com.datatorrent.api.Sink;
+import com.datatorrent.lib.appdata.gpo.GPOMutable;
 import com.datatorrent.lib.appdata.gpo.GPOUtils;
 import com.datatorrent.lib.appdata.gpo.GPOUtils.IndexSubset;
 import com.datatorrent.lib.appdata.schemas.DimensionalConfigurationSchema;
 import com.datatorrent.lib.appdata.schemas.FieldsDescriptor;
 import com.datatorrent.lib.dimensions.DimensionsEvent.Aggregate;
+import com.datatorrent.lib.dimensions.DimensionsEvent.EventKey;
 import com.datatorrent.lib.dimensions.DimensionsEvent.InputEvent;
 import com.datatorrent.lib.dimensions.aggregator.AggregatorRegistry;
 import com.datatorrent.lib.dimensions.aggregator.IncrementalAggregator;
@@ -86,7 +88,7 @@ public abstract class DimensionsComputationFlexibleSingleSchema<EVENT> implement
   /**
    * The {@link AggregatorRegistry} to use for this dimensions computation operator.
    */
-  private AggregatorRegistry aggregatorRegistry = AggregatorRegistry.DEFAULT_AGGREGATOR_REGISTRY;
+  protected AggregatorRegistry aggregatorRegistry = AggregatorRegistry.DEFAULT_AGGREGATOR_REGISTRY;
   /**
    * This is a reused {@link InputEvent} object. Its purpose is to serve as a container for converted
    * inputs. This {@link InputEvent} should have all the keys and values defined in the schema extracted into
@@ -149,6 +151,13 @@ public abstract class DimensionsComputationFlexibleSingleSchema<EVENT> implement
 
     dimensionsComputation.output.setSink((Sink) sink);
     dimensionsComputation.setup(context);
+
+    inputEvent = new InputEvent(
+            new EventKey(0,
+                         0,
+                         0,
+                         new GPOMutable(this.configurationSchema.getKeyDescriptorWithTime())),
+            new GPOMutable(this.configurationSchema.getInputValuesDescriptor()));
   }
 
   /**
@@ -161,9 +170,10 @@ public abstract class DimensionsComputationFlexibleSingleSchema<EVENT> implement
   {
     aggregatorRegistry.setup();
 
-    configurationSchema =
-    new DimensionalConfigurationSchema(configurationSchemaJSON,
-                                       aggregatorRegistry);
+    if(configurationSchema == null) {
+      configurationSchema = new DimensionalConfigurationSchema(configurationSchemaJSON,
+                                                               aggregatorRegistry);
+    }
 
     //Num incremental aggregators
     int numIncrementalAggregators = 0;
@@ -329,6 +339,22 @@ public abstract class DimensionsComputationFlexibleSingleSchema<EVENT> implement
   public void setUnifier(DimensionsComputationUnifierImpl<InputEvent, Aggregate> unifier)
   {
     this.unifier = unifier;
+  }
+
+  /**
+   * @return the schemaID
+   */
+  public int getSchemaID()
+  {
+    return schemaID;
+  }
+
+  /**
+   * @param schemaID the schemaID to set
+   */
+  public void setSchemaID(int schemaID)
+  {
+    this.schemaID = schemaID;
   }
 
   /**

@@ -22,7 +22,6 @@ import com.datatorrent.lib.appdata.gpo.GPOMutable;
 import com.datatorrent.lib.appdata.gpo.GPOUtils;
 import com.datatorrent.lib.appdata.schemas.FieldsDescriptor;
 import com.datatorrent.lib.appdata.schemas.Type;
-import com.datatorrent.lib.dimensions.DimensionsEvent.EventKey;
 import com.datatorrent.lib.dimensions.DimensionsEvent.InputEvent;
 import com.datatorrent.lib.util.PojoUtils;
 import com.datatorrent.lib.util.PojoUtils.GetterBoolean;
@@ -85,14 +84,6 @@ public class DimensionsComputationFlexibleSingleSchemaPOJO extends DimensionsCom
   public void setup(OperatorContext context)
   {
     super.setup(context);
-
-    inputEvent = new InputEvent(
-                 new EventKey(0,
-                         0,
-                         0,
-                         new GPOMutable(this.configurationSchema.getKeyDescriptorWithTime())),
-                 new GPOMutable(this.configurationSchema.getInputValuesDescriptor()));
-
   }
 
   @Override

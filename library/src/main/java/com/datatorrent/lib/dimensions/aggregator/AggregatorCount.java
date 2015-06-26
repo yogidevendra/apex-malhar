@@ -15,8 +15,11 @@
  */
 package com.datatorrent.lib.dimensions.aggregator;
 
+import com.datatorrent.lib.appdata.gpo.GPOMutable;
+import com.datatorrent.lib.appdata.gpo.GPOUtils;
 import com.datatorrent.lib.appdata.schemas.Type;
 import com.datatorrent.lib.dimensions.DimensionsEvent.Aggregate;
+import com.datatorrent.lib.dimensions.DimensionsEvent.EventKey;
 import com.datatorrent.lib.dimensions.DimensionsEvent.InputEvent;
 import com.google.common.collect.Maps;
 import org.slf4j.Logger;
@@ -56,13 +59,17 @@ public class AggregatorCount extends AbstractIncrementalAggregator
   @Override
   public Aggregate getGroup(InputEvent src, int aggregatorIndex)
   {
-    Aggregate aggregate = createAggregate(src,
-                                          context,
-                                          indexSubsetAggregates,
-                                          indexSubsetKeys,
-                                          aggregatorIndex);
 
-    long[] longFields = aggregate.getAggregates().getFieldsLong();
+    GPOMutable aggregates = new GPOMutable(context.aggregateOutputDescriptor);
+    GPOMutable keys = new GPOMutable(context.keyDescriptor);
+    GPOUtils.indirectCopy(keys, src.getKeys(), indexSubsetKeys);
+
+    EventKey eventKey = new EventKey(context.schemaID,
+                                     context.dimensionsDescriptorID,
+                                     context.aggregatorID,
+                                     keys);
+
+    long[] longFields = aggregates.getFieldsLong();
 
     for(int index = 0;
         index < longFields.length;
@@ -70,7 +77,8 @@ public class AggregatorCount extends AbstractIncrementalAggregator
       longFields[index] = 0;
     }
 
-    return aggregate;
+    return new Aggregate(eventKey,
+                         aggregates);
   }
 
   @Override

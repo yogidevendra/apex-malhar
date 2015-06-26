@@ -178,7 +178,6 @@ public class DimensionsComputation<EVENT, AGGREGATE extends DimensionsComputatio
   @Override
   public void setup(OperatorContext context)
   {
-    LOG.debug("Aggregator maps length {}", aggregatorMaps.length);
     for(int i = aggregatorMaps.length; i-- > 0;) {
       aggregatorMaps[i].setUseAggregatesAsKeys(useAggregatesAsKeys);
     }
@@ -381,7 +380,6 @@ public class DimensionsComputation<EVENT, AGGREGATE extends DimensionsComputatio
         aggregateEvent = aggregator.getGroup(tuple, aggregatorIdx);
 
         if(useAggregatesAsKeys) {
-          LOG.debug("Added");
           put((EVENT) aggregateEvent, aggregateEvent);
         }
         else {
