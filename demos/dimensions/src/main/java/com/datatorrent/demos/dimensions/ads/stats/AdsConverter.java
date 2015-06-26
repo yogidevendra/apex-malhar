@@ -111,7 +111,6 @@ public class AdsConverter implements Operator
         ddID < dimensionsDescriptorList.size();
         ddID++) {
       DimensionsDescriptor dimensionsDescriptor = dimensionsDescriptorList.get(ddID);
-      LOG.debug("{}", dimensionsDescriptor);
       dimensionsDescriptorToID.put(dimensionsDescriptor, ddID);
     }
 
@@ -126,6 +125,7 @@ public class AdsConverter implements Operator
       LOG.debug("{}", dimensionsDescriptor);
       int newID = dimensionsDescriptorToID.get(dimensionsDescriptor);
       int oldID = index;
+      LOG.debug("{} {}", newID, oldID);
       prevDdIDToThisDdID.put(newID, oldID);
     }
   }

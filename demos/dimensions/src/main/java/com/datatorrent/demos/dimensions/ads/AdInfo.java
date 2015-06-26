@@ -286,7 +286,8 @@ public class AdInfo implements Serializable
     {
       AdInfoAggregateEvent event = new AdInfoAggregateEvent(aggregatorIndex);
       if (time != null) {
-        event.time = TimeUnit.MILLISECONDS.convert(time.convert(src.time, TimeUnit.MILLISECONDS), time);
+        event.time = timeBucket.roundDown(src.time);
+        event.timeBucket = timeBucketInt;
       }
 
       if (publisherId) {
