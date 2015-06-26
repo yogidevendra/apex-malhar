@@ -83,7 +83,7 @@ public abstract class AbstractAppDataDimensionStoreHDHT extends DimensionsStoreH
   @AppData.ResultPort
   public final transient DefaultOutputPort<String> queryResult = new DefaultOutputPort<String>();
   /**
-   * This is the input port from which queries are recieved.
+   * This is the input port from which queries are received.
    */
   @InputPortFieldAnnotation(optional = true)
   @AppData.QueryPort
@@ -117,8 +117,6 @@ public abstract class AbstractAppDataDimensionStoreHDHT extends DimensionsStoreH
       }
     }
   };
-
-  //private EmbeddableQuery<String> embeddableQuery;
 
   /**
    * Constructor to create operator.

@@ -43,7 +43,7 @@ import java.util.Set;
 
 /**
  * This operator is a base class for dimension store operators. This operator assumes that an
- * upstream {@link AbstractDimensionsComputationFlexible} operator is producing {@link Aggregate}
+ * upstream {@link DimensionsComputationFlexibleSingleSchema} operator is producing {@link Aggregate}
  * objects which are provided to it as input.
  */
 @OperatorAnnotation(checkpointableWithinAppWindow=false)
