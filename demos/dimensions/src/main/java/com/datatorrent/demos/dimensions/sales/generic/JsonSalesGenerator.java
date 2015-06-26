@@ -26,8 +26,6 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.Random;
@@ -62,9 +60,8 @@ import java.util.Random;
  */
 public class JsonSalesGenerator implements InputOperator
 {
-  private static final Logger logger = LoggerFactory.getLogger(JsonSalesGenerator.class);
-
   public static final String KEY_PRODUCT = "product";
+  public static final String KEY_CUSTOMER = "customer";
   public static final String KEY_CHANNEL = "channel";
   public static final String KEY_REGION = "region";
 
@@ -73,6 +70,7 @@ public class JsonSalesGenerator implements InputOperator
   public static final String AGG_TAX = "tax";
 
   private transient int maxProductId;
+  private transient int maxCustomerId;
   private transient int maxChannelId;
   private transient int maxRegionId;
 
@@ -163,6 +161,7 @@ public class JsonSalesGenerator implements InputOperator
                                                               AggregatorRegistry.DEFAULT_AGGREGATOR_REGISTRY));
 
     maxProductId = schema.getDimensionalConfigurationSchema().getKeysToEnumValuesList().get(KEY_PRODUCT).size();
+    maxCustomerId = 30;
     maxChannelId = schema.getDimensionalConfigurationSchema().getKeysToEnumValuesList().get(KEY_CHANNEL).size();
     maxRegionId = schema.getDimensionalConfigurationSchema().getKeysToEnumValuesList().get(KEY_REGION).size();
 
@@ -304,7 +303,7 @@ public class JsonSalesGenerator implements InputOperator
   }
 
   public int getMaxCustomerId() {
-    return 100;
+    return maxCustomerId;
   }
 
   public int getMaxChannelId() {
