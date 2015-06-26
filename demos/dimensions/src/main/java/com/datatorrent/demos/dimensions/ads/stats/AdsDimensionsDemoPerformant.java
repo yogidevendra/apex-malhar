@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.datatorrent.demos.dimensions.ads.custom;
+package com.datatorrent.demos.dimensions.ads.stats;
 
 import com.datatorrent.api.Context;
 import com.datatorrent.api.Context.OperatorContext;

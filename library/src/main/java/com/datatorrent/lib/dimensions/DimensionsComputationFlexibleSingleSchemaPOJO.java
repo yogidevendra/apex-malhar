@@ -33,22 +33,51 @@ import com.datatorrent.lib.util.PojoUtils.GetterFloat;
 import com.datatorrent.lib.util.PojoUtils.GetterInt;
 import com.datatorrent.lib.util.PojoUtils.GetterLong;
 import com.datatorrent.lib.util.PojoUtils.GetterShort;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
 
-public class GenericDimensionsComputationSingleSchemaPOJO extends GenericDimensionsComputationSingleSchema<Object>
+/**
+ * <p>
+ * This operator performs dimensions computation on a POJO. See {@link DimensionsComputationFlexibleSingleSchema}
+ * for description of how the dimensions computation is performed.
+ * </p>
+ * <p>
+ * This operator is configured by by setting the getter expressions to use for extracting keys and values from input
+ * POJOs.
+ * </p>
+ *
+ * @displayName Dimension Computation POJO
+ * @category Statistics
+ * @tags event, dimension, aggregation, computation, pojo
+ */
+public class DimensionsComputationFlexibleSingleSchemaPOJO extends DimensionsComputationFlexibleSingleSchema<Object>
 {
+  /**
+   * The array of getters to use to extract keys from input POJOs.
+   */
   private transient GPOGetters gpoGettersKey;
+  /**
+   * The array of getters to use to extract values from input POJOs.
+   */
   private transient GPOGetters gpoGettersValue;
 
+  /**
+   * Flag indicating whether or not getters need to be created.
+   */
   private boolean needToCreateGetters = true;
+  /**
+   * This is a map from a key name (as defined in the {@link DimensionalConfigurationSchema}) to the getter
+   * expression to use for that key.
+   */
   private Map<String, String> keyToExpression;
+  /**
+   * This is a map from a value name (as defined in the {@link DimensionalConfigurationSchema}) to the getter
+   * expression to use for that value.
+   */
   private Map<String, String> aggregateToExpression;
 
-  public GenericDimensionsComputationSingleSchemaPOJO()
+  public DimensionsComputationFlexibleSingleSchemaPOJO()
   {
   }
 
@@ -83,6 +112,15 @@ public class GenericDimensionsComputationSingleSchemaPOJO extends GenericDimensi
     GPOUtils.copyPOJOToGPO(inputEvent.getAggregates(), gpoGettersValue, event);
   }
 
+  /**
+   * This is a helper method which creates the getters to extract values from a pojo into a {@link GPOMutable}
+   * object.
+   * @param fieldsDescriptor The {@link FieldsDescriptor} of the {@link GPOMutable} object.
+   * @param valueToExpression The map from field name to getter expression for the values that will be extracted
+   * into a {@link GPOMutable} object.
+   * @param event The input pojo.
+   * @return {@link GPOGetters} used to extract values from an input POJO into a {@link GPOMutable} object.
+   */
   @SuppressWarnings("unchecked")
   private GPOGetters createGetters(FieldsDescriptor fieldsDescriptor,
                                    Map<String, String> valueToExpression,
@@ -227,6 +265,4 @@ public class GenericDimensionsComputationSingleSchemaPOJO extends GenericDimensi
   {
     this.aggregateToExpression = aggregateToExpression;
   }
-
-  private static final Logger LOG = LoggerFactory.getLogger(GenericDimensionsComputationSingleSchemaPOJO.class);
 }

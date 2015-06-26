@@ -27,12 +27,20 @@ import javax.validation.constraints.NotNull;
 import java.util.Map;
 
 /**
- * This operator performs dimensions computation on a map.
- * @displayName Dimension Computation
+ * <p>
+ * This operator performs dimensions computation on a map. See {@link DimensionsComputationFlexibleSingleSchema}
+ * for description of how the dimensions computation is performed.
+ * </p>
+ * <p>
+ * This operator is configured by by setting key and value aliases. These aliases are used in the
+ * case where the names of keys or values as they're defined in the {@link DimensionalConfigurationSchema} are different from the
+ * names of keys or values as they're defined in incoming input maps.
+ * </p>
+ * @displayName Dimension Computation Map
  * @category Statistics
- * @tags event, dimension, aggregation, computation
+ * @tags event, dimension, aggregation, computation, map
  */
-public class GenericDimensionsComputationSingleSchemaMap extends GenericDimensionsComputationSingleSchema<Map<String, Object>>
+public class DimensionsComputationFlexibleSingleSchemaMap extends DimensionsComputationFlexibleSingleSchema<Map<String, Object>>
 {
   @NotNull
   private Map<String, String> keyNameAliases = Maps.newHashMap();

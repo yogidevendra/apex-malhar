@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.datatorrent.demos.dimensions.ads.custom;
+package com.datatorrent.demos.dimensions.ads.stats;
 
 import com.datatorrent.api.Context.OperatorContext;
 import com.datatorrent.api.DefaultInputPort;
@@ -28,7 +28,7 @@ import com.datatorrent.lib.appdata.schemas.FieldsDescriptor;
 import com.datatorrent.lib.dimensions.DimensionsDescriptor;
 import com.datatorrent.lib.dimensions.DimensionsEvent.Aggregate;
 import com.datatorrent.lib.dimensions.DimensionsEvent.EventKey;
-import com.datatorrent.lib.dimensions.GenericDimensionsComputationSingleSchema;
+import com.datatorrent.lib.dimensions.DimensionsComputationFlexibleSingleSchema;
 import com.datatorrent.lib.dimensions.aggregator.AggregatorRegistry;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
@@ -45,7 +45,7 @@ public class AdsConverter implements Operator
   private transient Object2IntOpenHashMap<DimensionsDescriptor> dimensionsDescriptorToID = new Object2IntOpenHashMap<DimensionsDescriptor>();
   private transient FieldsDescriptor aggregateFieldsDescriptor;
   private String[] dimensionSpecs;
-  private int schemaID = GenericDimensionsComputationSingleSchema.DEFAULT_SCHEMA_ID;
+  private int schemaID = DimensionsComputationFlexibleSingleSchema.DEFAULT_SCHEMA_ID;
   private transient int sumAggregatorIndex;
 
   private Int2IntOpenHashMap prevDdIDToThisDdID = new Int2IntOpenHashMap();

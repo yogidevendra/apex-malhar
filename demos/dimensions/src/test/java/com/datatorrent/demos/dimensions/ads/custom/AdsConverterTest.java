@@ -16,6 +16,7 @@
 
 package com.datatorrent.demos.dimensions.ads.custom;
 
+import com.datatorrent.demos.dimensions.ads.stats.AdsConverter;
 import com.datatorrent.demos.dimensions.ads.AdInfo.AdInfoAggregateEvent;
 import com.datatorrent.demos.dimensions.ads.InputItemGenerator;
 import com.datatorrent.lib.appdata.gpo.GPOMutable;
@@ -30,7 +31,7 @@ import org.junit.Test;
 
 import java.util.concurrent.TimeUnit;
 
-import static com.datatorrent.demos.dimensions.ads.custom.AdsDimensionsDemoPerformant.EVENT_SCHEMA;
+import static com.datatorrent.demos.dimensions.ads.stats.AdsDimensionsDemoPerformant.EVENT_SCHEMA;
 
 public class AdsConverterTest
 {

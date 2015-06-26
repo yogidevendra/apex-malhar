@@ -20,7 +20,7 @@ import com.datatorrent.lib.appdata.gpo.GPOUtils.IndexSubset;
 import com.datatorrent.lib.appdata.schemas.Type;
 import com.datatorrent.lib.dimensions.DimensionsEvent.Aggregate;
 import com.datatorrent.lib.dimensions.DimensionsEvent.InputEvent;
-import com.datatorrent.lib.dimensions.GenericDimensionsComputationSingleSchema.DimensionsConversionContext;
+import com.datatorrent.lib.dimensions.DimensionsComputationFlexibleSingleSchema.DimensionsConversionContext;
 
 /**
  * <p>

@@ -29,7 +29,7 @@ import com.datatorrent.lib.appdata.schemas.SchemaUtils;
 import com.datatorrent.lib.counters.BasicCounters;
 import com.datatorrent.lib.dimensions.DimensionsEvent.Aggregate;
 import com.datatorrent.lib.dimensions.DimensionsEvent.InputEvent;
-import com.datatorrent.lib.dimensions.GenericDimensionsComputationSingleSchemaPOJO;
+import com.datatorrent.lib.dimensions.DimensionsComputationFlexibleSingleSchemaPOJO;
 import com.datatorrent.lib.io.PubSubWebSocketAppDataQuery;
 import com.datatorrent.lib.io.PubSubWebSocketAppDataResult;
 import com.datatorrent.lib.statistics.DimensionsComputationUnifierImpl;
@@ -46,77 +46,6 @@ import java.util.Map;
 
 /**
  * An AdsDimensionsDemo run with HDHT
- *
- * Example of configuration
- <pre>
- {@code
- <property>
- <name>dt.application.AdsDimensionsWithHDSDemo.class</name>
- <value>com.datatorrent.demos.adsdimension.ApplicationWithHDS</value>
- </property>
-
- <property>
- <name>dt.application.AdsDimensionsWithHDSDemo.attr.containerMemoryMB</name>
- <value>8192</value>
- </property>
-
- <property>
- <name>dt.application.AdsDimensionsWithHDSDemo.attr.containerJvmOpts</name>
- <value>-Xmx6g -server -Dlog4j.debug=true -Xloggc:&lt;LOG_DIR&gt;/gc.log -verbose:gc -XX:+PrintGCDateStamps</value>
- </property>
-
- <property>
- <name>dt.application.AdsDimensionsWithHDSDemo.port.*.attr.QUEUE_CAPACITY</name>
- <value>32000</value>
- </property>
-
- <property>
- <name>dt.operator.InputGenerator.attr.PARTITIONER</name>
- <value>com.datatorrent.lib.partitioner.StatelessPartitioner:8</value>
- </property>
-
- <property>
- <name>dt.operator.DimensionsComputation.attr.APPLICATION_WINDOW_COUNT</name>
- <value>4</value>
- </property>
-
- <property>
- <name>dt.operator.DimensionsComputation.port.data.attr.PARTITION_PARALLEL</name>
- <value>true</value>
- </property>
-
- <property>
- <name>dt.operator.HDSOut.attr.PARTITIONER</name>
- <value>com.datatorrent.lib.partitioner.StatelessPartitioner:4</value>
- </property>
-
- <property>
- <name>dt.operator.HDSOut.fileStore.basePath</name>
- <value>AdsDimensionWithHDS</value>
- </property>
-
- <property>
- <name>dt.operator.Query.topic</name>
- <value>HDSQuery</value>
- </property>
-
- <property>
- <name>dt.operator.QueryResult.topic</name>
- <value>HDSQueryResult</value>
- </property>
-
- <property>
- <name>dt.operator.Query.brokerSet</name>
- <value>localhost:9092</value>
- </property>
-
- <property>
- <name>dt.operator.QueryResult.prop.configProperties(metadata.broker.list)</name>
- <value>localhost:9092</value>
- </property>
-
- }
- </pre>
  *
  * @since 2.0.0
  */
@@ -142,7 +71,7 @@ public class AdsDimensionsDemo implements StreamingApplication
 
     InputItemGenerator input = dag.addOperator("InputGenerator", InputItemGenerator.class);
     input.advertiserName = advertisers;
-    GenericDimensionsComputationSingleSchemaPOJO dimensions = dag.addOperator("DimensionsComputation", GenericDimensionsComputationSingleSchemaPOJO.class);
+    DimensionsComputationFlexibleSingleSchemaPOJO dimensions = dag.addOperator("DimensionsComputation", DimensionsComputationFlexibleSingleSchemaPOJO.class);
     dag.getMeta(dimensions).getAttributes().put(Context.OperatorContext.APPLICATION_WINDOW_COUNT, 4);
     dag.getMeta(dimensions).getAttributes().put(Context.OperatorContext.CHECKPOINT_WINDOW_COUNT, 4);
     AppDataSingleSchemaDimensionStoreHDHT store = dag.addOperator("Store", AppDataSingleSchemaDimensionStoreHDHT.class);

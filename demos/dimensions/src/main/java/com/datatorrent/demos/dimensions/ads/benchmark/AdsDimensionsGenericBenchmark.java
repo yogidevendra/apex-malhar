@@ -25,7 +25,7 @@ import com.datatorrent.demos.dimensions.ads.InputItemGenerator;
 import com.datatorrent.lib.appdata.schemas.SchemaUtils;
 import com.datatorrent.lib.dimensions.DimensionsEvent.Aggregate;
 import com.datatorrent.lib.dimensions.DimensionsEvent.InputEvent;
-import com.datatorrent.lib.dimensions.GenericDimensionsComputationSingleSchemaPOJO;
+import com.datatorrent.lib.dimensions.DimensionsComputationFlexibleSingleSchemaPOJO;
 import com.datatorrent.lib.statistics.DimensionsComputationUnifierImpl;
 import com.datatorrent.lib.stream.DevNull;
 import com.google.common.collect.Maps;
@@ -33,14 +33,14 @@ import org.apache.hadoop.conf.Configuration;
 
 import java.util.Map;
 
-@ApplicationAnnotation(name="AdsDimensionsFlexibleBenchmark")
-public class AdsDimensionsFlexibleBenchmark implements StreamingApplication
+@ApplicationAnnotation(name="AdsDimensionsGenericBenchmark")
+public class AdsDimensionsGenericBenchmark implements StreamingApplication
 {
   @Override
   public void populateDAG(DAG dag, Configuration conf)
   {
     InputItemGenerator input = dag.addOperator("InputGenerator", InputItemGenerator.class);
-    GenericDimensionsComputationSingleSchemaPOJO dimensions = dag.addOperator("DimensionsComputation", GenericDimensionsComputationSingleSchemaPOJO.class);
+    DimensionsComputationFlexibleSingleSchemaPOJO dimensions = dag.addOperator("DimensionsComputation", DimensionsComputationFlexibleSingleSchemaPOJO.class);
     dag.getMeta(dimensions).getAttributes().put(Context.OperatorContext.APPLICATION_WINDOW_COUNT, 10);
     DevNull<Object> devNull = dag.addOperator("DevNull", new DevNull<Object>());
 

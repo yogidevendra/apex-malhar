@@ -18,7 +18,7 @@ import com.datatorrent.lib.appdata.schemas.SchemaUtils;
 import com.datatorrent.lib.counters.BasicCounters;
 import com.datatorrent.lib.dimensions.DimensionsEvent.Aggregate;
 import com.datatorrent.lib.dimensions.DimensionsEvent.InputEvent;
-import com.datatorrent.lib.dimensions.GenericDimensionsComputationSingleSchemaMap;
+import com.datatorrent.lib.dimensions.DimensionsComputationFlexibleSingleSchemaMap;
 import com.datatorrent.lib.io.PubSubWebSocketAppDataQuery;
 import com.datatorrent.lib.io.PubSubWebSocketAppDataResult;
 import com.datatorrent.lib.statistics.DimensionsComputationUnifierImpl;
@@ -51,8 +51,8 @@ public class SalesDemo implements StreamingApplication
   {
     JsonSalesGenerator input = dag.addOperator("InputGenerator", JsonSalesGenerator.class);
     JsonToMapConverter converter = dag.addOperator("Converter", JsonToMapConverter.class);
-    GenericDimensionsComputationSingleSchemaMap dimensions =
-    dag.addOperator("DimensionsComputation", GenericDimensionsComputationSingleSchemaMap.class);
+    DimensionsComputationFlexibleSingleSchemaMap dimensions =
+    dag.addOperator("DimensionsComputation", DimensionsComputationFlexibleSingleSchemaMap.class);
     dag.getMeta(dimensions).getAttributes().put(Context.OperatorContext.APPLICATION_WINDOW_COUNT, 4);
     AppDataSingleSchemaDimensionStoreHDHT store = dag.addOperator("Store", AppDataSingleSchemaDimensionStoreHDHT.class);
 

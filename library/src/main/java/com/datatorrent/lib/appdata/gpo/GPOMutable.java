@@ -21,8 +21,6 @@ import com.datatorrent.lib.appdata.schemas.FieldsDescriptor;
 import com.datatorrent.lib.appdata.schemas.Type;
 import com.google.common.base.Preconditions;
 import java.io.Serializable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 
@@ -34,7 +32,6 @@ import java.util.Arrays;
  */
 public class GPOMutable implements Serializable
 {
-  private static final Logger logger = LoggerFactory.getLogger(GPOMutable.class);
   private static final long serialVersionUID = 201503231207L;
 
   //Primitive arrays holding primitive values
