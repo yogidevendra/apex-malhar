@@ -95,7 +95,8 @@ public class AdsDimensionsDemoPerformant implements StreamingApplication
       aggregator.init(dimensionSpec, index);
       aggregators[index] = aggregator;
     }
-
+    
+    unifier.setAggregators(aggregators);
     dimensions.setAggregators(aggregators);
     dag.getMeta(dimensions).getMeta(dimensions.output).getUnifierMeta().getAttributes().put(OperatorContext.MEMORY_MB, 8092);
 
