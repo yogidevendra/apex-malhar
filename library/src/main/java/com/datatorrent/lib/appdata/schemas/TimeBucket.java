@@ -24,6 +24,24 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * This enum represents a TimeBucket that is supported by AppData
+ * <br/>
+ * <br/>
+ * The currently supported buckets are:
+ * <ul>
+ * <li>m - minute</li>
+ * <li>h - hour</li>
+ * <li>d - day</li>
+ * </ul>
+ * <br/>
+ * <br/>
+ * Buckets supported in the future will be:
+ * <ul>
+ * <li>s - second</li>
+ * <li>w - week</li>
+ * <li>M - month</li>
+ * <li>q - quarter</li>
+ * <li>y - year</li>
+ * </ul>
  */
 public enum TimeBucket
 {
