@@ -1500,7 +1500,6 @@ public class GPOUtils
         for(int index = 0;
             index < stringArray.length;
             index++) {
-          LOG.debug("{}", stringArray[index]);
           hashCode ^= stringArray[index].hashCode();
         }
       }
@@ -1556,7 +1555,6 @@ public class GPOUtils
         for(int index = 0;
             index < integerArray.length;
             index++) {
-          LOG.debug("{}", integerArray[index]);
           hashCode ^= integerArray[index];
         }
       }
@@ -1568,7 +1566,6 @@ public class GPOUtils
         for(int index = 0;
             index < longArray.length;
             index++) {
-          LOG.debug("{}", longArray[index]);
           hashCode ^= longArray[index];
         }
       }
@@ -1607,14 +1604,13 @@ public class GPOUtils
     {
       String[] stringArray = gpo.getFieldsString();
       int[] srcIndex = indexSubset.fieldsStringIndexSubset;
-      if(stringArray != null) {
+      if(srcIndex != null) {
         for(int index = 0;
             index < srcIndex.length;
             index++) {
           if(srcIndex[index] == -1) {
             continue;
           }
-          LOG.debug("{}", stringArray[srcIndex[index]]);
           hashCode ^= stringArray[srcIndex[index]].hashCode();
         }
       }
@@ -1623,7 +1619,7 @@ public class GPOUtils
     {
       boolean[] booleanArray = gpo.getFieldsBoolean();
       int[] srcIndex = indexSubset.fieldsBooleanIndexSubset;
-      if(booleanArray != null) {
+      if(srcIndex != null) {
         for(int index = 0;
             index < srcIndex.length;
             index++) {
@@ -1638,7 +1634,7 @@ public class GPOUtils
     {
       char[] charArray = gpo.getFieldsCharacter();
       int[] srcIndex = indexSubset.fieldsCharacterIndexSubset;
-      if(charArray != null) {
+      if(srcIndex != null) {
         for(int index = 0;
             index < srcIndex.length;
             index++) {
@@ -1653,7 +1649,7 @@ public class GPOUtils
     {
       byte[] byteArray = gpo.getFieldsByte();
       int[] srcIndex = indexSubset.fieldsByteIndexSubset;
-      if(byteArray != null) {
+      if(srcIndex != null) {
         for(int index = 0;
             index < srcIndex.length;
             index++) {
@@ -1668,7 +1664,7 @@ public class GPOUtils
     {
       short[] shortArray = gpo.getFieldsShort();
       int[] srcIndex = indexSubset.fieldsShortIndexSubset;
-      if(shortArray != null) {
+      if(srcIndex != null) {
         for(int index = 0;
             index < srcIndex.length;
             index++) {
@@ -1683,14 +1679,13 @@ public class GPOUtils
     {
       int[] integerArray = gpo.getFieldsInteger();
       int[] srcIndex = indexSubset.fieldsIntegerIndexSubset;
-      if(integerArray != null) {
+      if(srcIndex != null) {
         for(int index = 0;
             index < srcIndex.length;
             index++) {
           if(srcIndex[index] == -1) {
             continue;
           }
-          LOG.debug("{}", integerArray[srcIndex[index]]);
           hashCode ^= integerArray[srcIndex[index]];
         }
       }
@@ -1699,14 +1694,13 @@ public class GPOUtils
     {
       long[] longArray = gpo.getFieldsLong();
       int[] srcIndex = indexSubset.fieldsLongIndexSubset;
-      if(longArray != null) {
+      if(srcIndex != null) {
         for(int index = 0;
             index < srcIndex.length;
             index++) {
           if(srcIndex[index] == -1) {
             continue;
           }
-          LOG.debug("{}", longArray[srcIndex[index]]);
           hashCode ^= longArray[srcIndex[index]];
         }
       }
@@ -1715,7 +1709,7 @@ public class GPOUtils
     {
       float[] floatArray = gpo.getFieldsFloat();
       int[] srcIndex = indexSubset.fieldsFloatIndexSubset;
-      if(floatArray != null) {
+      if(srcIndex != null) {
         for(int index = 0;
             index < srcIndex.length;
             index++) {
@@ -1730,7 +1724,7 @@ public class GPOUtils
     {
       double[] doubleArray = gpo.getFieldsDouble();
       int[] srcIndex = indexSubset.fieldsDoubleIndexSubset;
-      if(doubleArray != null) {
+      if(srcIndex != null) {
         for(int index = 0;
             index < srcIndex.length;
             index++) {
