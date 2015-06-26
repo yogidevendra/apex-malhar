@@ -1,8 +1,0 @@
-{
-  "name": "dashboard2",
-  "config": {
-    "widgets": [ {
-      "name": "widgetName2"
-    } ]
-  }
-}
