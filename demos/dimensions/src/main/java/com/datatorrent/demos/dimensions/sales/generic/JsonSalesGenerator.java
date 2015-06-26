@@ -304,7 +304,7 @@ public class JsonSalesGenerator implements InputOperator
   }
 
   public int getMaxCustomerId() {
-    return maxCustomerId;
+    return 100;
   }
 
   public int getMaxChannelId() {
