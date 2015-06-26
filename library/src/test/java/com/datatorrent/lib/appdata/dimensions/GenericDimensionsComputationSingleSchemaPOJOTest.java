@@ -112,6 +112,7 @@ public class GenericDimensionsComputationSingleSchemaPOJOTest
     LOG.debug("{}", expectedAE.getAggregates().toString());
 
     Assert.assertEquals(expectedAE, sink.collectedTuples.get(0));
+    Assert.assertEquals(expectedAE.getAggregates(), sink.collectedTuples.get(0).getAggregates());
   }
 
   @Test
@@ -206,6 +207,22 @@ public class GenericDimensionsComputationSingleSchemaPOJOTest
     ai2.setRevenue(5.0);
     ai2.setCost(3.50);
     ai2.setTime(300L);
+
+    return ai2;
+  }
+
+  private AdInfo createTestAdInfoEvent3()
+  {
+    AdInfo ai2 = new AdInfo();
+    ai2.setPublisher("twitter");
+    ai2.setAdvertiser("starbucks");
+    ai2.setLocation("SKY");
+
+    ai2.setClicks(155L);
+    ai2.setImpressions(105L);
+    ai2.setRevenue(5.5);
+    ai2.setCost(3.55);
+    ai2.setTime(305L);
 
     return ai2;
   }

@@ -1500,6 +1500,7 @@ public class GPOUtils
         for(int index = 0;
             index < stringArray.length;
             index++) {
+          LOG.debug("{}", stringArray[index]);
           hashCode ^= stringArray[index].hashCode();
         }
       }
@@ -1555,6 +1556,7 @@ public class GPOUtils
         for(int index = 0;
             index < integerArray.length;
             index++) {
+          LOG.debug("{}", integerArray[index]);
           hashCode ^= integerArray[index];
         }
       }
@@ -1566,6 +1568,7 @@ public class GPOUtils
         for(int index = 0;
             index < longArray.length;
             index++) {
+          LOG.debug("{}", longArray[index]);
           hashCode ^= longArray[index];
         }
       }
@@ -1611,6 +1614,7 @@ public class GPOUtils
           if(srcIndex[index] == -1) {
             continue;
           }
+          LOG.debug("{}", stringArray[srcIndex[index]]);
           hashCode ^= stringArray[srcIndex[index]].hashCode();
         }
       }
@@ -1686,6 +1690,7 @@ public class GPOUtils
           if(srcIndex[index] == -1) {
             continue;
           }
+          LOG.debug("{}", integerArray[srcIndex[index]]);
           hashCode ^= integerArray[srcIndex[index]];
         }
       }
@@ -1701,6 +1706,7 @@ public class GPOUtils
           if(srcIndex[index] == -1) {
             continue;
           }
+          LOG.debug("{}", longArray[srcIndex[index]]);
           hashCode ^= longArray[srcIndex[index]];
         }
       }

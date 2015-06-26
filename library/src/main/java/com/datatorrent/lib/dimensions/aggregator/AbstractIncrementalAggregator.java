@@ -89,7 +89,32 @@ public abstract class AbstractIncrementalAggregator implements IncrementalAggreg
   @Override
   public int computeHashCode(InputEvent inputEvent)
   {
-    return GPOUtils.hashcode(inputEvent.getKeys());
+    int hashCode;
+
+    if(inputEvent.isTypeInputEvent()) {
+      hashCode = GPOUtils.indirectHashcode(inputEvent.getKeys(), indexSubsetKeys);
+
+      if(this.context.inputTimestampIndex != -1 &&
+         this.context.outputTimebucketIndex != -1) {
+        hashCode ^= inputEvent.getKeys().getFieldsLong()[this.context.inputTimestampIndex];
+        hashCode ^= this.context.dd.getTimeBucket().roundDown(inputEvent.getKeys().getFieldsLong()[this.context.inputTimestampIndex]);
+      }
+
+      LOG.debug("Input Event");
+    }
+    else {
+      hashCode = GPOUtils.hashcode(inputEvent.getKeys());
+
+      if(this.context.outputTimebucketIndex != -1) {
+        hashCode ^= this.context.dd.getTimeBucket().ordinal();
+      }
+
+      LOG.debug("Aggregate Event");
+    }
+
+    LOG.debug("Hash Code: {}", hashCode);
+
+    return hashCode;
   }
 
   @Override
@@ -112,9 +137,23 @@ public abstract class AbstractIncrementalAggregator implements IncrementalAggreg
       aggregate = inputEvent1;
     }
 
-    return GPOUtils.indirectEquals(aggregate.getKeys(),
-                                   inputEvent.getKeys(),
-                                   indexSubsetKeys);
+    long timestamp = 0;
+
+    if(context.inputTimestampIndex != -1) {
+      timestamp = inputEvent.getKeys().getFieldsLong()[context.inputTimestampIndex];
+      inputEvent.getKeys().getFieldsLong()[context.inputTimestampIndex] =
+      context.dd.getTimeBucket().roundDown(timestamp);
+    }
+
+    boolean equals = GPOUtils.indirectEquals(aggregate.getKeys(),
+                                             inputEvent.getKeys(),
+                                             indexSubsetKeys);
+
+    if(context.inputTimestampIndex != -1) {
+      inputEvent.getKeys().getFieldsLong()[context.inputTimestampIndex] = timestamp;
+    }
+
+    return equals;
   }
 
   public static Aggregate createAggregate(InputEvent inputEvent,

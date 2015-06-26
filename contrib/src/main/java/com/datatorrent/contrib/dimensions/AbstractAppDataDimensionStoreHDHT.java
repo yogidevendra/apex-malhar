@@ -270,24 +270,6 @@ public abstract class AbstractAppDataDimensionStoreHDHT extends DimensionsStoreH
   }
 
   /**
-   * Returns the {@link EmbeddableQuery} operator set on this operator.
-   * @return The {@link EmbeddableQuery} operator.
-   */
-  /*public EmbeddableQuery<String> getEmbeddableQuery()
-  {
-    return embeddableQuery;
-  }*/
-
-  /**
-   * Sets the {@link EmbeddableQuery} operator on this operator.
-   * @param embeddableQuery The {@link EmbeddableQuery} operator to set on this operator.
-   */
-  /*public void setEmbeddableQuery(EmbeddableQuery<String> embeddableQuery)
-  {
-    this.embeddableQuery = embeddableQuery;
-  }*/
-
-  /**
    * This is a {@link QueryExecutor} that is responsible for executing schema queries.
    */
   public class SchemaQueryExecutor implements QueryExecutor<SchemaQuery, Void, Void, SchemaResult>

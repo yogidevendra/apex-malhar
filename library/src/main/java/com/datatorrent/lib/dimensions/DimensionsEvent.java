@@ -16,6 +16,7 @@
 package com.datatorrent.lib.dimensions;
 
 import com.datatorrent.lib.appdata.gpo.GPOMutable;
+import com.datatorrent.lib.appdata.gpo.GPOUtils;
 import com.google.common.base.Preconditions;
 import java.io.Serializable;
 
@@ -606,6 +607,29 @@ public class DimensionsEvent implements Serializable
     {
       this.typeInputEvent = typeInputEvent;
     }
+    
+    @Override
+    public int hashCode()
+    {
+      return GPOUtils.hashcode(this.getKeys());
+    }
+
+    @Override
+    public boolean equals(Object obj)
+    {
+      if(obj == null) {
+        return false;
+      }
+      if(getClass() != obj.getClass()) {
+        return false;
+      }
+      final DimensionsEvent other = (DimensionsEvent)obj;
+
+      if(this.eventKey != other.eventKey && (this.eventKey == null || !this.eventKey.equals(other.eventKey))) {
+        return false;
+      }
+      return true;
+    }
   }
 
   public static class Aggregate extends InputEvent implements com.datatorrent.lib.statistics.DimensionsComputation.AggregateEvent
@@ -699,9 +723,7 @@ public class DimensionsEvent implements Serializable
     @Override
     public int hashCode()
     {
-      int hash = 5;
-      hash = 79 * hash + (this.eventKey != null ? this.eventKey.hashCode() : 0);
-      return hash;
+      return GPOUtils.hashcode(this.getKeys());
     }
 
     @Override
@@ -714,7 +736,7 @@ public class DimensionsEvent implements Serializable
         return false;
       }
       final DimensionsEvent other = (DimensionsEvent)obj;
-      
+
       if(this.eventKey != other.eventKey && (this.eventKey == null || !this.eventKey.equals(other.eventKey))) {
         return false;
       }

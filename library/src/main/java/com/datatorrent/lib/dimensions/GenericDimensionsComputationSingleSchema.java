@@ -133,7 +133,7 @@ public abstract class GenericDimensionsComputationSingleSchema<EVENT> implements
     dimensionsComputation.setup(context);
   }
 
-  private IncrementalAggregator[] createAggregators() throws RuntimeException
+  private IncrementalAggregator[] createAggregators()
   {
     aggregatorRegistry.setup();
 
