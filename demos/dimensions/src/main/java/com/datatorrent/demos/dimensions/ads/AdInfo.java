@@ -313,6 +313,9 @@ public class AdInfo implements Serializable
         event.locationID = -1;
       }
 
+      event.aggregatorIndex = aggregatorIndex;
+      event.dimensionsDescriptorID = dimensionsDescriptorID;
+
       return event;
     }
 
