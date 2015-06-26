@@ -37,7 +37,7 @@ import static com.datatorrent.lib.appdata.gpo.GPOUtils.*;
  */
 abstract class GPOType
 {
-  public static GPOType[] GPO_TYPE_ARRAY;
+  public static final GPOType[] GPO_TYPE_ARRAY;
 
   static
   {
