@@ -63,7 +63,7 @@ public class HBaseTransactionalPutOperatorTest {
         }
 
         @Override
-        public AttributeMap getAttributes() {
+        public AttributeMap getAttributes() {  
           return null;
         }
 
@@ -74,15 +74,14 @@ public class HBaseTransactionalPutOperatorTest {
         }
 
         @Override
-        public void sendCustomMetrics(Collection<String> metricNames)
-        {
-          throw new UnsupportedOperationException("not supported");
-        }
-
-        @Override
         public void setCounters(Object counters) {
           // TODO Auto-generated method stub
 
+        }
+
+        @Override
+        public void sendCustomMetrics(Collection<String> collection)
+        {
         }
       });
       thop.beginWindow(0);
@@ -128,7 +127,7 @@ public class HBaseTransactionalPutOperatorTest {
         }
 
         @Override
-        public AttributeMap getAttributes() {
+        public AttributeMap getAttributes() {  
           return null;
         }
 
@@ -139,15 +138,14 @@ public class HBaseTransactionalPutOperatorTest {
         }
 
         @Override
-        public void sendCustomMetrics(Collection<String> metricNames)
-        {
-          throw new UnsupportedOperationException("not supported");
-        }
-
-        @Override
         public void setCounters(Object counters) {
           // TODO Auto-generated method stub
 
+        }
+
+        @Override
+        public void sendCustomMetrics(Collection<String> collection)
+        {
         }
       });
       thop.beginWindow(0);
@@ -197,7 +195,7 @@ public class HBaseTransactionalPutOperatorTest {
         }
 
         @Override
-        public AttributeMap getAttributes() {
+        public AttributeMap getAttributes() {  
           return null;
         }
 
@@ -208,18 +206,19 @@ public class HBaseTransactionalPutOperatorTest {
         }
 
         @Override
-        public void sendCustomMetrics(Collection<String> metricNames)
-        {
-          throw new UnsupportedOperationException("not supported");
-        }
-
-        @Override
         public void setCounters(Object counters) {
           // TODO Auto-generated method stub
 
         }
+
+        @Override
+        public void sendCustomMetrics(Collection<String> collection)
+        {
+        }
       });
 
+      
+      
       thop.input.process(t2);
       thop.endWindow();
       HBaseTuple tuple,tuple2;
@@ -237,7 +236,7 @@ public class HBaseTransactionalPutOperatorTest {
       logger.error(e.getMessage());
     }
   }
-
+  
   public static class TestHBasePutOperator extends
   AbstractHBaseWindowPutOutputOperator<HBaseTuple> {
 
