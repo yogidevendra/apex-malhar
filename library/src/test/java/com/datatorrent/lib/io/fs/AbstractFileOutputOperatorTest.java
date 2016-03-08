@@ -1447,7 +1447,7 @@ public class AbstractFileOutputOperatorTest
 
     correctContents = "8\n" +
                       "6\n" +
-                      "10\n" ;
+                      "10\n";
     checkOutput(1,
                 evenFileName,
                 correctContents);
@@ -1734,9 +1734,8 @@ public class AbstractFileOutputOperatorTest
 
     try {
       LocalMode.runApp(validationTestApp, 1);
-    }
-    catch(RuntimeException e) {
-      if(e.getCause() instanceof ConstraintViolationException) {
+    } catch (RuntimeException e) {
+      if (e.getCause() instanceof ConstraintViolationException) {
         error = true;
       }
     }
@@ -1992,10 +1991,8 @@ public class AbstractFileOutputOperatorTest
         while ((line = br.readLine()) != null) {
           Assert.assertEquals("File line", eline, line);
           ++count;
-          //System.out.println("line " + line + " " + count);
           if ((count % totalRecords) == 0) {
             ++numWindows;
-            //System.out.println("numWindows " + numWindows);
             eline = "" + (startVal + numWindows * 2);
           }
         }
@@ -2032,8 +2029,7 @@ public class AbstractFileOutputOperatorTest
     final SecretKey secretKey = keygen.generateKey();
     byte[] iv = "TestParam16bytes".getBytes();
     final IvParameterSpec ivps = new IvParameterSpec(iv);
-    FilterStreamProvider.FilterChainStreamProvider<FilterOutputStream, OutputStream> chainStreamProvider
-            = new FilterStreamProvider.FilterChainStreamProvider<FilterOutputStream, OutputStream>();
+    FilterStreamProvider.FilterChainStreamProvider<FilterOutputStream, OutputStream> chainStreamProvider = new FilterStreamProvider.FilterChainStreamProvider<FilterOutputStream, OutputStream>();
     chainStreamProvider.addStreamProvider(new FilterStreamCodec.GZipFilterStreamProvider());
 
     // The filter is to keep track of the offsets to handle multi member gzip issue with openjdk
@@ -2117,7 +2113,8 @@ public class AbstractFileOutputOperatorTest
 
     private CounterFilterOutputStream counterStream;
     
-    public void init(OutputStream outputStream) {
+    public void init(OutputStream outputStream) 
+    {
       counterStream = new CounterFilterOutputStream(outputStream);
     }
     
@@ -2138,7 +2135,8 @@ public class AbstractFileOutputOperatorTest
 
     }
     
-    public long getCounter() {
+    public long getCounter() 
+    {
       if (isDoInit()) {
         return 0;
       } else {
