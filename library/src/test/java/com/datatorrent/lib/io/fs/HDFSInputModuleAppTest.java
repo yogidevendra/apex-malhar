@@ -30,7 +30,6 @@ import org.junit.Test;
 import org.junit.rules.TestWatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.hadoop.conf.Configuration;
@@ -43,7 +42,6 @@ import com.datatorrent.api.StreamingApplication;
 import com.datatorrent.lib.io.block.AbstractBlockReader.ReaderRecord;
 import com.datatorrent.lib.io.block.BlockMetadata.FileBlockMetadata;
 import com.datatorrent.lib.io.fs.AbstractFileSplitter.FileMetadata;
-import com.datatorrent.lib.io.fs.HDFSFileSplitter.HDFSFileMetaData;
 import com.datatorrent.lib.stream.DevNull;
 import com.datatorrent.netlet.util.Slice;
 
@@ -121,10 +119,10 @@ public class HDFSInputModuleAppTest
 
     File dir = new File(outputDir);
     FileFilter fileFilter = new WildcardFileFilter(OUT_METADATA_FILE + "*");
-    verifyFileContents(dir.listFiles(fileFilter), "[relativePath=input/file1.txt, getNumberOfBlocks()=2, getFileName()=file1.txt, getFileLength()=13, isDirectory()=false]");
-    verifyFileContents(dir.listFiles(fileFilter), "[relativePath=input/file2.txt, getNumberOfBlocks()=6, getFileName()=file2.txt, getFileLength()=52, isDirectory()=false]");
-    verifyFileContents(dir.listFiles(fileFilter), "[relativePath=input/dir, getNumberOfBlocks()=0, getFileName()=dir, getFileLength()=4096, isDirectory()=true]");
-    verifyFileContents(dir.listFiles(fileFilter), "[relativePath=input/dir/inner.txt, getNumberOfBlocks()=2, getFileName()=inner.txt, getFileLength()=13, isDirectory()=false]");
+    verifyFileContents(dir.listFiles(fileFilter), "[fileName=file1.txt, numberOfBlocks=2, fileLength=13, isDirectory=false, relativePath=input/file1.txt]");
+    verifyFileContents(dir.listFiles(fileFilter), "[fileName=file2.txt, numberOfBlocks=6, fileLength=52, isDirectory=false, relativePath=input/file2.txt]");
+    verifyFileContents(dir.listFiles(fileFilter), "[fileName=dir, numberOfBlocks=0, fileLength=4096, isDirectory=true, relativePath=input/dir]");
+    verifyFileContents(dir.listFiles(fileFilter), "[fileName=inner.txt, numberOfBlocks=2, fileLength=13, isDirectory=false, relativePath=input/dir/inner.txt]");
 
     fileFilter = new WildcardFileFilter(OUT_DATA_FILE + "*");
     verifyFileContents(dir.listFiles(fileFilter), FILE_1_DATA);
@@ -188,7 +186,7 @@ public class HDFSInputModuleAppTest
     @Override
     protected byte[] getBytesForTuple(FileMetadata tuple)
     {
-      return ((HDFSFileMetaData)tuple).toString().getBytes();
+      return (tuple).toString().getBytes();
     }
   }
 

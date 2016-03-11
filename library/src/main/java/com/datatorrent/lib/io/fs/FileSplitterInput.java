@@ -408,6 +408,13 @@ public class FileSplitterInput extends AbstractFileSplitter implements InputOper
 
     private void scan(Path filePath, Path rootPath, Map<String, Long> lastModifiedTimesForInputDir)
     {
+      Map<String, Long> lastModifiedTimesForInputDir;
+      lastModifiedTimesForInputDir = getLastModifiedTimeMap(filePath.toUri().getPath());
+      scan(filePath, rootPath, lastModifiedTimesForInputDir);
+    }
+
+    private void scan(Path filePath, Path rootPath, Map<String, Long> lastModifiedTimesForInputDir)
+    {
       try {
         FileStatus parentStatus = fs.getFileStatus(filePath);
         String parentPathStr = filePath.toUri().getPath();

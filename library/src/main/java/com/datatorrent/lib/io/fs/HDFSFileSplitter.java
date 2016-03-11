@@ -18,20 +18,20 @@
  */
 package com.datatorrent.lib.io.fs;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.validation.constraints.NotNull;
-
-import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
 
 import com.datatorrent.api.Context.OperatorContext;
 import com.datatorrent.lib.io.block.BlockMetadata.FileBlockMetadata;
-import com.datatorrent.lib.io.block.HDFSBlockMetadata;
 
+/**
+ * HDFSFileSplitter extends {@link FileSplitterInput} to,
+ * 1. Add relative path to file metadata.
+ * 2. Ignore HDFS temp files (files with extensions _COPYING_).
+ * 3. Set sequencial read option on readers.
+ */
 public class HDFSFileSplitter extends FileSplitterInput
 {
   private boolean sequencialFileRead;
@@ -42,53 +42,13 @@ public class HDFSFileSplitter extends FileSplitterInput
     super.setScanner(new HDFSScanner());
   }
 
-  @Override
-  protected FileMetadata createFileMetadata(FileInfo fileInfo)
-  {
-    return new HDFSFileMetaData(fileInfo.getFilePath());
-  }
 
   @Override
-  protected HDFSFileMetaData buildFileMetadata(FileInfo fileInfo) throws IOException
+  protected FileBlockMetadata createBlockMetadata(FileMetadata fileMetadata)
   {
-    FileMetadata metadata = super.buildFileMetadata(fileInfo);
-    HDFSFileMetaData hdfsFileMetaData = (HDFSFileMetaData)metadata;
-
-    Path path = new Path(fileInfo.getFilePath());
-    FileStatus status = getFileStatus(path);
-    if (fileInfo.getDirectoryPath() == null) { // Direct filename is given as input.
-      hdfsFileMetaData.setRelativePath(status.getPath().getName());
-    } else {
-      String relativePath = getRelativePathWithFolderName(fileInfo);
-      hdfsFileMetaData.setRelativePath(relativePath);
-    }
-    return hdfsFileMetaData;
-  }
-
-  /*
-   * As folder name was given to input for copy, prefix folder name to the sub items to copy.
-   */
-  private String getRelativePathWithFolderName(FileInfo fileInfo)
-  {
-    String parentDir = new Path(fileInfo.getDirectoryPath()).getName();
-    return parentDir + File.separator + fileInfo.getRelativeFilePath();
-  }
-
-  @Override
-  protected HDFSBlockMetadata createBlockMetadata(FileMetadata fileMetadata)
-  {
-    HDFSBlockMetadata blockMetadta = new HDFSBlockMetadata(fileMetadata.getFilePath());
+    FileBlockMetadata blockMetadta = new FileBlockMetadata(fileMetadata.getFilePath());
     blockMetadta.setReadBlockInSequence(sequencialFileRead);
     return blockMetadta;
-  }
-
-  @Override
-  protected HDFSBlockMetadata buildBlockMetadata(long pos, long lengthOfFileInBlock, int blockNumber,
-      FileMetadata fileMetadata, boolean isLast)
-  {
-    FileBlockMetadata metadata = super.buildBlockMetadata(pos, lengthOfFileInBlock, blockNumber, fileMetadata, isLast);
-    HDFSBlockMetadata blockMetadata = (HDFSBlockMetadata)metadata;
-    return blockMetadata;
   }
 
   public boolean isSequencialFileRead()
@@ -101,6 +61,10 @@ public class HDFSFileSplitter extends FileSplitterInput
     this.sequencialFileRead = sequencialFileRead;
   }
 
+  /**
+   * HDFSScanner extends {@link TimeBasedDirectoryScanner} to ignore HDFS temporary files
+   * and files containing unsupported characters. 
+   */
   public static class HDFSScanner extends TimeBasedDirectoryScanner
   {
     protected static final String HDFS_TEMP_FILE = ".*._COPYING_";
@@ -142,37 +106,4 @@ public class HDFSFileSplitter extends FileSplitterInput
     }
   }
 
-  public static class HDFSFileMetaData extends FileMetadata
-  {
-    protected String relativePath;
-
-    protected HDFSFileMetaData()
-    {
-      super();
-    }
-
-    public HDFSFileMetaData(@NotNull String filePath)
-    {
-      super(filePath);
-    }
-
-    public String getRelativePath()
-    {
-      return relativePath;
-    }
-
-    public void setRelativePath(String relativePath)
-    {
-      this.relativePath = relativePath;
-    }
-
-    @Override
-    public String toString()
-    {
-      return "HDFSFileMetaData [relativePath=" + relativePath + ", getNumberOfBlocks()=" + getNumberOfBlocks()
-          + ", getFileName()=" + getFileName() + ", getFileLength()=" + getFileLength() + ", isDirectory()="
-          + isDirectory() + "]";
-    }
-
-  }
 }
