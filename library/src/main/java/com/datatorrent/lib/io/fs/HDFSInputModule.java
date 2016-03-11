@@ -22,17 +22,12 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import org.apache.commons.lang.mutable.MutableLong;
 import org.apache.hadoop.conf.Configuration;
 
 import com.datatorrent.api.Context;
 import com.datatorrent.api.DAG;
 import com.datatorrent.api.Module;
-import com.datatorrent.common.metric.MetricsAggregator;
-import com.datatorrent.common.metric.SingleMetricAggregator;
-import com.datatorrent.common.metric.sum.LongSumAggregator;
 import com.datatorrent.common.partitioner.StatelessPartitioner;
-import com.datatorrent.lib.counters.BasicCounters;
 import com.datatorrent.lib.io.block.AbstractBlockReader.ReaderRecord;
 import com.datatorrent.lib.io.block.BlockMetadata.FileBlockMetadata;
 import com.datatorrent.lib.io.block.BlockReader;
@@ -67,9 +62,9 @@ public class HDFSInputModule implements Module
   private boolean sequencialFileRead = false;
   private int readersCount;
 
-  public final transient ProxyOutputPort<FileMetadata> filesMetadataOutput = new ProxyOutputPort();
-  public final transient ProxyOutputPort<FileBlockMetadata> blocksMetadataOutput = new ProxyOutputPort();
-  public final transient ProxyOutputPort<ReaderRecord<Slice>> messages = new ProxyOutputPort();
+  public final transient ProxyOutputPort<FileMetadata> filesMetadataOutput = new ProxyOutputPort<>();
+  public final transient ProxyOutputPort<FileBlockMetadata> blocksMetadataOutput = new ProxyOutputPort<>();
+  public final transient ProxyOutputPort<ReaderRecord<Slice>> messages = new ProxyOutputPort<>();
 
   @Override
   public void populateDAG(DAG dag, Configuration conf)
@@ -102,11 +97,6 @@ public class HDFSInputModule implements Module
     if (readersCount != 0) {
       dag.setAttribute(blockReader, Context.OperatorContext.PARTITIONER, new StatelessPartitioner<BlockReader>(readersCount));
     }
-
-    MetricsAggregator blockReaderMetrics = new MetricsAggregator();
-    blockReaderMetrics.addAggregators("bytesReadPerSec", new SingleMetricAggregator[] {new LongSumAggregator()});
-    dag.setAttribute(blockReader, Context.OperatorContext.METRICS_AGGREGATOR, blockReaderMetrics);
-    dag.setAttribute(blockReader, Context.OperatorContext.COUNTERS_AGGREGATOR, new BasicCounters.LongAggregator<MutableLong>());
   }
 
   /**

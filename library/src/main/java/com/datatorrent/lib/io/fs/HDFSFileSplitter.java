@@ -18,14 +18,9 @@
  */
 package com.datatorrent.lib.io.fs;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.validation.constraints.NotNull;
-
-import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
 
 import com.datatorrent.api.Context.OperatorContext;
@@ -47,37 +42,6 @@ public class HDFSFileSplitter extends FileSplitterInput
     super.setScanner(new HDFSScanner());
   }
 
-  @Override
-  protected FileMetadata createFileMetadata(FileInfo fileInfo)
-  {
-    return new HDFSFileMetaData(fileInfo.getFilePath());
-  }
-
-  @Override
-  protected HDFSFileMetaData buildFileMetadata(FileInfo fileInfo) throws IOException
-  {
-    FileMetadata metadata = super.buildFileMetadata(fileInfo);
-    HDFSFileMetaData hdfsFileMetaData = (HDFSFileMetaData)metadata;
-
-    Path path = new Path(fileInfo.getFilePath());
-    FileStatus status = getFileStatus(path);
-    if (fileInfo.getDirectoryPath() == null) { // Direct filename is given as input.
-      hdfsFileMetaData.setRelativePath(status.getPath().getName());
-    } else {
-      String relativePath = getRelativePathWithFolderName(fileInfo);
-      hdfsFileMetaData.setRelativePath(relativePath);
-    }
-    return hdfsFileMetaData;
-  }
-
-  /*
-   * As folder name was given to input for copy, prefix folder name to the sub items to copy.
-   */
-  private String getRelativePathWithFolderName(FileInfo fileInfo)
-  {
-    String parentDir = new Path(fileInfo.getDirectoryPath()).getName();
-    return parentDir + File.separator + fileInfo.getRelativeFilePath();
-  }
 
   @Override
   protected FileBlockMetadata createBlockMetadata(FileMetadata fileMetadata)
@@ -142,43 +106,4 @@ public class HDFSFileSplitter extends FileSplitterInput
     }
   }
 
-  /**
-   * Adds relative path to {@link FileMetadata}
-   */
-  public static class HDFSFileMetaData extends FileMetadata
-  {
-    private String relativePath;
-
-    protected HDFSFileMetaData()
-    {
-      super();
-    }
-
-    public HDFSFileMetaData(@NotNull String filePath)
-    {
-      super(filePath);
-    }
-
-    public String getRelativePath()
-    {
-      return relativePath;
-    }
-
-    public void setRelativePath(String relativePath)
-    {
-      this.relativePath = relativePath;
-    }
-
-    @Override
-    public String toString()
-    {
-      return "HDFSFileMetaData [relativePath=" + relativePath + ", getNumberOfBlocks()=" + getNumberOfBlocks() + ", getFileName()=" + getFileName() + ", getFileLength()=" + getFileLength() + ", isDirectory()=" + isDirectory() + "]";
-    }
-
-    public String getOutputRelativePath()
-    {
-      return relativePath;
-    }
-
-  }
 }

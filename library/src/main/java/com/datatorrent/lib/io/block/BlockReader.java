@@ -24,13 +24,24 @@ import java.net.URI;
 import org.apache.hadoop.fs.FileSystem;
 
 import com.google.common.base.Splitter;
+import com.datatorrent.api.AutoMetric;
 
 /**
  * BlockReader extends {@link FSSliceReader} to accept case insensitive uri
  */
 public class BlockReader extends FSSliceReader
 {
+  @AutoMetric
+  private long bytesRead;
+
   protected String uri;
+
+  @Override
+  public void beginWindow(long windowId)
+  {
+    super.beginWindow(windowId);
+    bytesRead = 0;
+  }
 
   @Override
   protected FileSystem getFSInstance() throws IOException
