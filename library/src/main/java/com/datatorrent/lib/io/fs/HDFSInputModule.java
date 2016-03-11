@@ -91,18 +91,21 @@ public class HDFSInputModule implements Module
 
     blockReader.setUri(files);
     if (readersCount != 0) {
-      dag.setAttribute(blockReader, Context.OperatorContext.PARTITIONER, new StatelessPartitioner<HDFSBlockReader>(readersCount));
+      dag.setAttribute(blockReader, Context.OperatorContext.PARTITIONER,
+          new StatelessPartitioner<HDFSBlockReader>(readersCount));
     }
 
     MetricsAggregator blockReaderMetrics = new MetricsAggregator();
-    blockReaderMetrics.addAggregators("bytesReadPerSec", new SingleMetricAggregator[] {new LongSumAggregator()});
+    blockReaderMetrics.addAggregators("bytesReadPerSec", new SingleMetricAggregator[] { new LongSumAggregator() });
     dag.setAttribute(blockReader, Context.OperatorContext.METRICS_AGGREGATOR, blockReaderMetrics);
-    dag.setAttribute(blockReader, Context.OperatorContext.COUNTERS_AGGREGATOR, new BasicCounters.LongAggregator<MutableLong>());
+    dag.setAttribute(blockReader, Context.OperatorContext.COUNTERS_AGGREGATOR,
+        new BasicCounters.LongAggregator<MutableLong>());
   }
 
   /**
-   * A comma separated list of directories to scan. If the path is not fully qualified the default file system is used.
-   * A fully qualified path can be provided to scan directories in other filesystems.
+   * A comma separated list of directories to scan. If the path is not fully
+   * qualified the default file system is used. A fully qualified path can be
+   * provided to scan directories in other filesystems.
    *
    * @param files
    *          files
@@ -144,7 +147,8 @@ public class HDFSInputModule implements Module
   }
 
   /**
-   * Gets scan interval in milliseconds, interval between two scans to discover new files in input directory
+   * Gets scan interval in milliseconds, interval between two scans to discover
+   * new files in input directory
    *
    * @return scanInterval milliseconds
    */
@@ -154,7 +158,8 @@ public class HDFSInputModule implements Module
   }
 
   /**
-   * Sets scan interval in milliseconds, interval between two scans to discover new files in input directory
+   * Sets scan interval in milliseconds, interval between two scans to discover
+   * new files in input directory
    *
    * @param scanIntervalMillis
    */

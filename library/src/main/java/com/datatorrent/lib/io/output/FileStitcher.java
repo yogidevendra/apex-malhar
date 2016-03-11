@@ -24,6 +24,7 @@ import com.google.common.collect.Queues;
 import com.datatorrent.api.Context;
 import com.datatorrent.api.Context.DAGContext;
 import com.datatorrent.api.DefaultOutputPort;
+import com.datatorrent.lib.io.block.HDFSBlockReader;
 import com.datatorrent.lib.io.fs.AbstractReconciler;
 import com.datatorrent.lib.io.output.OutputFileMetaData.OutputBlock;
 
@@ -35,11 +36,12 @@ import com.datatorrent.lib.io.output.OutputFileMetaData.OutputBlock;
  */
 public class FileStitcher<T extends OutputFileMetaData> extends AbstractReconciler<T, T>
 {
-  protected transient FileSystem appFS, outputFS;
+  protected transient FileSystem appFS;
+  protected transient FileSystem outputFS;
 
   @NotNull
   protected String filePath;
-  transient protected String blocksDir;
+  protected transient String blocksDir;
 
   protected transient Context.OperatorContext context;
 
@@ -286,7 +288,7 @@ public class FileStitcher<T extends OutputFileMetaData> extends AbstractReconcil
 
   public void setFilePath(String filePath)
   {
-    this.filePath = ModuleUtils.convertSchemeToLowerCase(filePath);
+    this.filePath = HDFSBlockReader.convertSchemeToLowerCase(filePath);
   }
 
   public boolean isWriteChecksum()

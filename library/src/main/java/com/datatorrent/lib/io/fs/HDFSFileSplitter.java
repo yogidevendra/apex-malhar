@@ -83,7 +83,8 @@ public class HDFSFileSplitter extends FileSplitterInput
   }
 
   @Override
-  protected HDFSBlockMetadata buildBlockMetadata(long pos, long lengthOfFileInBlock, int blockNumber, FileMetadata fileMetadata, boolean isLast)
+  protected HDFSBlockMetadata buildBlockMetadata(long pos, long lengthOfFileInBlock, int blockNumber,
+      FileMetadata fileMetadata, boolean isLast)
   {
     FileBlockMetadata metadata = super.buildBlockMetadata(pos, lengthOfFileInBlock, blockNumber, fileMetadata, isLast);
     HDFSBlockMetadata blockMetadata = (HDFSBlockMetadata)metadata;
@@ -143,7 +144,7 @@ public class HDFSFileSplitter extends FileSplitterInput
 
   public static class HDFSFileMetaData extends FileMetadata
   {
-    private String relativePath;
+    protected String relativePath;
 
     protected HDFSFileMetaData()
     {
@@ -168,12 +169,9 @@ public class HDFSFileSplitter extends FileSplitterInput
     @Override
     public String toString()
     {
-      return "HDFSFileMetaData [relativePath=" + relativePath + ", getNumberOfBlocks()=" + getNumberOfBlocks() + ", getFileName()=" + getFileName() + ", getFileLength()=" + getFileLength() + ", isDirectory()=" + isDirectory() + "]";
-    }
-
-    public String getOutputRelativePath()
-    {
-      return relativePath;
+      return "HDFSFileMetaData [relativePath=" + relativePath + ", getNumberOfBlocks()=" + getNumberOfBlocks()
+          + ", getFileName()=" + getFileName() + ", getFileLength()=" + getFileLength() + ", isDirectory()="
+          + isDirectory() + "]";
     }
 
   }

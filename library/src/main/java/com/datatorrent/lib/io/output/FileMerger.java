@@ -16,7 +16,7 @@ import org.apache.hadoop.fs.Path;
 import com.datatorrent.api.AutoMetric;
 import com.datatorrent.api.Context;
 import com.datatorrent.api.Context.OperatorContext;
-import com.datatorrent.lib.io.input.ModuleFileSplitter.ModuleFileMetaData;
+import com.datatorrent.lib.io.output.Synchronizer.ModuleFileMetaData;
 
 /**
  * This operator merges the blocks into a file. The list of blocks is obtained

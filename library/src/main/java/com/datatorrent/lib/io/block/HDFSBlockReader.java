@@ -51,13 +51,13 @@ public class HDFSBlockReader extends FSSliceReader
   }
 
   /**
-   * Converts Scheme part of the URI to lower case. Multiple URI can be comma separated. If no scheme is there, no
-   * change is made.
+   * Converts Scheme part of the URI to lower case. Multiple URI can be comma
+   * separated. If no scheme is there, no change is made.
    * 
    * @param
    * @return String with scheme part as lower case
    */
-  private static String convertSchemeToLowerCase(String uri)
+  public static String convertSchemeToLowerCase(String uri)
   {
     if (uri == null) {
       return null;
