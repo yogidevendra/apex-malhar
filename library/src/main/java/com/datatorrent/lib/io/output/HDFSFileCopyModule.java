@@ -18,7 +18,6 @@ import com.datatorrent.api.Module;
 import com.datatorrent.lib.io.block.AbstractBlockReader.ReaderRecord;
 import com.datatorrent.lib.io.block.BlockMetadata;
 import com.datatorrent.lib.io.fs.AbstractFileSplitter.FileMetadata;
-import com.datatorrent.lib.io.fs.HDFSFileSplitter.HDFSFileMetaData;
 import com.datatorrent.lib.io.output.Synchronizer.ModuleFileMetaData;
 import com.datatorrent.lib.stream.DevNull;
 import com.datatorrent.netlet.util.Slice;

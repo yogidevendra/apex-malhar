@@ -381,6 +381,20 @@ public abstract class AbstractFileSplitter extends BaseOperator
       this.filePath = filePath;
       discoverTime = System.currentTimeMillis();
     }
+    
+    protected FileMetadata(FileMetadata fileMetadata)
+    {
+      this();
+      this.filePath = fileMetadata.filePath;
+      this.fileName = fileMetadata.fileName;
+      this.numberOfBlocks = fileMetadata.numberOfBlocks;
+      this.dataOffset = fileMetadata.dataOffset;
+      this.fileLength = fileMetadata.fileLength;
+      this.discoverTime = fileMetadata.discoverTime;
+      this.blockIds = fileMetadata.blockIds;
+      this.isDirectory = fileMetadata.isDirectory;
+      this.relativePath = fileMetadata.relativePath;
+    }
 
     /**
      * Returns the total number of blocks.

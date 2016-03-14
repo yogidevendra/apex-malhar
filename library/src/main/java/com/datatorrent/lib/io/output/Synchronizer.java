@@ -5,8 +5,6 @@
  */
 package com.datatorrent.lib.io.output;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +24,6 @@ import com.datatorrent.api.DefaultOutputPort;
 import com.datatorrent.common.util.BaseOperator;
 import com.datatorrent.lib.io.block.BlockMetadata;
 import com.datatorrent.lib.io.fs.AbstractFileSplitter.FileMetadata;
-import com.datatorrent.lib.io.fs.HDFSFileSplitter.HDFSFileMetaData;
 import com.datatorrent.lib.io.output.OutputFileMetaData.OutputBlock;
 import com.datatorrent.lib.io.output.OutputFileMetaData.OutputFileBlockMetaData;
 
@@ -68,9 +65,12 @@ public class Synchronizer extends BaseOperator
     @Override
     public void process(FileMetadata fileMetadata)
     {
+      LOG.debug("received fileMetadata {}", fileMetadata);
       String filePath = fileMetadata.getFilePath();
       Map<Long, BlockMetadata.FileBlockMetadata> receivedBlocksMetadata = getReceivedBlocksMetadata(filePath);
+      LOG.debug("received receivedBlocksMetadata {}", receivedBlocksMetadata);
       fileMetadataMap.put(filePath, fileMetadata);
+      LOG.debug("received receivedBlocksMetadata {} for fileMetadata {}", receivedBlocksMetadata, fileMetadata);
       emitTriggerIfAllBlocksReceived(fileMetadata, receivedBlocksMetadata);
     }
   };
@@ -96,8 +96,9 @@ public class Synchronizer extends BaseOperator
   private void emitTriggerIfAllBlocksReceived(FileMetadata fileMetadata,
       Map<Long, BlockMetadata.FileBlockMetadata> receivedBlocksMetadata)
   {
+    
     String filePath = fileMetadata.getFilePath();
-
+    LOG.debug("received receivedBlocksMetadata {} for fileMetadata {}", receivedBlocksMetadata, fileMetadata);
     if (receivedBlocksMetadata.size() != fileMetadata.getNumberOfBlocks()) {
       //Some blocks are yet to be received
       fileMetadataMap.put(filePath, fileMetadata);
@@ -145,13 +146,14 @@ public class Synchronizer extends BaseOperator
     Map<Long, BlockMetadata.FileBlockMetadata> receivedBlocksMetadata = fileToReceivedBlocksMetadataMap.get(filePath);
     if (receivedBlocksMetadata == null) {
       //No blocks received till now
-      receivedBlocksMetadata = fileToReceivedBlocksMetadataMap.put(filePath,
-          new HashMap<Long, BlockMetadata.FileBlockMetadata>());
+      receivedBlocksMetadata = new HashMap<Long, BlockMetadata.FileBlockMetadata>();
+          fileToReceivedBlocksMetadataMap.put(filePath,
+          receivedBlocksMetadata);
     }
     return receivedBlocksMetadata;
   }
 
-  public static class ModuleFileMetaData extends HDFSFileMetaData implements OutputFileMetaData
+  public static class ModuleFileMetaData extends FileMetadata implements OutputFileMetaData
   {
     private List<OutputBlock> outputBlockMetaDataList;
 
@@ -163,15 +165,7 @@ public class Synchronizer extends BaseOperator
 
     protected ModuleFileMetaData(FileMetadata fileMetaData, List<OutputBlock> outputBlockMetaDataList)
     {
-      super();
-
-      for (int i = 0; i < SUPER_GETTER_METHODS.size(); i++) {
-        try {
-          THIS_SETTER_METHODS.get(i).invoke(this, SUPER_GETTER_METHODS.get(i).invoke(fileMetaData));
-        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-          throw new RuntimeException("Error in initializing ModuleFileMetaData", e);
-        }
-      }
+      super(fileMetaData);
       this.outputBlockMetaDataList = outputBlockMetaDataList;
     }
 
@@ -182,7 +176,7 @@ public class Synchronizer extends BaseOperator
 
     public String getOutputRelativePath()
     {
-      return relativePath;
+      return getRelativePath();
     }
 
     /* (non-Javadoc)
@@ -202,48 +196,7 @@ public class Synchronizer extends BaseOperator
     {
       this.outputBlockMetaDataList = outputBlockMetaDataList;
     }
-
-    //Collecting getter methods from super class
-    private static final List<Method> SUPER_GETTER_METHODS;
-
-    //Collecting setter methods from this class
-    private static final List<Method> THIS_SETTER_METHODS;
-
-    static {
-      //Initialization of static lists
-      SUPER_GETTER_METHODS = Lists.newArrayList();
-      THIS_SETTER_METHODS = Lists.newArrayList();
-
-      Method[] methods = HDFSFileMetaData.class.getMethods();
-      for (Method method : methods) {
-        if (isGetter(method)) {
-          SUPER_GETTER_METHODS.add(method);
-          String setterName = "set" + method.getName().substring(3);
-          try {
-            Method setter = ModuleFileMetaData.class.getMethod(setterName, method.getReturnType());
-            THIS_SETTER_METHODS.add(setter);
-          } catch (NoSuchMethodException e) {
-            throw new RuntimeException("Error in initializing ModuleFileMetaData", e);
-          } catch (SecurityException e) {
-            throw new RuntimeException("Error in initializing ModuleFileMetaData", e);
-          }
-        }
-      }
-    }
-
-    public static boolean isGetter(Method method)
-    {
-      if (!method.getName().startsWith("get")) {
-        return false;
-      }
-      if (method.getParameterTypes().length != 0) {
-        return false;
-      }
-      if (void.class.equals(method.getReturnType())) {
-        return false;
-      }
-      return true;
-    }
+    
   }
 
   private static final Logger LOG = LoggerFactory.getLogger(Synchronizer.class);

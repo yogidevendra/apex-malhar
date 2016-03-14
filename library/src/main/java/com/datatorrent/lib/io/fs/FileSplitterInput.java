@@ -399,14 +399,7 @@ public class FileSplitterInput extends AbstractFileSplitter implements InputOper
       lastScanMillis = System.currentTimeMillis();
     }
 
-    protected void scan(Path filePath, Path rootPath)
-    {
-      Map<String, Long> lastModifiedTimesForInputDir;
-      lastModifiedTimesForInputDir = getLastModifiedTimeMap(filePath.toUri().getPath());
-      scan(filePath, rootPath, lastModifiedTimesForInputDir);
-    }
-
-    private void scan(Path filePath, Path rootPath, Map<String, Long> lastModifiedTimesForInputDir)
+    protected void scan(@NotNull Path filePath, Path rootPath)
     {
       Map<String, Long> lastModifiedTimesForInputDir;
       lastModifiedTimesForInputDir = getLastModifiedTimeMap(filePath.toUri().getPath());
