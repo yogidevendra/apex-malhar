@@ -1,7 +1,22 @@
-/*
- * Copyright (c) 2016 DataTorrent, Inc. 
- * ALL Rights Reserved.
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
+
 package com.datatorrent.lib.io.output;
 
 import java.io.IOException;
@@ -30,17 +45,27 @@ import com.datatorrent.lib.io.fs.AbstractFileOutputOperator;
 import com.datatorrent.netlet.util.Slice;
 
 /**
- * Writes a block to the fs.
- *
+ * Writes a block to the appFS (HDFS on which app is running).
+ * This is temporary write to HDFS to handle large files.
  */
 public class BlockWriter extends AbstractFileOutputOperator<AbstractBlockReader.ReaderRecord<Slice>>
     implements Partitioner<BlockWriter>
 {
+  /**
+   * Directory under application directory where blocks gets stored
+   */
   public static final String SUBDIR_BLOCKS = "blocks";
+  /**
+   * List of FileBlockMetadata received in the current window.
+   */
   private transient List<BlockMetadata.FileBlockMetadata> blockMetadatas;
 
+  /**
+   * Input port to receive Block meta data
+   */
   public final transient DefaultInputPort<BlockMetadata.FileBlockMetadata> blockMetadataInput = new DefaultInputPort<BlockMetadata.FileBlockMetadata>()
   {
+   
     @Override
     public void process(BlockMetadata.FileBlockMetadata blockMetadata)
     {
@@ -49,6 +74,9 @@ public class BlockWriter extends AbstractFileOutputOperator<AbstractBlockReader.
     }
   };
 
+  /**
+   * Output port to send Block meta data to downstream operator
+   */
   public final transient DefaultOutputPort<BlockMetadata.FileBlockMetadata> blockMetadataOutput = new DefaultOutputPort<BlockMetadata.FileBlockMetadata>();
 
   public BlockWriter()
@@ -60,6 +88,9 @@ public class BlockWriter extends AbstractFileOutputOperator<AbstractBlockReader.
     filePath = "";
   }
 
+  /**
+   * Also, initializes the filePath based on Application path
+   */
   @Override
   public void setup(Context.OperatorContext context)
   {
@@ -67,6 +98,9 @@ public class BlockWriter extends AbstractFileOutputOperator<AbstractBlockReader.
     super.setup(context);
   }
 
+  /**
+   * Finalizes files for all the blockMetaDatas received during current window
+   */
   @Override
   public void endWindow()
   {
@@ -100,6 +134,7 @@ public class BlockWriter extends AbstractFileOutputOperator<AbstractBlockReader.
 
   private static final Logger LOG = LoggerFactory.getLogger(BlockWriter.class);
 
+  
   @Override
   public Collection<Partition<BlockWriter>> definePartitions(Collection<Partition<BlockWriter>> partitions,
       PartitioningContext context)

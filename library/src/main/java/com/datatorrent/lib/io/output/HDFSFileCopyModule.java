@@ -1,6 +1,20 @@
 /**
- * Copyright (c) 2015 DataTorrent, Inc.
- * All rights reserved.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 package com.datatorrent.lib.io.output;
@@ -18,22 +32,47 @@ import com.datatorrent.api.Module;
 import com.datatorrent.lib.io.block.AbstractBlockReader.ReaderRecord;
 import com.datatorrent.lib.io.block.BlockMetadata;
 import com.datatorrent.lib.io.fs.AbstractFileSplitter.FileMetadata;
-import com.datatorrent.lib.io.output.Synchronizer.ModuleFileMetaData;
+import com.datatorrent.lib.io.output.Synchronizer.OutputFileMetadata;
 import com.datatorrent.lib.stream.DevNull;
 import com.datatorrent.netlet.util.Slice;
 
+/**
+ * HDFS file copy module can be used in conjunction with file input modules to
+ * copy files from any file system to HDFS. This module supports parallel write
+ * to multiple blocks of the same file and then stitching those blocks in
+ * original sequence.
+ * 
+ * Essential operators are wrapped into single component using Module API.
+ * 
+ */
 public class HDFSFileCopyModule implements Module
 {
 
+  /**
+   * Path of the output directory. Relative path of the files copied will be
+   * maintained w.r.t. source directory and output directory
+   */
   @NotNull
-  protected String hostName;
-  @NotNull
-  protected int port;
-  @NotNull
-  protected String directory;
+  protected String outputDirectoryPath;
 
+  /**
+   * Flag to control if existing file with same name should be overwritten
+   */
+  private boolean overwriteOnConflict;
+
+  /**
+   * Input port for files metadata.
+   */
   public final transient ProxyInputPort<FileMetadata> filesMetadataInput = new ProxyInputPort<FileMetadata>();
+
+  /**
+   * Input port for blocks metadata
+   */
   public final transient ProxyInputPort<BlockMetadata.FileBlockMetadata> blocksMetadataInput = new ProxyInputPort<BlockMetadata.FileBlockMetadata>();
+
+  /**
+   * Input port for blocks data
+   */
   public final transient ProxyInputPort<ReaderRecord<Slice>> blockData = new ProxyInputPort<ReaderRecord<Slice>>();
 
   @Override
@@ -52,11 +91,12 @@ public class HDFSFileCopyModule implements Module
     merger = dag.addOperator("FileMerger", merger);
     dag.addStream("MergeTrigger", synchronizer.trigger, merger.input);
 
-    DevNull<ModuleFileMetaData> devNull1 = dag.addOperator("devNull1", DevNull.class);
+    DevNull<OutputFileMetadata> devNull1 = dag.addOperator("devNull1", DevNull.class);
     dag.addStream("ignored", merger.completedFilesMetaOutput, devNull1.data);
 
     //Setting operator properties
-    merger.setFilePath(constructFilePath());
+    merger.setFilePath(outputDirectoryPath);
+    merger.setOverwriteOnConflict(overwriteOnConflict);
 
     //Binding proxy ports
     filesMetadataInput.set(synchronizer.filesMetadataInput);
@@ -65,44 +105,24 @@ public class HDFSFileCopyModule implements Module
 
   }
 
-  public String getHostName()
+  public String getOutputDirectoryPath()
   {
-    return hostName;
+    return outputDirectoryPath;
   }
 
-  public void setHostName(String hostName)
+  public void setOutputDirectoryPath(String outputDirectoryPath)
   {
-    this.hostName = hostName;
+    this.outputDirectoryPath = outputDirectoryPath;
   }
 
-  public int getPort()
+  public boolean isOverwriteOnConflict()
   {
-    return port;
+    return overwriteOnConflict;
   }
 
-  public void setPort(int port)
+  public void setOverwriteOnConflict(boolean overwriteOnConflict)
   {
-    this.port = port;
-  }
-
-  public String getDirectory()
-  {
-    return directory;
-  }
-
-  public void setDirectory(String directory)
-  {
-    this.directory = directory;
-  }
-
-  private String constructFilePath()
-  {
-    StringBuffer sb = new StringBuffer("hdfs://");
-    sb.append(hostName);
-    sb.append(":");
-    sb.append(port);
-    sb.append(directory);
-    return sb.toString();
+    this.overwriteOnConflict = overwriteOnConflict;
   }
 
   private static Logger LOG = LoggerFactory.getLogger(HDFSFileCopyModule.class);

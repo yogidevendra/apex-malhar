@@ -1,3 +1,22 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package com.datatorrent.lib.io.output;
 
 import java.io.IOException;
@@ -12,21 +31,33 @@ import org.apache.hadoop.fs.Path;
 import com.google.common.annotations.VisibleForTesting;
 
 import com.datatorrent.api.Context.OperatorContext;
-import com.datatorrent.lib.io.output.Synchronizer.ModuleFileMetaData;
+import com.datatorrent.lib.io.output.StitchedFileMetaData.BlockNotFoundException;
+import com.datatorrent.lib.io.output.Synchronizer.OutputFileMetadata;
 
 /**
- * <p>
- * HDFSFileMerger class.
- * </p>
- *
- * @since 1.0.0
+ * HDFS file merger extends file merger to optimize for HDFS file copy usecase.
+ * This uses fast merge from HDFS if destination filesystem is same as
+ * application filesystem.
  */
 public class HDFSFileMerger extends FileMerger
 {
-  private boolean fastMergeActive;
-  private long defaultBlockSize;
+  /**
+   * Fast merge is possible if append is allowed for output file system.
+   */
+  private transient boolean fastMergeActive;
+  /**
+   * Default block size for output file system
+   */
+  private transient long defaultBlockSize;
+  /**
+   * Decision maker to enable fast merge based on blocks directory, application
+   * directory, block size
+   */
   private transient FastMergerDecisionMaker fastMergerDecisionMaker;
 
+  /**
+   * Initializations based on output file system configuration
+   */
   @Override
   public void setup(OperatorContext context)
   {
@@ -39,8 +70,11 @@ public class HDFSFileMerger extends FileMerger
     fastMergerDecisionMaker = new FastMergerDecisionMaker(blocksDir, appFS, defaultBlockSize);
   }
 
+  /**
+   * Uses fast merge if possible. Else, fall back to serial merge.
+   */
   @Override
-  protected void mergeBlocks(ModuleFileMetaData fileMetadata) throws IOException
+  protected void mergeBlocks(OutputFileMetadata fileMetadata) throws IOException
   {
 
     try {
@@ -64,7 +98,13 @@ public class HDFSFileMerger extends FileMerger
     }
   }
 
-  private void concatBlocks(ModuleFileMetaData fileMetadata) throws IOException
+  /**
+   * Fast merge using HDFS block concat
+   * 
+   * @param fileMetadata
+   * @throws IOException
+   */
+  private void concatBlocks(OutputFileMetadata fileMetadata) throws IOException
   {
     Path outputFilePath = new Path(filePath, fileMetadata.getRelativePath());
 
@@ -85,8 +125,16 @@ public class HDFSFileMerger extends FileMerger
     moveToFinalFile(firstBlock, outputFilePath);
   }
 
+  /**
+   * Attempt for recovery if block concat is successful but temp file is not
+   * moved to final file
+   * 
+   * @param iFileMetadata
+   * @return
+   * @throws IOException
+   */
   @VisibleForTesting
-  protected boolean recover(ModuleFileMetaData iFileMetadata) throws IOException
+  protected boolean recover(OutputFileMetadata iFileMetadata) throws IOException
   {
     Path firstBlockPath = new Path(blocksDir + Path.SEPARATOR + iFileMetadata.getBlockIds()[0]);
     Path outputFilePath = new Path(filePath, iFileMetadata.getRelativePath());
@@ -110,6 +158,9 @@ public class HDFSFileMerger extends FileMerger
 
   private static final Logger LOG = LoggerFactory.getLogger(HDFSFileMerger.class);
 
+  /**
+   * Utility class to decide fast merge possibility
+   */
   public static class FastMergerDecisionMaker
   {
 
@@ -124,7 +175,16 @@ public class HDFSFileMerger extends FileMerger
       this.defaultBlockSize = defaultBlockSize;
     }
 
-    public boolean isFastMergePossible(ModuleFileMetaData fileMetadata) throws IOException, BlockNotFoundException
+    /**
+     * Checks if fast merge is possible for given settings for blocks directory,
+     * application file system, block size
+     * 
+     * @param fileMetadata
+     * @return
+     * @throws IOException
+     * @throws BlockNotFoundException
+     */
+    public boolean isFastMergePossible(OutputFileMetadata fileMetadata) throws IOException, BlockNotFoundException
     {
       short replicationFactor = 0;
       boolean sameReplicationFactor = true;

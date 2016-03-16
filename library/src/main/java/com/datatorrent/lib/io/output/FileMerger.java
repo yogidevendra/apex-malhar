@@ -1,8 +1,22 @@
-/*
- * Copyright (c) 2016 DataTorrent, Inc. 
- * ALL Rights Reserved.
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
+
 package com.datatorrent.lib.io.output;
 
 import java.io.IOException;
@@ -16,18 +30,22 @@ import org.apache.hadoop.fs.Path;
 import com.datatorrent.api.AutoMetric;
 import com.datatorrent.api.Context;
 import com.datatorrent.api.Context.OperatorContext;
-import com.datatorrent.lib.io.output.Synchronizer.ModuleFileMetaData;
+import com.datatorrent.lib.io.output.StitchedFileMetaData.BlockNotFoundException;
+import com.datatorrent.lib.io.output.Synchronizer.OutputFileMetadata;
 
 /**
  * This operator merges the blocks into a file. The list of blocks is obtained
- * from the IngestionFileMetaData. The implementation extends OutputFileMerger
- * (which uses reconsiler), hence the file merging operation is carried out in a
+ * from the OutputFileMetadata. The implementation extends FileStitcher
+ * (which uses reconciler), hence the file merging operation is carried out in a
  * separate thread.
  *
  */
-public class FileMerger extends FileStitcher<ModuleFileMetaData>
+public class FileMerger extends FileStitcher<OutputFileMetadata>
 {
-  private boolean overwriteOutputFile;
+  /**
+   * Flag to control if existing file with same name should be overwritten 
+   */
+  private boolean overwriteOnConflict;
 
   private static final Logger LOG = LoggerFactory.getLogger(FileMerger.class);
 
@@ -60,7 +78,7 @@ public class FileMerger extends FileStitcher<ModuleFileMetaData>
   @Override
   public void endWindow()
   {
-    ModuleFileMetaData tuple;
+    OutputFileMetadata tuple;
     int size = doneTuples.size();
     for (int i = 0; i < size; i++) {
       tuple = doneTuples.peek();
@@ -69,16 +87,16 @@ public class FileMerger extends FileStitcher<ModuleFileMetaData>
       // and then reconciler thread add that in doneTuples 
       if (successfulFiles.contains(tuple)) {
         successfulFiles.remove(tuple);
-        LOG.debug("File copy successful: {}", tuple.getOutputRelativePath());
+        LOG.debug("File copy successful: {}", tuple.getStitchedFileRelativePath());
       } else if (skippedFiles.contains(tuple)) {
         skippedFiles.remove(tuple);
-        LOG.debug("File copy skipped: {}", tuple.getOutputRelativePath());
+        LOG.debug("File copy skipped: {}", tuple.getStitchedFileRelativePath());
       } else if (failedFiles.contains(tuple)) {
         failedFiles.remove(tuple);
-        LOG.debug("File copy failed: {}", tuple.getOutputRelativePath());
+        LOG.debug("File copy failed: {}", tuple.getStitchedFileRelativePath());
       } else {
         throw new RuntimeException(
-            "Tuple present in doneTuples but not in successfulFiles: " + tuple.getOutputRelativePath());
+            "Tuple present in doneTuples but not in successfulFiles: " + tuple.getStitchedFileRelativePath());
       }
       completedFilesMetaOutput.emit(tuple);
       committedTuples.remove(tuple);
@@ -89,18 +107,18 @@ public class FileMerger extends FileStitcher<ModuleFileMetaData>
   }
 
   @Override
-  protected void mergeOutputFile(ModuleFileMetaData moduleFileMetaData) throws IOException
+  protected void mergeOutputFile(OutputFileMetadata moduleFileMetaData) throws IOException
   {
-    LOG.debug("Processing file: {}", moduleFileMetaData.getOutputRelativePath());
+    LOG.debug("Processing file: {}", moduleFileMetaData.getStitchedFileRelativePath());
 
-    Path outputFilePath = new Path(filePath, moduleFileMetaData.getOutputRelativePath());
+    Path outputFilePath = new Path(filePath, moduleFileMetaData.getStitchedFileRelativePath());
     if (moduleFileMetaData.isDirectory()) {
       createDir(outputFilePath);
       successfulFiles.add(moduleFileMetaData);
       return;
     }
 
-    if (outputFS.exists(outputFilePath) && !overwriteOutputFile) {
+    if (outputFS.exists(outputFilePath) && !overwriteOnConflict) {
       LOG.debug("Output file {} already exits and overwrite flag is off. Skipping.", outputFilePath);
       skippedFiles.add(moduleFileMetaData);
       return;
@@ -108,16 +126,15 @@ public class FileMerger extends FileStitcher<ModuleFileMetaData>
     //Call super method for serial merge of blocks
     super.mergeOutputFile(moduleFileMetaData);
 
-    Path destination = new Path(filePath, moduleFileMetaData.getOutputRelativePath());
+    Path destination = new Path(filePath, moduleFileMetaData.getStitchedFileRelativePath());
     Path path = Path.getPathWithoutSchemeAndAuthority(destination);
-    long len = outputFS.getFileStatus(path).getLen();
   }
 
   /* (non-Javadoc)
    * @see com.datatorrent.apps.ingestion.io.output.OutputFileMerger#writeTempOutputFile(com.datatorrent.apps.ingestion.io.output.OutputFileMetaData)
    */
   @Override
-  protected OutputStream writeTempOutputFile(ModuleFileMetaData moduleFileMetadata)
+  protected OutputStream writeTempOutputFile(OutputFileMetadata moduleFileMetadata)
       throws IOException, BlockNotFoundException
   {
     OutputStream outputStream = super.writeTempOutputFile(moduleFileMetadata);
@@ -139,13 +156,13 @@ public class FileMerger extends FileStitcher<ModuleFileMetaData>
     return outputStream;
   }
 
-  public boolean isOverwriteOutputFile()
+  public boolean isOverwriteOnConflict()
   {
-    return overwriteOutputFile;
+    return overwriteOnConflict;
   }
-
-  public void setOverwriteOutputFile(boolean overwriteOutputFile)
+  
+  public void setOverwriteOnConflict(boolean overwriteOnConflict)
   {
-    this.overwriteOutputFile = overwriteOutputFile;
+    this.overwriteOnConflict = overwriteOnConflict;
   }
 }

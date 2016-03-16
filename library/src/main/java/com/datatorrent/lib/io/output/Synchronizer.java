@@ -1,10 +1,27 @@
-/*
- * Copyright (c) 2016 DataTorrent, Inc. 
- * ALL Rights Reserved.
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
+
 package com.datatorrent.lib.io.output;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +32,9 @@ import javax.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -23,19 +43,25 @@ import com.datatorrent.api.DefaultInputPort;
 import com.datatorrent.api.DefaultOutputPort;
 import com.datatorrent.common.util.BaseOperator;
 import com.datatorrent.lib.io.block.BlockMetadata;
+import com.datatorrent.lib.io.block.BlockMetadata.FileBlockMetadata;
 import com.datatorrent.lib.io.fs.AbstractFileSplitter.FileMetadata;
-import com.datatorrent.lib.io.output.OutputFileMetaData.OutputBlock;
-import com.datatorrent.lib.io.output.OutputFileMetaData.OutputFileBlockMetaData;
+import com.datatorrent.lib.io.output.StitchedFileMetaData.BlockNotFoundException;
+import com.datatorrent.lib.io.output.StitchedFileMetaData.StitchBlock;
 
 /**
- * <p>
- * Synchronizer class.
- * </p>
- *
+ * Synchronizer waits for all data blocks for a file to be written to disk. It
+ * sends trigger to merge the file only after all blocks are written to HDFS
  */
 public class Synchronizer extends BaseOperator
 {
+  /**
+   * Map to FileMetadata for given file
+   */
   private Map<String, FileMetadata> fileMetadataMap = Maps.newHashMap();
+
+  /**
+   * Map maintaining BlockId to BlockMetadata mapping for given file
+   */
   private Map<String, Map<Long, BlockMetadata.FileBlockMetadata>> fileToReceivedBlocksMetadataMap = Maps.newHashMap();
 
   public Synchronizer()
@@ -65,12 +91,9 @@ public class Synchronizer extends BaseOperator
     @Override
     public void process(FileMetadata fileMetadata)
     {
-      LOG.debug("received fileMetadata {}", fileMetadata);
       String filePath = fileMetadata.getFilePath();
       Map<Long, BlockMetadata.FileBlockMetadata> receivedBlocksMetadata = getReceivedBlocksMetadata(filePath);
-      LOG.debug("received receivedBlocksMetadata {}", receivedBlocksMetadata);
       fileMetadataMap.put(filePath, fileMetadata);
-      LOG.debug("received receivedBlocksMetadata {} for fileMetadata {}", receivedBlocksMetadata, fileMetadata);
       emitTriggerIfAllBlocksReceived(fileMetadata, receivedBlocksMetadata);
     }
   };
@@ -93,12 +116,18 @@ public class Synchronizer extends BaseOperator
     }
   };
 
+  /**
+   * Checks if all blocks for given file are received. Sends triggger when all
+   * blocks are received.
+   * 
+   * @param fileMetadata
+   * @param receivedBlocksMetadata
+   */
   private void emitTriggerIfAllBlocksReceived(FileMetadata fileMetadata,
       Map<Long, BlockMetadata.FileBlockMetadata> receivedBlocksMetadata)
   {
-    
+
     String filePath = fileMetadata.getFilePath();
-    LOG.debug("received receivedBlocksMetadata {} for fileMetadata {}", receivedBlocksMetadata, fileMetadata);
     if (receivedBlocksMetadata.size() != fileMetadata.getNumberOfBlocks()) {
       //Some blocks are yet to be received
       fileMetadataMap.put(filePath, fileMetadata);
@@ -116,8 +145,8 @@ public class Synchronizer extends BaseOperator
       if (!blockMissing) {
         //All blocks received emit the filemetadata
         long fileProcessingTime = System.currentTimeMillis() - fileMetadata.getDiscoverTime();
-        List<OutputBlock> outputBlocks = constructOutputBlockMetadataList(fileMetadata);
-        ModuleFileMetaData moduleFileMetaData = new ModuleFileMetaData(fileMetadata, outputBlocks);
+        List<StitchBlock> outputBlocks = constructOutputBlockMetadataList(fileMetadata);
+        OutputFileMetadata moduleFileMetaData = new OutputFileMetadata(fileMetadata, outputBlocks);
         trigger.emit(moduleFileMetaData);
         LOG.debug("Total time taken to process the file {} is {} ms", fileMetadata.getFilePath(), fileProcessingTime);
         fileMetadataMap.remove(filePath);
@@ -125,15 +154,15 @@ public class Synchronizer extends BaseOperator
     }
   }
 
-  private List<OutputBlock> constructOutputBlockMetadataList(FileMetadata fileMetadata)
+  private List<StitchBlock> constructOutputBlockMetadataList(FileMetadata fileMetadata)
   {
     String filePath = fileMetadata.getFilePath();
     Map<Long, BlockMetadata.FileBlockMetadata> receivedBlocksMetadata = fileToReceivedBlocksMetadataMap.get(filePath);
-    List<OutputBlock> outputBlocks = Lists.newArrayList();
+    List<StitchBlock> outputBlocks = Lists.newArrayList();
     long[] blockIDs = fileMetadata.getBlockIds();
     for (int i = 0; i < blockIDs.length; i++) {
       Long blockId = blockIDs[i];
-      OutputFileBlockMetaData outputFileBlockMetaData = new OutputFileBlockMetaData(receivedBlocksMetadata.get(blockId),
+      StitchBlockMetaData outputFileBlockMetaData = new StitchBlockMetaData(receivedBlocksMetadata.get(blockId),
           fileMetadata.getRelativePath(), (i == blockIDs.length - 1));
       outputBlocks.add(outputFileBlockMetaData);
     }
@@ -147,34 +176,41 @@ public class Synchronizer extends BaseOperator
     if (receivedBlocksMetadata == null) {
       //No blocks received till now
       receivedBlocksMetadata = new HashMap<Long, BlockMetadata.FileBlockMetadata>();
-          fileToReceivedBlocksMetadataMap.put(filePath,
-          receivedBlocksMetadata);
+      fileToReceivedBlocksMetadataMap.put(filePath, receivedBlocksMetadata);
     }
     return receivedBlocksMetadata;
   }
 
-  public static class ModuleFileMetaData extends FileMetadata implements OutputFileMetaData
-  {
-    private List<OutputBlock> outputBlockMetaDataList;
+  private static final Logger LOG = LoggerFactory.getLogger(Synchronizer.class);
+  public final transient DefaultOutputPort<OutputFileMetadata> trigger = new DefaultOutputPort<OutputFileMetadata>();
 
-    protected ModuleFileMetaData()
+  /**
+   * FileSticher needs information about original sequence of blocks.
+   * {@link OutputFileMetadata} maintains list of {@link StitchBlock} in
+   * addition to {@link FileMetadata}
+   */
+  public static class OutputFileMetadata extends FileMetadata implements StitchedFileMetaData
+  {
+    private List<StitchBlock> stitchBlocksList;
+
+    protected OutputFileMetadata()
     {
       super();
-      outputBlockMetaDataList = Lists.newArrayList();
+      stitchBlocksList = Lists.newArrayList();
     }
 
-    protected ModuleFileMetaData(FileMetadata fileMetaData, List<OutputBlock> outputBlockMetaDataList)
+    protected OutputFileMetadata(FileMetadata fileMetaData, List<StitchBlock> stitchBlocksList)
     {
       super(fileMetaData);
-      this.outputBlockMetaDataList = outputBlockMetaDataList;
+      this.stitchBlocksList = stitchBlocksList;
     }
 
-    public ModuleFileMetaData(@NotNull String filePath)
+    public OutputFileMetadata(@NotNull String filePath)
     {
       super(filePath);
     }
 
-    public String getOutputRelativePath()
+    public String getStitchedFileRelativePath()
     {
       return getRelativePath();
     }
@@ -183,22 +219,145 @@ public class Synchronizer extends BaseOperator
      * @see com.datatorrent.apps.ingestion.io.output.OutputFileMetaData#getOutputBlocksList()
      */
     @Override
-    public List<OutputBlock> getOutputBlocksList()
+    public List<StitchBlock> getStitchBlocksList()
     {
-      return outputBlockMetaDataList;
+      return stitchBlocksList;
     }
 
     /**
      * @param outputBlockMetaDataList
      *          the outputBlockMetaDataList to set
      */
-    public void setOutputBlockMetaDataList(List<OutputBlock> outputBlockMetaDataList)
+    public void setOutputBlockMetaDataList(List<StitchBlock> outputBlockMetaDataList)
     {
-      this.outputBlockMetaDataList = outputBlockMetaDataList;
+      this.stitchBlocksList = outputBlockMetaDataList;
     }
-    
+
+  }
+  
+  
+  /**
+   * Partition block representing chunk of data from block files
+   */
+  public static class StitchBlockMetaData extends FileBlockMetadata implements StitchBlock
+  {
+
+    /**
+     * Buffer size to be used for reading data from block files
+     */
+    public static final int BUFFER_SIZE = 64 * 1024;
+
+   
+
+    /**
+     * Relative path of the source file (w.r.t input directory)
+     */
+    String sourceRelativePath;
+    /**
+     * Is this the last block for source file
+     */
+    boolean isLastBlockSource;
+
+    /**
+     * Default constructor for serialization
+     */
+    public StitchBlockMetaData()
+    {
+      super();
+    }
+
+    /**
+     * @param fileBlockMetadata
+     * @param sourceRelativePath
+     * @param isLastBlockSource
+     */
+    public StitchBlockMetaData(FileBlockMetadata fmd, String sourceRelativePath, boolean isLastBlockSource)
+    {
+      super(fmd.getFilePath(), fmd.getBlockId(), fmd.getOffset(), fmd.getLength(), fmd.isLastBlock(),
+          fmd.getPreviousBlockId());
+      this.sourceRelativePath = sourceRelativePath;
+      this.isLastBlockSource = isLastBlockSource;
+    }
+
+    /**
+     * @return the sourceRelativePath
+     */
+    public String getSourceRelativePath()
+    {
+      return sourceRelativePath;
+    }
+
+    /**
+     * @param sourceRelativePath
+     *          the sourceRelativePath to set
+     */
+    public void setSourceRelativePath(String sourceRelativePath)
+    {
+      this.sourceRelativePath = sourceRelativePath;
+    }
+
+    /**
+     * @return the isLastBlockSource
+     */
+    public boolean isLastBlockSource()
+    {
+      return isLastBlockSource;
+    }
+
+    /**
+     * @param isLastBlockSource
+     *          the isLastBlockSource to set
+     */
+    public void setLastBlockSource(boolean isLastBlockSource)
+    {
+      this.isLastBlockSource = isLastBlockSource;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.datatorrent.apps.ingestion.process.compaction.PartitionBlock#write(org.apache.hadoop.fs.FSDataOutputStream)
+     */
+    @Override
+    public void writeTo(FileSystem appFS, String blocksDir, OutputStream outputStream)
+        throws IOException, BlockNotFoundException
+    {
+      Path blockPath = new Path(blocksDir, Long.toString(getBlockId()));
+      if (!appFS.exists(blockPath)) {
+        throw new BlockNotFoundException(blockPath);
+      }
+      writeTo(appFS, blocksDir, outputStream, 0, appFS.getFileStatus(blockPath).getLen());
+    }
+
+    public void writeTo(FileSystem appFS, String blocksDir, OutputStream outputStream, long offset, long length)
+        throws IOException, BlockNotFoundException
+    {
+      InputStream inStream = null;
+
+      byte[] buffer = new byte[BUFFER_SIZE];
+      int inputBytesRead;
+      Path blockPath = new Path(blocksDir, Long.toString(getBlockId()));
+      if (!appFS.exists(blockPath)) {
+        throw new BlockNotFoundException(blockPath);
+      }
+      inStream = appFS.open(blockPath);
+      try {
+        inStream.skip(offset);
+
+        long bytesRemainingToRead = length;
+        int bytesToread = Math.min(BUFFER_SIZE, (int)bytesRemainingToRead);
+        while (((inputBytesRead = inStream.read(buffer, 0, bytesToread)) != -1) && bytesRemainingToRead > 0) {
+          outputStream.write(buffer, 0, inputBytesRead);
+          bytesRemainingToRead -= inputBytesRead;
+          bytesToread = Math.min(BUFFER_SIZE, (int)bytesRemainingToRead);
+        }
+      } finally {
+        inStream.close();
+      }
+
+    }
+
   }
 
-  private static final Logger LOG = LoggerFactory.getLogger(Synchronizer.class);
-  public final transient DefaultOutputPort<ModuleFileMetaData> trigger = new DefaultOutputPort<ModuleFileMetaData>();
 }
