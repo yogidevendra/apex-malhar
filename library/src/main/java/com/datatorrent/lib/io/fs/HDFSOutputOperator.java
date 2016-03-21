@@ -21,6 +21,7 @@ package com.datatorrent.lib.io.fs;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
 import javax.validation.constraints.NotNull;
 
@@ -33,6 +34,7 @@ import com.datatorrent.api.DefaultInputPort;
 import com.datatorrent.api.StreamCodec;
 import com.datatorrent.api.Context.OperatorContext;
 import com.datatorrent.lib.io.fs.AbstractFileOutputOperator;
+import com.datatorrent.netlet.util.DTThrowable;
 
 /**
  * This class is responsible for writing tuples to HDFS. All tuples are written
@@ -66,11 +68,6 @@ class HDFSOutputOperator extends AbstractFileOutputOperator<byte[]>
    * Physical partition id for the current partition.
    */
   protected transient int physicalPartitionId;
-
-  /**
-   * partNumber will be incremented after part file is finalized
-   */
-  private int partNumber;
 
   /**
    * Flag to mark if new data in current application window
@@ -260,7 +257,7 @@ class HDFSOutputOperator extends AbstractFileOutputOperator<byte[]>
     //request for finalization if there is no new data in current application window.
     //This is done automatically if the file is rotated periodically or has a size threshold.
     if (checkEndWindowFinalization()) {
-      requestFinalize(currentPartName);
+      rotateCall(currentPartName);
     }
   }
 
@@ -276,17 +273,26 @@ class HDFSOutputOperator extends AbstractFileOutputOperator<byte[]>
     return false;
   }
 
-  @Override
-  protected void requestFinalize(String partName)
-  {
-    LOG.debug("requestFinalize");
-    super.requestFinalize(partName);
-    currentPartName = String.format(currentPartNameformat, fileName, physicalPartitionId);
-    currentPartIdleWindows = 0;
-    currentPartElapsedWindows = 0;
-    currentPartTupleCount = 0;
-  }
 
+  protected void rotateCall(String lastFile)
+  {
+    try {
+      this.rotate(lastFile);
+      currentPartName = String.format(currentPartNameformat, fileName, physicalPartitionId);
+      currentPartIdleWindows = 0;
+      currentPartElapsedWindows = 0;
+      currentPartTupleCount = 0;
+    }
+    catch (IOException ex) {
+      LOG.debug(ex.getMessage());
+      DTThrowable.rethrow(ex);
+    }
+    catch (ExecutionException ex) {
+      LOG.debug(ex.getMessage());
+      DTThrowable.rethrow(ex);
+    }
+  }
+  
   /**
    * @return File name for writing output. All tuples are written to the same
    *         file.

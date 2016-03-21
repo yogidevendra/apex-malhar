@@ -43,7 +43,7 @@ public class HDFSOutputOperatorTest extends AbstractFileOutputOperatorTest
         {},
         {},
         {},
-        {"26a", "26b"}
+        {"26a", "26b"},
     };
     
     for (int i = 0; i <= 12; i++) {
@@ -55,7 +55,7 @@ public class HDFSOutputOperatorTest extends AbstractFileOutputOperatorTest
     }
     writer.committed(10);
     
-    for (int i = 13; i <= 23; i++) {
+    for (int i = 13; i <= 26; i++) {
       writer.beginWindow(i);
       for(String t : tuples[i]){
         writer.stringInput.put(t);
@@ -63,6 +63,6 @@ public class HDFSOutputOperatorTest extends AbstractFileOutputOperatorTest
       writer.endWindow();
     }
     writer.committed(20);
-    writer.committed(25);
+    writer.committed(26);
   }
 }
