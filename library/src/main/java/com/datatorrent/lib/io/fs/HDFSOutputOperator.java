@@ -254,8 +254,6 @@ class HDFSOutputOperator extends AbstractFileOutputOperator<byte[]>
 
     ++currentPartElapsedWindows;
 
-    //request for finalization if there is no new data in current application window.
-    //This is done automatically if the file is rotated periodically or has a size threshold.
     if (checkEndWindowFinalization()) {
       rotateCall(currentPartName);
     }
