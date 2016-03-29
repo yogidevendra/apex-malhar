@@ -38,9 +38,8 @@ import com.datatorrent.netlet.util.DTThrowable;
 
 /**
  * This class is responsible for writing tuples to HDFS. All tuples are written
- * to the same file. Rolling over to the next file based on file size is
- * supported.
- *
+ * to the same file. Rolling file based on size, no. of tuples, idle windows,
+ * elapsed windows is supported.
  * @param <T>
  */
 
@@ -105,18 +104,6 @@ class HDFSOutputOperator extends AbstractFileOutputOperator<byte[]>
    * these many tuples
    */
   private long maxTupleCount = Long.MAX_VALUE;
-
-  /**
-   * No. of windows passed from beginning of current file
-   */
-  private long currentPartElapsedWindows;
-
-  /**
-   * Max number of elapsed windows for which current part file is valid. Part
-   * file will be finalized after these many windows elasped since the beginning
-   * of current part file.
-   */
-  private long maxElapsedWindows = Long.MAX_VALUE;
 
   /**
    * No. of windows since last new data received
@@ -219,7 +206,7 @@ class HDFSOutputOperator extends AbstractFileOutputOperator<byte[]>
   @Override
   public void beginWindow(long windowId)
   {
-    LOG.debug("beginWindow : {}" , windowId);
+    LOG.debug("beginWindow : {}", windowId);
     super.beginWindow(windowId);
     bytesPerSec = 0;
     byteCount = 0;
@@ -235,7 +222,7 @@ class HDFSOutputOperator extends AbstractFileOutputOperator<byte[]>
     isNewDataInCurrentWindow = true;
 
     if (++currentPartTupleCount == maxTupleCount) {
-      requestFinalize(currentPartName);
+      rotateCall(currentPartName);
     }
   }
 
@@ -252,8 +239,6 @@ class HDFSOutputOperator extends AbstractFileOutputOperator<byte[]>
       currentPartIdleWindows = 0;
     }
 
-    ++currentPartElapsedWindows;
-
     if (checkEndWindowFinalization()) {
       rotateCall(currentPartName);
     }
@@ -264,13 +249,12 @@ class HDFSOutputOperator extends AbstractFileOutputOperator<byte[]>
    */
   private boolean checkEndWindowFinalization()
   {
-    if ((currentPartIdleWindows == maxIdleWindows || currentPartElapsedWindows == maxElapsedWindows)
-        && !endOffsets.isEmpty()) {
+    LOG.debug("checkEndWindowFinalization");
+    if ((currentPartIdleWindows == maxIdleWindows) && !endOffsets.isEmpty()) {
       return true;
     }
     return false;
   }
-
 
   protected void rotateCall(String lastFile)
   {
@@ -278,19 +262,16 @@ class HDFSOutputOperator extends AbstractFileOutputOperator<byte[]>
       this.rotate(lastFile);
       currentPartName = String.format(currentPartNameformat, fileName, physicalPartitionId);
       currentPartIdleWindows = 0;
-      currentPartElapsedWindows = 0;
       currentPartTupleCount = 0;
-    }
-    catch (IOException ex) {
+    } catch (IOException ex) {
       LOG.debug(ex.getMessage());
       DTThrowable.rethrow(ex);
-    }
-    catch (ExecutionException ex) {
+    } catch (ExecutionException ex) {
       LOG.debug(ex.getMessage());
       DTThrowable.rethrow(ex);
     }
   }
-  
+
   /**
    * @return File name for writing output. All tuples are written to the same
    *         file.
@@ -359,25 +340,15 @@ class HDFSOutputOperator extends AbstractFileOutputOperator<byte[]>
     this.maxTupleCount = maxTupleCount;
   }
 
-  public long getMaxElapsedWindows()
-  {
-    return maxElapsedWindows;
-  }
-
-  public void setMaxElapsedWindows(long maxElapsedWindows)
-  {
-    this.maxElapsedWindows = maxElapsedWindows;
-  }
-  
   public long getMaxIdleWindows()
   {
     return maxIdleWindows;
   }
-  
+
   public void setMaxIdleWindows(long maxIdleWindows)
   {
     this.maxIdleWindows = maxIdleWindows;
   }
-  
+
   private static final Logger LOG = LoggerFactory.getLogger(HDFSOutputOperator.class);
 }
