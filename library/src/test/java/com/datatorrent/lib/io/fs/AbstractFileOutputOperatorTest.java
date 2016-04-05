@@ -87,7 +87,7 @@ public class AbstractFileOutputOperatorTest
     protected void finished(Description description)
     {
       super.finished(description);
-      //FileUtils.deleteQuietly(new File(getDir()));
+      FileUtils.deleteQuietly(new File(getDir()));
     }
   }
 
