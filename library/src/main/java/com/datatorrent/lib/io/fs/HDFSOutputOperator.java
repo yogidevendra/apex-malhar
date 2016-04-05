@@ -29,11 +29,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.datatorrent.api.AutoMetric;
-import com.datatorrent.api.Context;
+import com.datatorrent.api.Context.OperatorContext;
 import com.datatorrent.api.DefaultInputPort;
 import com.datatorrent.api.StreamCodec;
-import com.datatorrent.api.Context.OperatorContext;
-import com.datatorrent.lib.io.fs.AbstractFileOutputOperator;
 import com.datatorrent.netlet.util.DTThrowable;
 
 /**
@@ -84,14 +82,9 @@ class HDFSOutputOperator extends AbstractFileOutputOperator<byte[]>
   private transient byte[] tupleSeparatorBytes;
 
   /**
-   * Operator specific metric bytes per second
-   */
-  @AutoMetric
-  private long bytesPerSec;
-
-  /**
    * No. of bytes received in current application window
    */
+  @AutoMetric
   private long byteCount;
 
   /**
@@ -116,17 +109,25 @@ class HDFSOutputOperator extends AbstractFileOutputOperator<byte[]>
    * new data.
    */
   private long maxIdleWindows = Long.MAX_VALUE;
-
+  
   /**
-   * Size of one application window in second
+   * Stream codec for string input port
    */
-  private transient double windowTimeSec;
-
   protected StreamCodec<String> stringStreamCodec;
 
+  /**
+   * Default value for stream expiry
+   */
   private static final long DEFAULT_STREAM_EXPIRY_ACCESS_MILL = 60 * 60 * 1000L; //1 hour
+  
+  /**
+   * Default value for rotation windows
+   */
   private static final int DEFAULT_ROTATION_WINDOWS = 2 * 60 * 10; //10 min  
 
+  /**
+   * Initializing default values for tuple separator, stream expiry, rotation windows
+   */
   public HDFSOutputOperator()
   {
     setTupleSeparator(System.getProperty("line.separator"));
@@ -134,14 +135,16 @@ class HDFSOutputOperator extends AbstractFileOutputOperator<byte[]>
     setRotationWindows(DEFAULT_ROTATION_WINDOWS);
   }
 
+  /**
+   * Initializing current partition id, part name etc.
+   * {@inheritDoc}
+   */
   @Override
   public void setup(OperatorContext context)
   {
     super.setup(context);
     physicalPartitionId = context.getId();
     currentPartName = String.format(currentPartNameformat, fileName, physicalPartitionId);
-    windowTimeSec = (context.getValue(Context.OperatorContext.APPLICATION_WINDOW_COUNT)
-        * context.getValue(Context.DAGContext.STREAMING_WINDOW_SIZE_MILLIS) * 1.0) / 1000.0;
   }
 
   /**
@@ -154,7 +157,7 @@ class HDFSOutputOperator extends AbstractFileOutputOperator<byte[]>
   }
 
   /**
-   * This input port receives incoming tuples.
+   * Input port for receiving string tuples.
    */
   public final transient DefaultInputPort<String> stringInput = new DefaultInputPort<String>()
   {
@@ -203,21 +206,25 @@ class HDFSOutputOperator extends AbstractFileOutputOperator<byte[]>
     }
   }
 
+  /**
+   * Initializing per window level fields
+   * {@inheritDoc}
+   */
   @Override
   public void beginWindow(long windowId)
   {
-    LOG.debug("beginWindow : {}", windowId);
     super.beginWindow(windowId);
-    bytesPerSec = 0;
     byteCount = 0;
-
     isNewDataInCurrentWindow = false;
   }
 
+  /**
+   * {@inheritDoc}
+   * Does additional state maintenance for rollover
+   */
   @Override
   protected void processTuple(byte[] tuple)
   {
-    LOG.debug("currentPartName : {}", currentPartName);
     super.processTuple(tuple);
     isNewDataInCurrentWindow = true;
 
@@ -226,12 +233,14 @@ class HDFSOutputOperator extends AbstractFileOutputOperator<byte[]>
     }
   }
 
+  /**
+   * {@inheritDoc}
+   * Does additional checks if file should be rolled over for this window.
+   */
   @Override
   public void endWindow()
   {
-    LOG.debug("endWindow");
     super.endWindow();
-    bytesPerSec = (long)(byteCount / windowTimeSec);
 
     if (!isNewDataInCurrentWindow) {
       ++currentPartIdleWindows;
@@ -245,17 +254,20 @@ class HDFSOutputOperator extends AbstractFileOutputOperator<byte[]>
   }
 
   /**
-   * 
+   * Rollover check at the endWindow
    */
   private boolean checkEndWindowFinalization()
   {
-    LOG.debug("checkEndWindowFinalization");
     if ((currentPartIdleWindows == maxIdleWindows) && !endOffsets.isEmpty()) {
       return true;
     }
     return false;
   }
 
+  /**
+   * {@inheritDoc} Handles file rotation along with exception handling
+   * @param lastFile
+   */
   protected void rotateCall(String lastFile)
   {
     try {
@@ -275,7 +287,6 @@ class HDFSOutputOperator extends AbstractFileOutputOperator<byte[]>
   /**
    * @return File name for writing output. All tuples are written to the same
    *         file.
-   * 
    */
   public String getFileName()
   {
@@ -292,21 +303,33 @@ class HDFSOutputOperator extends AbstractFileOutputOperator<byte[]>
     this.fileName = fileName;
   }
 
+  /**
+   * @return string format specifier for current part name
+   */
   public String getCurrentPartNameformat()
   {
     return currentPartNameformat;
   }
 
+  /**
+   * @param currentPartNameformat string format specifier for current part name
+   */
   public void setCurrentPartNameformat(String currentPartNameformat)
   {
     this.currentPartNameformat = currentPartNameformat;
   }
 
+  /**
+   * @return name of the current part file
+   */
   public String getCurrentPartName()
   {
     return currentPartName;
   }
 
+  /**
+   * @param currentPartName name of the current part file
+   */
   public void setCurrentPartName(String currentPartName)
   {
     this.currentPartName = currentPartName;
@@ -330,21 +353,33 @@ class HDFSOutputOperator extends AbstractFileOutputOperator<byte[]>
     this.tupleSeparatorBytes = separator.getBytes();
   }
 
+  /**
+   * @return max tuples in a part file
+   */
   public long getMaxTupleCount()
   {
     return maxTupleCount;
   }
 
+  /**
+   * @param maxTupleCount max tuples in a part file
+   */
   public void setMaxTupleCount(long maxTupleCount)
   {
     this.maxTupleCount = maxTupleCount;
   }
 
+  /**
+   * @return max number of idle windows for rollover
+   */
   public long getMaxIdleWindows()
   {
     return maxIdleWindows;
   }
 
+  /**
+   * @param maxIdleWindows  max number of idle windows for rollover
+   */
   public void setMaxIdleWindows(long maxIdleWindows)
   {
     this.maxIdleWindows = maxIdleWindows;
