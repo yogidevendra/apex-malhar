@@ -38,6 +38,7 @@ import com.datatorrent.netlet.util.DTThrowable;
  * This class is responsible for writing tuples to HDFS. All tuples are written
  * to the same file. Rolling file based on size, no. of tuples, idle windows,
  * elapsed windows is supported.
+ * 
  * @param <T>
  */
 
@@ -109,7 +110,7 @@ class HDFSOutputOperator extends AbstractFileOutputOperator<byte[]>
    * new data.
    */
   private long maxIdleWindows = Long.MAX_VALUE;
-  
+
   /**
    * Stream codec for string input port
    */
@@ -119,14 +120,15 @@ class HDFSOutputOperator extends AbstractFileOutputOperator<byte[]>
    * Default value for stream expiry
    */
   private static final long DEFAULT_STREAM_EXPIRY_ACCESS_MILL = 60 * 60 * 1000L; //1 hour
-  
+
   /**
    * Default value for rotation windows
    */
   private static final int DEFAULT_ROTATION_WINDOWS = 2 * 60 * 10; //10 min  
 
   /**
-   * Initializing default values for tuple separator, stream expiry, rotation windows
+   * Initializing default values for tuple separator, stream expiry, rotation
+   * windows
    */
   public HDFSOutputOperator()
   {
@@ -136,8 +138,7 @@ class HDFSOutputOperator extends AbstractFileOutputOperator<byte[]>
   }
 
   /**
-   * Initializing current partition id, part name etc.
-   * {@inheritDoc}
+   * Initializing current partition id, part name etc. {@inheritDoc}
    */
   @Override
   public void setup(OperatorContext context)
@@ -207,8 +208,7 @@ class HDFSOutputOperator extends AbstractFileOutputOperator<byte[]>
   }
 
   /**
-   * Initializing per window level fields
-   * {@inheritDoc}
+   * Initializing per window level fields {@inheritDoc}
    */
   @Override
   public void beginWindow(long windowId)
@@ -219,8 +219,7 @@ class HDFSOutputOperator extends AbstractFileOutputOperator<byte[]>
   }
 
   /**
-   * {@inheritDoc}
-   * Does additional state maintenance for rollover
+   * {@inheritDoc} Does additional state maintenance for rollover
    */
   @Override
   protected void processTuple(byte[] tuple)
@@ -234,8 +233,8 @@ class HDFSOutputOperator extends AbstractFileOutputOperator<byte[]>
   }
 
   /**
-   * {@inheritDoc}
-   * Does additional checks if file should be rolled over for this window.
+   * {@inheritDoc} Does additional checks if file should be rolled over for this
+   * window.
    */
   @Override
   public void endWindow()
@@ -266,6 +265,7 @@ class HDFSOutputOperator extends AbstractFileOutputOperator<byte[]>
 
   /**
    * {@inheritDoc} Handles file rotation along with exception handling
+   * 
    * @param lastFile
    */
   protected void rotateCall(String lastFile)
@@ -312,7 +312,8 @@ class HDFSOutputOperator extends AbstractFileOutputOperator<byte[]>
   }
 
   /**
-   * @param currentPartNameformat string format specifier for current part name
+   * @param currentPartNameformat
+   *          string format specifier for current part name
    */
   public void setCurrentPartNameformat(String currentPartNameformat)
   {
@@ -328,7 +329,8 @@ class HDFSOutputOperator extends AbstractFileOutputOperator<byte[]>
   }
 
   /**
-   * @param currentPartName name of the current part file
+   * @param currentPartName
+   *          name of the current part file
    */
   public void setCurrentPartName(String currentPartName)
   {
@@ -362,7 +364,8 @@ class HDFSOutputOperator extends AbstractFileOutputOperator<byte[]>
   }
 
   /**
-   * @param maxTupleCount max tuples in a part file
+   * @param maxTupleCount
+   *          max tuples in a part file
    */
   public void setMaxTupleCount(long maxTupleCount)
   {
@@ -378,7 +381,8 @@ class HDFSOutputOperator extends AbstractFileOutputOperator<byte[]>
   }
 
   /**
-   * @param maxIdleWindows  max number of idle windows for rollover
+   * @param maxIdleWindows
+   *          max number of idle windows for rollover
    */
   public void setMaxIdleWindows(long maxIdleWindows)
   {
