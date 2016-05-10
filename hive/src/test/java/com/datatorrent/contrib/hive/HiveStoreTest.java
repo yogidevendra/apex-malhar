@@ -16,5 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-@org.apache.hadoop.classification.InterfaceStability.Evolving
 package com.datatorrent.contrib.hive;
+
+import org.junit.Assert;
+import org.junit.Test;
+
+public class HiveStoreTest
+{
+  @Test
+  public void defaultDriverTest()
+  {
+    HiveStore hiveStore = new HiveStore();
+    Assert.assertEquals("Test default driver", HiveStore.HIVE_DRIVER, hiveStore.getDatabaseDriver());
+  }
+}

@@ -20,15 +20,14 @@ package com.datatorrent.contrib.hive;
 
 import java.util.ArrayList;
 
-
-public  class FSRollingTestImpl extends AbstractFSRollingOutputOperator<String>
+public class FSRollingTestImpl extends AbstractFSRollingOutputOperator<String>
 {
   @Override
   public ArrayList<String> getHivePartition(String tuple)
   {
     ArrayList<String> hivePartitions = new ArrayList<String>();
     hivePartitions.add(tuple);
-    return(hivePartitions);
+    return (hivePartitions);
   }
 
   @Override
