@@ -18,26 +18,26 @@
  */
 package com.datatorrent.contrib.hive;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.*;
+import java.util.ArrayList;
 
 import javax.annotation.Nonnull;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.datatorrent.lib.db.AbstractStoreOutputOperator;
+import org.apache.commons.lang.mutable.MutableLong;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 
 import com.datatorrent.api.Context.OperatorContext;
 import com.datatorrent.api.annotation.OperatorAnnotation;
 import com.datatorrent.contrib.hive.AbstractFSRollingOutputOperator.FilePartitionMapping;
 import com.datatorrent.lib.counters.BasicCounters;
-import java.io.IOException;
-import org.apache.commons.lang.mutable.MutableLong;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
+import com.datatorrent.lib.db.AbstractStoreOutputOperator;
 
 /**
  * Hive operator which can insert data in txt format in tables/partitions from a file written in hdfs location.
@@ -57,6 +57,12 @@ public class HiveOperator extends AbstractStoreOutputOperator<FilePartitionMappi
   //This Property is user configurable.
   protected ArrayList<String> hivePartitionColumns = new ArrayList<String>();
   private transient String localString = "";
+  
+  /**
+   * Hive store.
+   * @deprecated use {@link AbstractStoreOutputOperator#store} instead
+   */
+  @Deprecated
   protected HiveStore hivestore;
 
   /**
@@ -90,6 +96,12 @@ public class HiveOperator extends AbstractStoreOutputOperator<FilePartitionMappi
    * The total number of bytes written by the operator.
    */
   protected long totalBytesWritten = 0;
+
+  public HiveOperator()
+  {
+    store = new HiveStore();
+    hivestore = store;
+  }
 
   @Override
   public void setup(OperatorContext context)
@@ -249,18 +261,21 @@ public class HiveOperator extends AbstractStoreOutputOperator<FilePartitionMappi
 
   /**
    * Gets the store set for hive;
+   * @deprecated use {@link #getStore()} instead.  
    * @return hive store
    */
+  @Deprecated
   public HiveStore getHivestore()
   {
-    return hivestore;
+    return store;
   }
 
   /**
    * Set the store in hive.
-   *
+   * @deprecated use {@link #setStore()} instead.  
    * @param hivestore
    */
+  @Deprecated
   public void setHivestore(HiveStore hivestore)
   {
     this.hivestore = hivestore;
