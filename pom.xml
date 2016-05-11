@@ -187,7 +187,6 @@
       <id>all-modules</id>
       <modules>
         <module>benchmark</module>
-        <module>apps</module>
         <module>samples</module>
         <module>kafka</module>
       </modules>
@@ -197,6 +196,7 @@
   <modules>
     <module>library</module>
     <module>contrib</module>
+    <module>apps</module>
     <module>demos</module>
   </modules>
 
