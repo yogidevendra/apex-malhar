@@ -29,10 +29,6 @@ import com.datatorrent.lib.util.PojoUtils.GetterLong;
 import com.datatorrent.lib.util.PojoUtils.GetterShort;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.List;
 import java.sql.Date;
 
@@ -70,6 +66,7 @@ public class FSPojoToHiveOperator extends AbstractFSRollingOutputOperator<Object
   {
     setListItem(expressionsForHivePartitionColumns, index, expressionsForHivePartitionColumn);
   }
+
 
   /*
    * A list of Java expressions in which each expression yields the specific table column value and partition column value in hive table from the input POJO.
@@ -178,7 +175,6 @@ public class FSPojoToHiveOperator extends AbstractFSRollingOutputOperator<Object
     setListItem(hivePartitionColumns, index, hivePartitionColumn);
   }
 
-  
   /*
    * Data Types of Hive table data columns.
    * Example: If the Hive table has two columns of data type int and float,
@@ -260,10 +256,6 @@ public class FSPojoToHiveOperator extends AbstractFSRollingOutputOperator<Object
   public void processFirstTuple(Object tuple)
   {
     Class<?> fqcn = tuple.getClass();
-    logger.debug("hiveColumns {}\n expressionsForHiveColumns{}\n hiveColumnDataTypes{}\n "
-        + "hivePartitionColumns{}\n expressionsForHivePartitionColumns{}\n "
-        + "hivePartitionColumnDataTypes{}\n ", hiveColumns,expressionsForHiveColumns,hiveColumnDataTypes,
-        hivePartitionColumns,expressionsForHivePartitionColumns,hivePartitionColumnDataTypes);
     createGetters(fqcn, hiveColumns.size(), expressionsForHiveColumns,hiveColumnDataTypes);
     createGetters(fqcn, hivePartitionColumns.size(), expressionsForHivePartitionColumns,hivePartitionColumnDataTypes);
   }
@@ -274,7 +266,6 @@ public class FSPojoToHiveOperator extends AbstractFSRollingOutputOperator<Object
       FIELD_TYPE type = columnDataTypes.get(i);
       final Object getter;
       final String getterExpression = expressions.get(i);
-      logger.debug("type {}", type.getClass().getCanonicalName());
       switch (type) {
         case CHARACTER:
           getter = PojoUtils.createGetterChar(fqcn, getterExpression);
@@ -309,8 +300,7 @@ public class FSPojoToHiveOperator extends AbstractFSRollingOutputOperator<Object
         default:
           getter = PojoUtils.createGetter(fqcn, getterExpression, Object.class);
       }
-      
-      logger.debug("getter {}", getter.getClass().getCanonicalName());
+
       getters.add(getter);
 
     }
@@ -337,6 +327,4 @@ public class FSPojoToHiveOperator extends AbstractFSRollingOutputOperator<Object
     for (int i = 0; i < need; i++) list.add(null);
     list.set(index, value);
   }
-  
-  private static final Logger logger = LoggerFactory.getLogger(FSPojoToHiveOperator.class);
 }
