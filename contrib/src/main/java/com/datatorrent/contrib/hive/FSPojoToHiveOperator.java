@@ -18,6 +18,8 @@
  */
 package com.datatorrent.contrib.hive;
 
+import com.google.common.collect.Lists;
+
 import com.datatorrent.lib.util.PojoUtils;
 import com.datatorrent.lib.util.PojoUtils.Getter;
 import com.datatorrent.lib.util.PojoUtils.GetterBoolean;
@@ -41,16 +43,16 @@ import java.sql.Date;
  * @tags fs, hive, database
  * @since 3.0.0
  */
-public class FSPojoToHiveOperator extends AbstractFSRollingOutputOperator<Object>
+public class FSPojoToHiveOperator<T> extends AbstractFSRollingOutputOperator<T>
 {
   private static final long serialVersionUID = 1L;
-  private ArrayList<String> hivePartitionColumns;
-  private ArrayList<String> hiveColumns;
-  private ArrayList<FIELD_TYPE> hiveColumnDataTypes;
-  private ArrayList<FIELD_TYPE> hivePartitionColumnDataTypes;
-  private transient ArrayList<Object> getters;
-  private ArrayList<String> expressionsForHiveColumns;
-  private ArrayList<String> expressionsForHivePartitionColumns;
+  private ArrayList<String> hivePartitionColumns = Lists.newArrayList();
+  private ArrayList<String> hiveColumns = Lists.newArrayList();
+  private ArrayList<FIELD_TYPE> hiveColumnDataTypes = Lists.newArrayList();
+  private ArrayList<FIELD_TYPE> hivePartitionColumnDataTypes = Lists.newArrayList();
+  private transient ArrayList<Object> getters = Lists.newArrayList();
+  private ArrayList<String> expressionsForHiveColumns = Lists.newArrayList();
+  private ArrayList<String> expressionsForHivePartitionColumns = Lists.newArrayList();
 
   public ArrayList<String> getExpressionsForHivePartitionColumns()
   {
@@ -84,12 +86,6 @@ public class FSPojoToHiveOperator extends AbstractFSRollingOutputOperator<Object
   public void setExpressionsForHiveColumnsItem(int index, String expression)
   {
     setListItem(expressionsForHiveColumns, index, expression);
-  }
-
-  public FSPojoToHiveOperator()
-  {
-    super();
-    getters = new ArrayList<Object>();
   }
 
   @SuppressWarnings("unchecked")
@@ -221,7 +217,7 @@ public class FSPojoToHiveOperator extends AbstractFSRollingOutputOperator<Object
 
   @Override
   @SuppressWarnings("unchecked")
-  public ArrayList<String> getHivePartition(Object tuple)
+  public ArrayList<String> getHivePartition(T tuple)
   {
     if (getters.isEmpty()) {
       processFirstTuple(tuple);
@@ -244,7 +240,7 @@ public class FSPojoToHiveOperator extends AbstractFSRollingOutputOperator<Object
   }
 
   @Override
-  public void processTuple(Object tuple)
+  public void processTuple(T tuple)
   {
     if (getters.isEmpty()) {
       processFirstTuple(tuple);
@@ -253,7 +249,7 @@ public class FSPojoToHiveOperator extends AbstractFSRollingOutputOperator<Object
   }
 
   @SuppressWarnings("unchecked")
-  public void processFirstTuple(Object tuple)
+  public void processFirstTuple(T tuple)
   {
     Class<?> fqcn = tuple.getClass();
     createGetters(fqcn, hiveColumns.size(), expressionsForHiveColumns,hiveColumnDataTypes);
@@ -309,7 +305,7 @@ public class FSPojoToHiveOperator extends AbstractFSRollingOutputOperator<Object
 
   @Override
   @SuppressWarnings("unchecked")
-  protected byte[] getBytesForTuple(Object tuple)
+  protected byte[] getBytesForTuple(T tuple)
   {
     int size = hiveColumns.size();
     StringBuilder result = new StringBuilder();
@@ -322,7 +318,7 @@ public class FSPojoToHiveOperator extends AbstractFSRollingOutputOperator<Object
     return (result.toString()).getBytes();
   }
   
-  public void setListItem(List list, int index, Object value) {
+  private void setListItem(List list, int index, Object value) {
     final int need = index - list.size() + 1;
     for (int i = 0; i < need; i++) list.add(null);
     list.set(index, value);
