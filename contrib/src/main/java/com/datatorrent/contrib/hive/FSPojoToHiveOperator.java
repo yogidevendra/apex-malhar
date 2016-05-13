@@ -18,6 +18,11 @@
  */
 package com.datatorrent.contrib.hive;
 
+import java.sql.Date;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+
 import com.google.common.collect.Lists;
 
 import com.datatorrent.lib.util.PojoUtils;
@@ -29,10 +34,6 @@ import com.datatorrent.lib.util.PojoUtils.GetterFloat;
 import com.datatorrent.lib.util.PojoUtils.GetterInt;
 import com.datatorrent.lib.util.PojoUtils.GetterLong;
 import com.datatorrent.lib.util.PojoUtils.GetterShort;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-import java.sql.Date;
 
 /**
  * An Implementation of AbstractFSRollingOutputOperator which takes any POJO as input, serializes the POJO as Hive delimiter separated values
@@ -133,7 +134,7 @@ public class FSPojoToHiveOperator<T> extends AbstractFSRollingOutputOperator<T>
   public enum FIELD_TYPE
   {
     BOOLEAN, DOUBLE, INTEGER, FLOAT, LONG, SHORT, CHARACTER, STRING, DATE, TIMESTAMP, OTHER
-  };
+  }
 
   /*
    * Columns in Hive table.
@@ -318,9 +319,12 @@ public class FSPojoToHiveOperator<T> extends AbstractFSRollingOutputOperator<T>
     return (result.toString()).getBytes();
   }
   
-  private void setListItem(List list, int index, Object value) {
+  private void setListItem(List list, int index, Object value)
+  {
     final int need = index - list.size() + 1;
-    for (int i = 0; i < need; i++) list.add(null);
+    for (int i = 0; i < need; i++) {
+      list.add(null);
+    }
     list.set(index, value);
   }
 }
