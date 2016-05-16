@@ -55,7 +55,7 @@ import org.apache.hadoop.fs.Path;
 public class HiveOperator extends AbstractStoreOutputOperator<FilePartitionMapping, HiveStore>
 {
   //This Property is user configurable.
-  protected ArrayList<String> hivePartitionColumns = new ArrayList<String>();
+  protected String[] hivePartitionColumns;
   private transient String localString = "";
 
   /**
@@ -170,17 +170,17 @@ public class HiveOperator extends AbstractStoreOutputOperator<FilePartitionMappi
     try {
       if (fs.exists(new Path(filepath))) {
         if (numPartitions > 0) {
-          StringBuilder partitionString = new StringBuilder(hivePartitionColumns.get(0) + "='" + partition.get(0) + "'");
+          StringBuilder partitionString = new StringBuilder(hivePartitionColumns[0] + "='" + partition.get(0) + "'");
           int i = 0;
           while (i < numPartitions) {
             i++;
             if (i == numPartitions) {
               break;
             }
-            partitionString.append(",").append(hivePartitionColumns.get(i)).append("='").append(partition.get(i)).append("'");
+            partitionString.append(",").append(hivePartitionColumns[i]).append("='").append(partition.get(i)).append("'");
           }
-          if (i < hivePartitionColumns.size()) {
-            partitionString.append(",").append(hivePartitionColumns.get(i));
+          if (i < hivePartitionColumns.length) {
+            partitionString.append(",").append(hivePartitionColumns[i]);
           }
           command = "load data" + localString + " inpath '" + filepath + "' into table " + tablename + " PARTITION" + "( " + partitionString + " )";
         }
@@ -219,7 +219,7 @@ public class HiveOperator extends AbstractStoreOutputOperator<FilePartitionMappi
    * Get the partition columns in hive to which data needs to be loaded.
    * @return List of Hive Partition Columns
    */
-  public ArrayList<String> getHivePartitionColumns()
+  public String[] getHivePartitionColumns()
   {
     return hivePartitionColumns;
   }
@@ -228,7 +228,7 @@ public class HiveOperator extends AbstractStoreOutputOperator<FilePartitionMappi
    * Set the hive partition columns to which data needs to be loaded.
    * @param hivePartitionColumns
    */
-  public void setHivePartitionColumns(ArrayList<String> hivePartitionColumns)
+  public void setHivePartitionColumns(String[] hivePartitionColumns)
   {
     this.hivePartitionColumns = hivePartitionColumns;
   }

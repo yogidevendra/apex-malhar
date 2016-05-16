@@ -23,6 +23,12 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.beanutils.ConvertUtils;
+import org.apache.commons.beanutils.Converter;
+import org.apache.commons.beanutils.converters.AbstractArrayConverter;
+import org.apache.commons.beanutils.converters.AbstractConverter;
+import org.apache.commons.beanutils.converters.ArrayConverter;
+
 import com.google.common.collect.Lists;
 
 import com.datatorrent.lib.util.PojoUtils;
@@ -47,46 +53,36 @@ import com.datatorrent.lib.util.PojoUtils.GetterShort;
 public class FSPojoToHiveOperator<T> extends AbstractFSRollingOutputOperator<T>
 {
   private static final long serialVersionUID = 1L;
-  private ArrayList<String> hivePartitionColumns = Lists.newArrayList();
-  private ArrayList<String> hiveColumns = Lists.newArrayList();
-  private ArrayList<FIELD_TYPE> hiveColumnDataTypes = Lists.newArrayList();
-  private ArrayList<FIELD_TYPE> hivePartitionColumnDataTypes = Lists.newArrayList();
+  
+  private String[] hivePartitionColumns;
+  private String[] hiveColumns;
+  private FIELD_TYPE[] hiveColumnDataTypes;
+  private FIELD_TYPE[] hivePartitionColumnDataTypes;
   private transient ArrayList<Object> getters = Lists.newArrayList();
-  private ArrayList<String> expressionsForHiveColumns = Lists.newArrayList();
-  private ArrayList<String> expressionsForHivePartitionColumns = Lists.newArrayList();
+  private String[] expressionsForHiveColumns;
+  private String[] expressionsForHivePartitionColumns;
 
-  public ArrayList<String> getExpressionsForHivePartitionColumns()
+  public String[] getExpressionsForHivePartitionColumns()
   {
     return expressionsForHivePartitionColumns;
   }
 
-  public void setExpressionsForHivePartitionColumns(ArrayList<String> expressionsForHivePartitionColumns)
+  public void setExpressionsForHivePartitionColumns(String[] expressionsForHivePartitionColumns)
   {
     this.expressionsForHivePartitionColumns = expressionsForHivePartitionColumns;
   }
-  
-  public void setExpressionsForHivePartitionColumnsItem(int index, String expressionsForHivePartitionColumn)
-  {
-    setListItem(expressionsForHivePartitionColumns, index, expressionsForHivePartitionColumn);
-  }
-
 
   /*
    * A list of Java expressions in which each expression yields the specific table column value and partition column value in hive table from the input POJO.
    */
-  public ArrayList<String> getExpressionsForHiveColumns()
+  public String[] getExpressionsForHiveColumns()
   {
     return expressionsForHiveColumns;
   }
 
-  public void setExpressionsForHiveColumns(ArrayList<String> expressions)
+  public void setExpressionsForHiveColumns(String[] expressions)
   {
     this.expressionsForHiveColumns = expressions;
-  }
-  
-  public void setExpressionsForHiveColumnsItem(int index, String expression)
-  {
-    setListItem(expressionsForHiveColumns, index, expression);
   }
 
   @SuppressWarnings("unchecked")
@@ -135,41 +131,65 @@ public class FSPojoToHiveOperator<T> extends AbstractFSRollingOutputOperator<T>
   {
     BOOLEAN, DOUBLE, INTEGER, FLOAT, LONG, SHORT, CHARACTER, STRING, DATE, TIMESTAMP, OTHER
   }
+  
+  
+  static{
+    //Code for enabling BeanUtils to accept comma separated string to initialize FIELD_TYPE[]
+    class FieldTypeConvertor extends AbstractConverter{
+
+      @Override
+      protected Object convertToType(Class type, Object value) throws Throwable
+      {
+        if(value instanceof String){
+          return FIELD_TYPE.valueOf((String)value);
+        }
+        else{
+          throw new IllegalArgumentException("FIELD_TYPE should be specified as String");
+        }
+      }
+
+      @Override
+      protected Class getDefaultType()
+      {
+        return FIELD_TYPE.class;
+      }
+    }
+    
+    class FieldTypeArrayConvertor extends ArrayConverter{
+
+      public FieldTypeArrayConvertor()
+      {
+        super(FIELD_TYPE[].class, new FieldTypeConvertor());
+      }
+    }
+    
+    ConvertUtils.register(new FieldTypeArrayConvertor(), FIELD_TYPE[].class);
+  }
 
   /*
    * Columns in Hive table.
    */
-  public ArrayList<String> getHiveColumns()
+  public String[] getHiveColumns()
   {
     return hiveColumns;
   }
 
-  public void setHiveColumns(ArrayList<String> hiveColumns)
+  public void setHiveColumns(String[] hiveColumns)
   {
     this.hiveColumns = hiveColumns;
-  }
-  
-  public void setHiveColumnsItem(int index, String hiveColumn)
-  {
-    setListItem(hiveColumns, index, hiveColumn);
   }
 
   /*
    * Partition Columns in Hive table.Example: dt for date,ts for timestamp
    */
-  public ArrayList<String> getHivePartitionColumns()
+  public String[] getHivePartitionColumns()
   {
     return hivePartitionColumns;
   }
 
-  public void setHivePartitionColumns(ArrayList<String> hivePartitionColumns)
+  public void setHivePartitionColumns(String[] hivePartitionColumns)
   {
     this.hivePartitionColumns = hivePartitionColumns;
-  }
-  
-  public void setHivePartitionColumnsItem(int index, String hivePartitionColumn)
-  {
-    setListItem(hivePartitionColumns, index, hivePartitionColumn);
   }
 
   /*
@@ -178,20 +198,14 @@ public class FSPojoToHiveOperator<T> extends AbstractFSRollingOutputOperator<T>
    * then hiveColumnsDataTypes = {INTEGER,FLOAT}.
    * Particular Data Type can be chosen from the List of data types provided.
    */
-  public ArrayList<FIELD_TYPE> getHiveColumnDataTypes()
+  public FIELD_TYPE[] getHiveColumnDataTypes()
   {
     return hiveColumnDataTypes;
   }
 
-  public void setHiveColumnDataTypes(ArrayList<FIELD_TYPE> hiveColumnDataTypes)
+  public void setHiveColumnDataTypes(FIELD_TYPE[] hiveColumnDataTypes)
   {
     this.hiveColumnDataTypes = hiveColumnDataTypes;
-  }
-  
-  public void setHiveColumnDataTypesItem(int index, String hiveColumnDataType)
-  {
-    FIELD_TYPE type = FIELD_TYPE.valueOf(hiveColumnDataType);
-    setListItem(hiveColumnDataTypes, index, type);
   }
   
   /*
@@ -200,20 +214,14 @@ public class FSPojoToHiveOperator<T> extends AbstractFSRollingOutputOperator<T>
    * then hivePartitionColumnDataTypes = {STRING}.
    * Particular Data Type can be chosen from the List of data types provided.
    */
-  public ArrayList<FIELD_TYPE> getHivePartitionColumnDataTypes()
+  public FIELD_TYPE[] getHivePartitionColumnDataTypes()
   {
     return hivePartitionColumnDataTypes;
   }
 
-  public void setHivePartitionColumnDataTypes(ArrayList<FIELD_TYPE> hivePartitionColumnDataTypes)
+  public void setHivePartitionColumnDataTypes(FIELD_TYPE[] hivePartitionColumnDataTypes)
   {
     this.hivePartitionColumnDataTypes = hivePartitionColumnDataTypes;
-  }
-
-  public void setHivePartitionColumnDataTypesItem(int index, String hivePartitionColumnDataType)
-  {
-    FIELD_TYPE type = FIELD_TYPE.valueOf(hivePartitionColumnDataType);
-    setListItem(hivePartitionColumnDataTypes, index, type);
   }
 
   @Override
@@ -224,13 +232,13 @@ public class FSPojoToHiveOperator<T> extends AbstractFSRollingOutputOperator<T>
       processFirstTuple(tuple);
     }
     
-    int sizeOfColumns = hiveColumns.size();
-    int sizeOfPartitionColumns = hivePartitionColumns.size();
+    int sizeOfColumns = hiveColumns.length;
+    int sizeOfPartitionColumns = hivePartitionColumns.length;
     //int size = sizeOfColumns + sizeOfPartitionColumns;
     ArrayList<String> hivePartitionColumnValues = new ArrayList<String>();
     String partitionColumnValue;
     for (int i = 0; i < sizeOfPartitionColumns; i++) {
-      FIELD_TYPE type = hivePartitionColumnDataTypes.get(i);
+      FIELD_TYPE type = hivePartitionColumnDataTypes[i];
       StringBuilder result = new StringBuilder();
       getValue(tuple, sizeOfColumns + i, type, result);
       partitionColumnValue = result.toString();
@@ -253,16 +261,16 @@ public class FSPojoToHiveOperator<T> extends AbstractFSRollingOutputOperator<T>
   public void processFirstTuple(T tuple)
   {
     Class<?> fqcn = tuple.getClass();
-    createGetters(fqcn, hiveColumns.size(), expressionsForHiveColumns,hiveColumnDataTypes);
-    createGetters(fqcn, hivePartitionColumns.size(), expressionsForHivePartitionColumns,hivePartitionColumnDataTypes);
+    createGetters(fqcn, hiveColumns.length, expressionsForHiveColumns,hiveColumnDataTypes);
+    createGetters(fqcn, hivePartitionColumns.length, expressionsForHivePartitionColumns,hivePartitionColumnDataTypes);
   }
 
-  protected void createGetters(Class<?> fqcn, int size, ArrayList<String> expressions,ArrayList<FIELD_TYPE> columnDataTypes)
+  protected void createGetters(Class<?> fqcn, int size, String[] expressions,FIELD_TYPE[] columnDataTypes)
   {
     for (int i = 0; i < size; i++) {
-      FIELD_TYPE type = columnDataTypes.get(i);
+      FIELD_TYPE type = columnDataTypes[i];
       final Object getter;
-      final String getterExpression = expressions.get(i);
+      final String getterExpression = expressions[i];
       switch (type) {
         case CHARACTER:
           getter = PojoUtils.createGetterChar(fqcn, getterExpression);
@@ -308,23 +316,15 @@ public class FSPojoToHiveOperator<T> extends AbstractFSRollingOutputOperator<T>
   @SuppressWarnings("unchecked")
   protected byte[] getBytesForTuple(T tuple)
   {
-    int size = hiveColumns.size();
+    int size = hiveColumns.length;
     StringBuilder result = new StringBuilder();
     for (int i = 0; i < size; i++) {
-      FIELD_TYPE type = hiveColumnDataTypes.get(i);
+      FIELD_TYPE type = hiveColumnDataTypes[i];
       getValue(tuple, i, type, result);
       result.append("\t");
     }
     result.append("\n");
     return (result.toString()).getBytes();
   }
-  
-  private void setListItem(List list, int index, Object value)
-  {
-    final int need = index - list.size() + 1;
-    for (int i = 0; i < need; i++) {
-      list.add(null);
-    }
-    list.set(index, value);
-  }
+
 }
