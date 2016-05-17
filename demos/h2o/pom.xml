@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <parent>
+    <artifactId>malhar-demos</artifactId>
+    <groupId>org.apache.apex</groupId>
+    <version>3.4.0-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.apache.apex</groupId>
+  <version>3.4.0-SNAPSHOT</version>
+  <artifactId>h2o</artifactId>
+  <packaging>jar</packaging>
+
+  <name>DataTorrent H2O Integration</name>
+  <description>DataTorrent demo applications that uses H2O to find the life span of wind turbines.</description>
+
+  <dependencies>
+    <dependency>
+      <groupId>h20</groupId>
+      <artifactId>h20.model</artifactId>
+      <version>1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.apex</groupId>
+      <artifactId>malhar-library</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+  </dependencies>
+
+
+</project>

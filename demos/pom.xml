@@ -179,6 +179,7 @@
   </profiles>
 
   <modules>
+    <module>h2o</module>
     <module>machinedata</module>
     <module>pi</module>
     <module>twitter</module>

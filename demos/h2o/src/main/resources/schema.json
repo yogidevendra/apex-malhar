@@ -1,0 +1,14 @@
+{
+  "values": [
+    {
+      "name": "Remaining Cycles",
+      "type": "string"
+    },
+    {
+      "name": "count",
+      "type": "long"
+    }
+  ]
+}
+
+
