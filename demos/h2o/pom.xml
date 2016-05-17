@@ -5,12 +5,12 @@
   <parent>
     <artifactId>malhar-demos</artifactId>
     <groupId>org.apache.apex</groupId>
-    <version>3.4.0-SNAPSHOT</version>
+    <version>3.3.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.apache.apex</groupId>
-  <version>3.4.0-SNAPSHOT</version>
+  <version>3.3.0-SNAPSHOT</version>
   <artifactId>h2o</artifactId>
   <packaging>jar</packaging>
 
@@ -22,6 +22,8 @@
       <groupId>h20</groupId>
       <artifactId>h20.model</artifactId>
       <version>1.0</version>
+     <scope>system</scope>
+     <systemPath>${project.basedir}/src/main/resources/h2o-genmodel.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>org.apache.apex</groupId>
