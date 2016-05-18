@@ -19,6 +19,8 @@
 
 package com.datatorrent.contrib.hive;
 
+import java.util.Properties;
+
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
@@ -77,11 +79,18 @@ public class HiveOutputModule implements Module
   private String[] expressionsForHivePartitionColumns;
   
   /**
-   * The maximum length in bytes of a rolling file. The default value of this is Long.MAX_VALUE
+   * The maximum length in bytes of a rolling file. Default value is 128MB.
    */
   @Min(1)
-  protected Long maxLength = Long.MAX_VALUE;
+  protected Long maxLength = 134217728L; 
   
+  @NotNull
+  private String databaseUrl;
+  
+  @NotNull
+  private String databaseDriver;
+  
+  private Properties connectionProperties;
   /**
    * Input port for files metadata.
    */
@@ -105,9 +114,11 @@ public class HiveOutputModule implements Module
     fsRolling.setExpressionsForHivePartitionColumns(expressionsForHivePartitionColumns);
     
     fsRolling.setMaxLength(maxLength);
+    fsRolling.setAlwaysWriteToTmp(true);
+    fsRolling.setRotationWindows(0);
     
     hiveOperator.setHivePartitionColumns(hivePartitionColumns);
-    
+    hiveOperator.getStore().setFilepath(filePath);
     
   }
   
@@ -228,8 +239,8 @@ public class HiveOutputModule implements Module
   }
   
   /**
-   * 
-   * @return
+   * The maximum length in bytes of a rolling file. 
+   * @return maximum size of file
    */
   public Long getMaxLength()
   {
@@ -237,8 +248,8 @@ public class HiveOutputModule implements Module
   }
   
   /**
-   * 
-   * @param maxLength
+   * The maximum length in bytes of a rolling file.
+   * @param maxLength maximum size of file
    */
   public void setMaxLength(Long maxLength)
   {
