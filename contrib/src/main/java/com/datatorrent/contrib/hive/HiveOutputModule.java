@@ -25,6 +25,7 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hive.metastore.api.ThriftHiveMetastore.Processor.set_ugi;
 
 import com.datatorrent.api.DAG;
 import com.datatorrent.api.Module;
@@ -82,15 +83,30 @@ public class HiveOutputModule implements Module
    * The maximum length in bytes of a rolling file. Default value is 128MB.
    */
   @Min(1)
-  protected Long maxLength = 134217728L; 
+  protected Long maxLength = 134217728L;
   
+  /**
+   * Connection URL for connecting to hive.
+   */
   @NotNull
   private String databaseUrl;
   
+  /**
+   * Driver for connecting to hive.
+   */
   @NotNull
   private String databaseDriver;
   
-  private Properties connectionProperties;
+  /**
+   * Username for connecting to hive
+   */
+  private String userName;
+  
+  /**
+   * Password for connecting to hive
+   */
+  private String password;
+  
   /**
    * Input port for files metadata.
    */
@@ -118,8 +134,12 @@ public class HiveOutputModule implements Module
     fsRolling.setRotationWindows(0);
     
     hiveOperator.setHivePartitionColumns(hivePartitionColumns);
-    hiveOperator.getStore().setFilepath(filePath);
-    
+    HiveStore hiveStore = hiveOperator.getStore();
+    hiveStore.setFilepath(filePath);
+    hiveStore.setDatabaseUrl(databaseUrl);
+    hiveStore.setDatabaseDriver(databaseDriver);
+    hiveStore.getConnectionProperties().put("user", userName);
+    hiveStore.getConnectionProperties().put("password", password);
   }
   
   /**
@@ -255,4 +275,78 @@ public class HiveOutputModule implements Module
   {
     this.maxLength = maxLength;
   }
+  
+  /**
+   * Connection URL for connecting to hive.
+   * @return database url
+   */
+  public String getDatabaseUrl()
+  {
+    return databaseUrl;
+  }
+  
+  /**
+   * Connection URL for connecting to hive.
+   * @param databaseUrl database url
+   */
+  public void setDatabaseUrl(String databaseUrl)
+  {
+    this.databaseUrl = databaseUrl;
+  }
+  
+  /**
+   * Driver for connecting to hive.
+   * @return database driver
+   */
+  public String getDatabaseDriver()
+  {
+    return databaseDriver;
+  }
+  
+  /**
+   * Driver for connecting to hive.
+   * @param databaseDriver database driver
+   */
+  public void setDatabaseDriver(String databaseDriver)
+  {
+    this.databaseDriver = databaseDriver;
+  }
+  
+  /**
+   * Username for connecting to hive
+   * @return user name
+   */
+  public String getUserName()
+  {
+    return userName;
+  }
+  
+  /**
+   * Username for connecting to hive
+   * @param username user name
+   */
+  public void setUserName(String userName)
+  {
+    this.userName = userName;
+  }
+  
+  /**
+   * Password for connecting to hive
+   * @return password 
+   */
+  public String getPassword()
+  {
+    return password;
+  }
+  
+  /**
+   * Password for connecting to hive
+   * @param password password
+   */
+  public void setPassword(String password)
+  {
+    this.password = password;
+  }
+  
+  
 }
