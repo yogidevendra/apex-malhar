@@ -2,6 +2,6 @@
 <configuration>
   <property>
     <name>dt.application.PredictiveMaintainceForWindTurbines.operator.Input.prop.directory</name>
-    <value></value>
+    <value>/user/sandeep/h2o/</value>
   </property>
 </configuration>

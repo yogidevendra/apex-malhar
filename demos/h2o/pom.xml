@@ -5,12 +5,12 @@
   <parent>
     <artifactId>malhar-demos</artifactId>
     <groupId>org.apache.apex</groupId>
-    <version>3.3.0-SNAPSHOT</version>
+    <version>3.4.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.apache.apex</groupId>
-  <version>3.3.0-SNAPSHOT</version>
+  <version>3.4.0-SNAPSHOT</version>
   <artifactId>h2o</artifactId>
   <packaging>jar</packaging>
 
