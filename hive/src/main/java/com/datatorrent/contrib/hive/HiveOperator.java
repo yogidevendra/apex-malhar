@@ -131,7 +131,7 @@ public class HiveOperator extends AbstractStoreOutputOperator<FilePartitionMappi
    */
   protected FileSystem getHDFSInstance() throws IOException
   {
-    FileSystem tempFS = FileSystem.newInstance(new Path(hivestore.filepath).toUri(), new Configuration());
+    FileSystem tempFS = FileSystem.newInstance(new Path(store.filepath).toUri(), new Configuration());
     if (!tempFS.getScheme().equalsIgnoreCase("hdfs")) {
       localString = " local";
     }
@@ -153,7 +153,7 @@ public class HiveOperator extends AbstractStoreOutputOperator<FilePartitionMappi
     if (command != null) {
       Statement stmt;
       try {
-        stmt = hivestore.getConnection().createStatement();
+        stmt = store.getConnection().createStatement();
         stmt.execute(command);
       }
       catch (SQLException ex) {
@@ -172,7 +172,7 @@ public class HiveOperator extends AbstractStoreOutputOperator<FilePartitionMappi
     String filename = tuple.getFilename();
     ArrayList<String> partition = tuple.getPartition();
     String command = null;
-    String filepath = hivestore.getFilepath() + Path.SEPARATOR + filename;
+    String filepath = store.getFilepath() + Path.SEPARATOR + filename;
     logger.debug("processing {} filepath", filepath);
     int numPartitions = partition.size();
     try {
