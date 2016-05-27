@@ -144,7 +144,8 @@ public class HiveMockTest extends HiveTestService
 
     stmt.execute("DROP TABLE " + tablename);
 
-    stmt.execute("CREATE TABLE IF NOT EXISTS " + tablename + " (col1 String) PARTITIONED BY(dt STRING) ROW FORMAT DELIMITED FIELDS TERMINATED BY '\n'  \n"
+    stmt.execute("CREATE TABLE IF NOT EXISTS " + tablename + " (col1 String) PARTITIONED BY(dt STRING) "
+        + "ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t' LINES TERMINATED BY '\n'  \n"
             + "STORED AS TEXTFILE ");
     /*ResultSet res = stmt.execute("CREATE TABLE IF NOT EXISTS temp4 (col1 map<string,int>,col2 map<string,int>,col3  map<string,int>,col4 map<String,timestamp>, col5 map<string,double>,col6 map<string,double>,col7 map<string,int>,col8 map<string,int>) ROW FORMAT DELIMITED FIELDS TERMINATED BY ','  \n"
      + "COLLECTION ITEMS TERMINATED BY '\n'  \n"
@@ -169,7 +170,8 @@ public class HiveMockTest extends HiveTestService
     }
     stmt.execute("DROP TABLE " + tablepojo);
 
-    stmt.execute("CREATE TABLE " + tablepojo + " (col1 int) PARTITIONED BY(dt STRING) ROW FORMAT DELIMITED FIELDS TERMINATED BY '\n'  \n"
+    stmt.execute("CREATE TABLE " + tablepojo + " (col1 int) PARTITIONED BY(dt STRING) ROW FORMAT DELIMITED "
+        + "FIELDS TERMINATED BY '\t' LINES TERMINATED BY '\n' \n"
             + "STORED AS TEXTFILE ");
     hiveStore.disconnect();
   }
@@ -189,7 +191,7 @@ public class HiveMockTest extends HiveTestService
 
     stmt.execute("DROP TABLE " + tablemap);
 
-    stmt.execute("CREATE TABLE IF NOT EXISTS " + tablemap + " (col1 map<string,int>) PARTITIONED BY(dt STRING) ROW FORMAT DELIMITED FIELDS TERMINATED BY '\n'  \n"
+    stmt.execute("CREATE TABLE IF NOT EXISTS " + tablemap + " (col1 map<string,int>) PARTITIONED BY(dt STRING) ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t'  \n"
             + "MAP KEYS TERMINATED BY '" + delimiterMap + "' \n"
             + "STORED AS TEXTFILE ");
     hiveStore.disconnect();
@@ -219,6 +221,7 @@ public class HiveMockTest extends HiveTestService
     fsRolling.setFilePath(testMeta.getDir());
     short permission = 511;
     fsRolling.setFilePermission(permission);
+    fsRolling.setAlwaysWriteToTmp(false);
     fsRolling.setMaxLength(128);
     AttributeMap.DefaultAttributeMap attributeMap = new AttributeMap.DefaultAttributeMap();
     attributeMap.put(OperatorContext.PROCESSING_MODE, ProcessingMode.AT_LEAST_ONCE);
@@ -319,6 +322,7 @@ public class HiveMockTest extends HiveTestService
     expressionsPartitions.add("getDate()");
     short permission = 511;
     fsRolling.setFilePermission(permission);
+    fsRolling.setAlwaysWriteToTmp(false);
     fsRolling.setMaxLength(128);
     fsRolling.setExpressionsForHiveColumns(expressions);
     fsRolling.setExpressionsForHivePartitionColumns(expressionsPartitions);
@@ -408,6 +412,7 @@ public class HiveMockTest extends HiveTestService
     fsRolling.setFilePath(testMeta.getDir());
     short permission = 511;
     fsRolling.setFilePermission(permission);
+    fsRolling.setAlwaysWriteToTmp(false);
     fsRolling.setMaxLength(128);
     AttributeMap.DefaultAttributeMap attributeMap = new AttributeMap.DefaultAttributeMap();
     attributeMap.put(OperatorContext.PROCESSING_MODE, ProcessingMode.AT_LEAST_ONCE);
@@ -489,6 +494,7 @@ public class HiveMockTest extends HiveTestService
     fsRolling.setFilePath(testMeta.getDir());
     short persmission = 511;
     fsRolling.setFilePermission(persmission);
+    fsRolling.setAlwaysWriteToTmp(false);
     fsRolling.setMaxLength(128);
     AttributeMap.DefaultAttributeMap attributeMap = new AttributeMap.DefaultAttributeMap();
     attributeMap.put(OperatorContext.PROCESSING_MODE, ProcessingMode.AT_LEAST_ONCE);
