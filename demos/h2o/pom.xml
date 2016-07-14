@@ -19,12 +19,11 @@
 
   <dependencies>
     <dependency>
-      <groupId>h20</groupId>
-      <artifactId>h20.model</artifactId>
-      <version>1.0</version>
-     <scope>system</scope>
-     <systemPath>${project.basedir}/src/main/resources/h2o-genmodel.jar</systemPath>
-    </dependency>
+		<groupId>ai.h2o</groupId>
+		<artifactId>h2o-genmodel</artifactId>
+		<version>3.8.3.3</version>
+	</dependency>
+
     <dependency>
       <groupId>org.apache.apex</groupId>
       <artifactId>malhar-library</artifactId>
