@@ -190,7 +190,7 @@ public interface ReaderContext<STREAM extends InputStream & PositionedReadable>
           if (bytesRead == -1) {
             break;
           }
-          strBuffer = new String(buffer);
+          strBuffer = new String(buffer,0, bytesRead);
         }
 
         while (posInStr < strBuffer.length()) {
@@ -219,6 +219,10 @@ public interface ReaderContext<STREAM extends InputStream & PositionedReadable>
           }
           usedBytes += emptyBuilder.toByteArray().length;
         } else {
+          //end of stream reached
+          if (bytesRead < bufferSize) {
+            break;
+          }
           //read more bytes from the input stream
           posInStr = 0;
         }
