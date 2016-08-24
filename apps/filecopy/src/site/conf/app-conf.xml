@@ -26,6 +26,10 @@
     <value>hdfs://localhost:54310/user/dtadmin/input</value>
   </property>
   <property>
+    <name>dt.operator.HDFSInputModule.prop.blocksThreshold</name>
+    <value>1</value>
+  </property>
+  <property>
     <name>dt.operator.HDFSFileCopyModule.prop.outputDirectoryPath</name>
     <value>hdfs://localhost:54310/user/dtadmin/output</value>
   </property>
