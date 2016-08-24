@@ -362,6 +362,7 @@ public abstract class AbstractBlockReader<R, B extends BlockMetadata, STREAM ext
     List<Stats.OperatorStats> lastWindowedStats = stats.getLastWindowedStats();
     if (lastWindowedStats != null && lastWindowedStats.size() > 0) {
       Stats.OperatorStats lastStats = lastWindowedStats.get(lastWindowedStats.size() - 1);
+      LOG.debug("lastStats = {}", lastStats);
       if (lastStats.inputPorts.size() > 0) {
         backlogPerOperator.put(stats.getOperatorId(), lastStats.inputPorts.get(0).queueSize);
       }

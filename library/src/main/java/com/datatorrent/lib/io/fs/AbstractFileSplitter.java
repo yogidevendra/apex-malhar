@@ -141,7 +141,9 @@ public abstract class AbstractFileSplitter extends BaseOperator
   {
     while (blockMetadataIterator.hasNext()) {
       if (blockCount++ < blocksThreshold) {
-        this.blocksMetadataOutput.emit(blockMetadataIterator.next());
+        BlockMetadata.FileBlockMetadata fileBlockMetadata = blockMetadataIterator.next();
+        LOG.debug("emit fileBlockMetadata = {}", fileBlockMetadata);
+        this.blocksMetadataOutput.emit(fileBlockMetadata);
       } else {
         return false;
       }
