@@ -26,18 +26,6 @@
     <value>hdfs://localhost:54310/user/dtadmin/input</value>
   </property>
   <property>
-    <name>dt.operator.HDFSInputModule.prop.blockSize</name>
-    <value>128000000</value>
-  </property>
-  <property>
-    <name>dt.operator.HDFSInputModule.prop.scanIntervalMillis</name>
-    <value>10000</value>
-  </property>
-  <property>
-    <name>dt.operator.HDFSInputModule.prop.dedup</name>
-    <value>true</value>
-  </property>
-  <property>
     <name>dt.operator.HDFSFileCopyModule.prop.outputDirectoryPath</name>
     <value>hdfs://localhost:54310/user/dtadmin/output</value>
   </property>
