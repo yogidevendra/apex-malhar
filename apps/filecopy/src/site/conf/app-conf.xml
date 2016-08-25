@@ -30,6 +30,10 @@
     <value>1</value>
   </property>
   <property>
+    <name>dt.operator.HDFSInputModule.prop.readersCount</name>
+    <value>4</value>
+  </property>
+  <property>
     <name>dt.operator.HDFSFileCopyModule.prop.outputDirectoryPath</name>
     <value>hdfs://localhost:54310/user/dtadmin/output</value>
   </property>
