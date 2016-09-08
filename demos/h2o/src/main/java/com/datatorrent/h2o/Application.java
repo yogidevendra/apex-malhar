@@ -28,12 +28,13 @@ import com.datatorrent.lib.appdata.snapshot.AppDataSnapshotServerMap;
 import com.datatorrent.lib.io.PubSubWebSocketAppDataQuery;
 import com.datatorrent.lib.io.PubSubWebSocketAppDataResult;
 
-@ApplicationAnnotation(name = "PredictiveMaintainceForWindTurbines")
+@ApplicationAnnotation(name = "H2oDemo")
 public class Application implements StreamingApplication
 {
   @Override
   public void populateDAG(DAG dag, Configuration configuration)
   {
+    
     InputFileReader input = dag.addOperator("Input", new InputFileReader());
     Enricher enricher = dag.addOperator("Enricher", new Enricher());
     H2OScorer scorer = dag.addOperator("H2OScorer", new H2OScorer());

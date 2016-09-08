@@ -15,84 +15,43 @@
  */
 package com.datatorrent.h2o;
 
-import java.util.List;
-import java.util.Map;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-
-import hex.genmodel.GenModel;
-import hex.genmodel.easy.EasyPredictModelWrapper;
-import hex.genmodel.easy.RowData;
+import org.apache.commons.collections.keyvalue.MultiKey;
 
 import com.datatorrent.api.Context;
 import com.datatorrent.api.DefaultInputPort;
 import com.datatorrent.api.DefaultOutputPort;
-
 import com.datatorrent.common.util.BaseOperator;
 import com.datatorrent.netlet.util.DTThrowable;
+
+import hex.genmodel.GenModel;
+import hex.genmodel.easy.EasyPredictModelWrapper;
+import hex.genmodel.easy.RowData;
+import hex.genmodel.easy.exception.PredictException;
+import hex.genmodel.easy.prediction.AbstractPrediction;
+import hex.genmodel.easy.prediction.BinomialModelPrediction;
 
 public class H2OScorer extends BaseOperator {
 	private static String modelClassName = "glm_f25f6cc8_3665_49dc_82c1_eaf0be1dd391";
 	private transient EasyPredictModelWrapper model;
 
-	public final transient DefaultOutputPort<List<Map<String, Object>>> output = new DefaultOutputPort<>();
+	public final transient DefaultOutputPort<MultiKey> output = new DefaultOutputPort<>();
 	public final transient DefaultInputPort<String> input = new DefaultInputPort<String>() {
 		@Override
 		public void process(String s) {
-
-			RowData row = new RowData();
-			row.put("Year", "1987");
-			row.put("Month", "10");
-			row.put("DayofMonth", "14");
-			row.put("DayOfWeek", "3");
-			row.put("CRSDepTime", "730");
-			row.put("UniqueCarrier", "PS");
-			row.put("Origin", "SAN");
-			row.put("Dest", "SFO");
-
-			String[] splits = s.split(",");
-			double[] data = new double[splits.length - 17];
-			for (int i = 17; i < splits.length; i++) {
-				data[i - 17] = Double.parseDouble(splits[i]);
-			}
-			double[] pred = new double[1];
-			model.score0(data, pred);
-			double absPred = Math.abs(pred[0]);
-			if (absPred <= 50) {
-				cyclesCount[0]++;
-			} else if (absPred <= 100) {
-				cyclesCount[1]++;
-			} else if (absPred < 150) {
-				cyclesCount[2]++;
-			} else {
-				cyclesCount[3]++;
-			}
+		  
+			RowData row = getRowData(s);
+			AbstractPrediction prediction;
+      try {
+        prediction = model.predict(row);
+        System.out.println("prediction ="+((BinomialModelPrediction)prediction).label);
+        output.emit(new MultiKey(row, prediction));
+      } catch (PredictException e) {
+        e.printStackTrace();
+      }
+			
+			
 		}
 	};
-
-	@Override
-	public void endWindow() {
-		super.endWindow();
-		List<Map<String, Object>> results = Lists.newArrayList();
-		Map<String, Object> resultMap = Maps.newHashMap();
-		resultMap.put("Remaining Cycles", "[0-50] cycles");
-		resultMap.put("count", cyclesCount[0]);
-		results.add(resultMap);
-		resultMap = Maps.newHashMap();
-		resultMap.put("Remaining Cycles", "(50-100] cycles");
-		resultMap.put("count", cyclesCount[1]);
-		results.add(resultMap);
-		resultMap = Maps.newHashMap();
-		resultMap.put("Remaining Cycles", "(100-150] cycles");
-		resultMap.put("count", cyclesCount[2]);
-		results.add(resultMap);
-		resultMap = Maps.newHashMap();
-		resultMap.put("Remaining Cycles", "(150- ] cycles");
-		resultMap.put("count", cyclesCount[3]);
-		results.add(resultMap);
-		output.emit(results);
-	}
 
 	@Override
 	public void setup(Context.OperatorContext context) {
@@ -103,5 +62,26 @@ public class H2OScorer extends BaseOperator {
 		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
 			DTThrowable.rethrow(e);
 		}
+	}
+	
+	public static void main(String[] args)
+  {
+	  H2OScorer scorer = new H2OScorer();
+	  scorer.setup(null);
+	  scorer.input.process(null);
+  }
+	
+	public RowData getRowData(String s){
+	  RowData row = new RowData();
+    row.put("Year", "1987");
+    row.put("Month", "10");
+    row.put("DayofMonth", "14");
+    row.put("DayOfWeek", "3");
+    row.put("CRSDepTime", "730");
+    row.put("UniqueCarrier", "PS");
+    row.put("Origin", "SAN");
+    row.put("Dest", "SFO");
+    
+    return row;
 	}
 }
