@@ -1,0 +1,22 @@
+<configuration>
+  <property>
+    <name>dt.operator.HDFSInputModule.prop.files</name>
+    <value>hdfs://node35.morado.com/user/dttbc/DATASETS/ing-source-data/10gb.file</value>
+  </property>
+  <property>
+    <name>dt.operator.HDFSFileCopyModule.prop.outputDirectoryPath</name>
+    <value>hdfs://node18.morado.com/user/appuser/output</value>
+  </property>
+  <property>
+    <name>dt.operator.HDFSInputModule.prop.blocksThreshold</name>
+    <value>4</value>
+  </property>
+  <property>
+    <name>dt.operator.HDFSInputModule.prop.readersCount</name>
+    <value>4</value>
+  </property>
+  <property>
+    <name>dt.operator.HDFSInputModule.prop.dedup</name>
+    <value>true</value>
+  </property>
+</configuration>

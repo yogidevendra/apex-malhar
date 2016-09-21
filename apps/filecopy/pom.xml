@@ -26,8 +26,10 @@
     <groupId>org.apache.apex</groupId>
     <version>3.6.0-SNAPSHOT</version>
   </parent>
-
-  <artifactId>filecopy</artifactId>
+  
+  <groupId>com.datatorrent</groupId>
+  <version>0.8</version>
+  <artifactId>hdfs-sync-app</artifactId>
   <packaging>jar</packaging>
 
   <properties>
@@ -36,8 +38,14 @@
     <semver.plugin.skip>true</semver.plugin.skip>
   </properties>
 
-  <name>Apache Apex Malhar File copy Application</name>
-
+  <name>HDFS Sync App</name>
+  <description>
+    Ingest and backup Hadoop HDFS data from one cluster to another in a fault tolerant way for use cases such as disaster recovery. 
+    This application transfers files from the configured source path to the destination path. 
+    The source code is available at: https://github.com/apache/apex-malhar/tree/master/apps/filecopy. 
+    Send feedback or feature requests to feedback@datatorrent.com
+  </description>
+  
   <build>
     <plugins>
       <plugin>
