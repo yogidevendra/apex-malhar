@@ -33,7 +33,7 @@ import com.datatorrent.lib.io.fs.HDFSFileCopyModule;
  *
  * @since 3.4.0
  */
-@ApplicationAnnotation(name = "HDFSFileCopyApp")
+@ApplicationAnnotation(name = "HDFS-Sync-App")
 public class HDFSFileCopyApp implements StreamingApplication
 {
   @Override
