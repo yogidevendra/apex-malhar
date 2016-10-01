@@ -283,7 +283,7 @@ public class FSInputModule implements Module
     @Override
     public int getPartition(BlockMetadata.FileBlockMetadata fileBlockMetadata)
     {
-      return fileBlockMetadata.hashCode();
+      return fileBlockMetadata.getFilePath().hashCode();
     }
   }
 }
