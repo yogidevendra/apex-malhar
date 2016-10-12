@@ -30,10 +30,11 @@ import org.apache.hadoop.conf.Configuration;
 import com.datatorrent.api.Context;
 import com.datatorrent.api.DAG;
 import com.datatorrent.api.Module;
-import com.datatorrent.common.partitioner.StatelessPartitioner;
+//import com.datatorrent.common.partitioner.StatelessPartitioner;
 import com.datatorrent.lib.codec.KryoSerializableStreamCodec;
 import com.datatorrent.lib.io.block.BlockMetadata;
-import com.datatorrent.lib.io.block.FSSliceReader;
+//import com.datatorrent.lib.io.block.FSSliceReader;
+import com.datatorrent.lib.io.fs.FSInputModule;
 import com.datatorrent.lib.io.fs.FileSplitterInput;
 
 /**
@@ -71,11 +72,15 @@ public class FSRecordReaderModule implements Module
   @Min(1)
   private long scanIntervalMillis = 5000;
   private boolean recursive = true;
+  private long blockSize;
   private boolean sequentialFileRead = false;
-  @Min(1)
-  private int readersCount = 1;
+  @Deprecated
+  private int readersCount = 16;
   @Min(1)
   protected int blocksThreshold = 1;
+  protected int minReaders;
+  protected int maxReaders;
+  protected long repartitionCheckInterval;
 
   public final transient ProxyOutputPort<byte[]> records = new ProxyOutputPort<byte[]>();
 
@@ -123,7 +128,11 @@ public class FSRecordReaderModule implements Module
 
     if (sequentialFileRead) {
       dag.setInputPortAttribute(recordReader.blocksMetadataInput, Context.PortContext.STREAM_CODEC,
-          new SequentialFileBlockMetadataCodec());
+          new FSInputModule.SequentialFileBlockMetadataCodec());
+    }
+
+    if (blockSize != 0) {
+      fileSplitter.setBlockSize(blockSize);
     }
 
     FileSplitterInput.TimeBasedDirectoryScanner fileScanner = fileSplitter.getScanner();
@@ -137,9 +146,31 @@ public class FSRecordReaderModule implements Module
     }
 
     recordReader.setBasePath(files);
-    if (readersCount != 0) {
-      dag.setAttribute(recordReader, Context.OperatorContext.PARTITIONER,
-          new StatelessPartitioner<FSSliceReader>(readersCount));
+
+//    if (readersCount != 0) {
+//      dag.setAttribute(recordReader, Context.OperatorContext.PARTITIONER,
+//          new StatelessPartitioner<FSSliceReader>(readersCount));
+//    }
+
+
+    if (readersCount != 0 && minReaders == 0) {
+      minReaders = readersCount;
+    }
+
+    if (readersCount != 0 && maxReaders == 0) {
+      maxReaders = readersCount;
+    }
+
+    if (minReaders != 0) {
+      recordReader.setMinReaders(minReaders);
+    }
+
+    if (maxReaders != 0) {
+      recordReader.setMaxReaders(maxReaders);
+    }
+
+    if (repartitionCheckInterval != 0) {
+      recordReader.setIntervalMillis(repartitionCheckInterval);
     }
     fileSplitter.setBlocksThreshold(blocksThreshold);
     records.set(recordReader.records);
@@ -232,6 +263,26 @@ public class FSRecordReaderModule implements Module
   }
 
   /**
+   * Get block size used to read input blocks of file
+   *
+   * @return blockSize
+   */
+  public long getBlockSize()
+  {
+    return blockSize;
+  }
+
+  /**
+   * Sets block size used to read input blocks of file
+   *
+   * @param blockSize
+   */
+  public void setBlockSize(long blockSize)
+  {
+    this.blockSize = blockSize;
+  }
+
+  /**
    * Gets readers count
    *
    * @return readersCount
@@ -295,6 +346,64 @@ public class FSRecordReaderModule implements Module
   {
     return blocksThreshold;
   }
+
+  /**
+   * Gets minimum number of block readers for dynamic partitioning.
+   * @return minimum instances of block reader.
+   */
+  public int getMinReaders()
+  {
+    return minReaders;
+  }
+
+  /**
+   * Sets minimum number of block readers for dynamic partitioning.
+   * @param minReaders
+   *          minimum number of readers.
+   */
+  public void setMinReaders(int minReaders)
+  {
+    this.minReaders = minReaders;
+  }
+
+  /**
+   * Gets maximum number of block readers for dynamic partitioning.
+   * @return maximum instances of block reader.
+   */
+  public int getMaxReaders()
+  {
+    return maxReaders;
+  }
+
+  /**
+   * Sets maximum number of block readers for dynamic partitioning.
+   * @param maxReaders
+   *          maximum number of readers.
+   */
+  public void setMaxReaders(int maxReaders)
+  {
+    this.maxReaders = maxReaders;
+  }
+
+  /**
+   * Gets Interval for re-evaluating dynamic partitioning
+   * @return interval for re-evaluating dynamic partitioning
+   */
+  public long getRepartitionCheckInterval()
+  {
+    return repartitionCheckInterval;
+  }
+
+  /**
+   * Sets Interval for re-evaluating dynamic partitioning
+   * @param repartitionCheckInterval
+   *          interval for re-evaluating dynamic partitioning
+   */
+  public void setRepartitionCheckInterval(long repartitionCheckInterval)
+  {
+    this.repartitionCheckInterval = repartitionCheckInterval;
+  }
+
 
   /**
    * Criteria for record split

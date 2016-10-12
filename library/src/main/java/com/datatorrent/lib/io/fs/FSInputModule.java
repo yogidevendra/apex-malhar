@@ -32,20 +32,23 @@ import com.datatorrent.lib.io.block.FSSliceReader;
 import com.datatorrent.netlet.util.Slice;
 
 /**
- * FSInputModule is an abstract class used to read files from file systems like HDFS, NFS, S3, etc. <br/>
+ * FSInputModule is an abstract class used to read files from file systems like
+ * HDFS, NFS, S3, etc. <br/>
  * FSInputModule emits FileMetadata, BlockMetadata, BlockBytes. <br/>
- * The module reads data in parallel, following parameters can be configured<br/>
+ * The module reads data in parallel, following parameters can be configured
+ * <br/>
  * 1. files: list of file(s)/directories to read<br/>
  * 2. filePatternRegularExp: Files names matching given regex will be read<br/>
- * 3. scanIntervalMillis: interval between two scans to discover new files in input directory<br/>
+ * 3. scanIntervalMillis: interval between two scans to discover new files in
+ * input directory<br/>
  * 4. recursive: if scan recursively input directories<br/>
  * 5. blockSize: block size used to read input blocks of file<br/>
  * 6. sequencialFileRead: If emit file blocks in sequence?<br/>
  * 7. readersCount: count of readers to read input file<br/>
- * 8. blocksThreshold: number of blocks emitted per window
- * 9. minReaders: Minimum number of block readers for dynamic partitioning
- * 10. maxReaders: Maximum number of block readers for dynamic partitioning
- * 11. repartitionCheckInterval: Interval for re-evaluating dynamic partitioning
+ * 8. blocksThreshold: number of blocks emitted per window 9. minReaders:
+ * Minimum number of block readers for dynamic partitioning 10. maxReaders:
+ * Maximum number of block readers for dynamic partitioning 11.
+ * repartitionCheckInterval: Interval for re-evaluating dynamic partitioning
  *
  * @since 3.5.0
  */
@@ -61,7 +64,7 @@ public class FSInputModule implements Module
   private boolean recursive = true;
   private long blockSize;
   private boolean sequencialFileRead = false;
-  @Deprecated 
+  @Deprecated
   private int readersCount;
   @Min(1)
   protected int blocksThreshold;
@@ -114,23 +117,23 @@ public class FSInputModule implements Module
     }
 
     blockReader.setBasePath(files);
-    
+
     if (readersCount != 0 && minReaders == 0) {
       minReaders = readersCount;
     }
-    
+
     if (readersCount != 0 && maxReaders == 0) {
       maxReaders = readersCount;
     }
-    
+
     if (minReaders != 0) {
       blockReader.setMinReaders(minReaders);
     }
-    
+
     if (maxReaders != 0) {
       blockReader.setMaxReaders(maxReaders);
     }
-    
+
     if (repartitionCheckInterval != 0) {
       blockReader.setIntervalMillis(repartitionCheckInterval);
     }
@@ -138,8 +141,9 @@ public class FSInputModule implements Module
   }
 
   /**
-   * A comma separated list of directories to scan. If the path is not fully qualified the default file system is used.
-   * A fully qualified path can be provided to scan directories in other filesystems.
+   * A comma separated list of directories to scan. If the path is not fully
+   * qualified the default file system is used. A fully qualified path can be
+   * provided to scan directories in other filesystems.
    *
    * @param files
    *          files
@@ -181,7 +185,8 @@ public class FSInputModule implements Module
   }
 
   /**
-   * Gets scan interval in milliseconds, interval between two scans to discover new files in input directory
+   * Gets scan interval in milliseconds, interval between two scans to discover
+   * new files in input directory
    *
    * @return scanInterval milliseconds
    */
@@ -191,7 +196,8 @@ public class FSInputModule implements Module
   }
 
   /**
-   * Sets scan interval in milliseconds, interval between two scans to discover new files in input directory
+   * Sets scan interval in milliseconds, interval between two scans to discover
+   * new files in input directory
    *
    * @param scanIntervalMillis
    */
@@ -245,7 +251,7 @@ public class FSInputModule implements Module
    * @return readersCount
    * @Deprecated Use getMinReaders(), getMaxReaders() instead
    */
-  @Deprecated 
+  @Deprecated
   public int getReadersCount()
   {
     return readersCount;
@@ -256,7 +262,7 @@ public class FSInputModule implements Module
    * @param readersCount
    * @Deprecated Use setMinReaders(), setMaxReaders() instead
    */
-  @Deprecated 
+  @Deprecated
   public void setReadersCount(int readersCount)
   {
     this.readersCount = readersCount;
@@ -264,7 +270,6 @@ public class FSInputModule implements Module
 
   /**
    * Gets is sequencial file read
-   *
    * @return sequencialFileRead
    */
   public boolean isSequencialFileRead()
@@ -274,7 +279,6 @@ public class FSInputModule implements Module
 
   /**
    * Sets is sequencial file read
-   *
    * @param sequencialFileRead
    */
   public void setSequencialFileRead(boolean sequencialFileRead)
@@ -284,8 +288,8 @@ public class FSInputModule implements Module
 
   /**
    * Sets number of blocks to be emitted per window.<br/>
-   * A lot of blocks emitted per window can overwhelm the downstream operators. Set this value considering blockSize and
-   * readersCount.
+   * A lot of blocks emitted per window can overwhelm the downstream operators.
+   * Set this value considering blockSize and readersCount.
    * @param threshold
    */
   public void setBlocksThreshold(int threshold)
@@ -295,15 +299,15 @@ public class FSInputModule implements Module
 
   /**
    * Gets number of blocks to be emitted per window.<br/>
-   * A lot of blocks emitted per window can overwhelm the downstream operators. Set this value considering blockSize and
-   * readersCount.
+   * A lot of blocks emitted per window can overwhelm the downstream operators.
+   * Set this value considering blockSize and readersCount.
    * @return
    */
   public int getBlocksThreshold()
   {
     return blocksThreshold;
   }
-  
+
   /**
    * Gets minimum number of block readers for dynamic partitioning.
    * @return minimum instances of block reader.
@@ -312,16 +316,17 @@ public class FSInputModule implements Module
   {
     return minReaders;
   }
-  
+
   /**
    * Sets minimum number of block readers for dynamic partitioning.
-   * @param minReaders minimum number of readers.
+   * @param minReaders
+   *          minimum number of readers.
    */
   public void setMinReaders(int minReaders)
   {
     this.minReaders = minReaders;
   }
-  
+
   /**
    * Gets maximum number of block readers for dynamic partitioning.
    * @return maximum instances of block reader.
@@ -330,16 +335,17 @@ public class FSInputModule implements Module
   {
     return maxReaders;
   }
-  
+
   /**
    * Sets maximum number of block readers for dynamic partitioning.
-   * @param maxReaders maximum number of readers.
+   * @param maxReaders
+   *          maximum number of readers.
    */
   public void setMaxReaders(int maxReaders)
   {
     this.maxReaders = maxReaders;
   }
-  
+
   /**
    * Gets Interval for re-evaluating dynamic partitioning
    * @return interval for re-evaluating dynamic partitioning
@@ -348,16 +354,17 @@ public class FSInputModule implements Module
   {
     return repartitionCheckInterval;
   }
-  
+
   /**
    * Sets Interval for re-evaluating dynamic partitioning
-   * @param repartitionCheckInterval interval for re-evaluating dynamic partitioning
+   * @param repartitionCheckInterval
+   *          interval for re-evaluating dynamic partitioning
    */
   public void setRepartitionCheckInterval(long repartitionCheckInterval)
   {
     this.repartitionCheckInterval = repartitionCheckInterval;
   }
-  
+
   public static class SequentialFileBlockMetadataCodec
       extends KryoSerializableStreamCodec<BlockMetadata.FileBlockMetadata>
   {
