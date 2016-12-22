@@ -68,6 +68,12 @@ public class GenericFileOutputOperator<INPUT> extends AbstractSingleFileOutputOp
   private long byteCount;
 
   /**
+   * Total number of tuples received.
+   */
+  @AutoMetric
+  private long outputTupleCount;
+
+  /**
    * No. of tuples present in current part for file
    */
   private long currentPartTupleCount;
@@ -138,6 +144,7 @@ public class GenericFileOutputOperator<INPUT> extends AbstractSingleFileOutputOp
       bytesOutStream.write(converter.convert(tuple));
       bytesOutStream.write(tupleSeparatorBytes);
       byteCount += bytesOutStream.size();
+      outputTupleCount++;
       return bytesOutStream.toByteArray();
     } catch (IOException e) {
       throw new RuntimeException(e);

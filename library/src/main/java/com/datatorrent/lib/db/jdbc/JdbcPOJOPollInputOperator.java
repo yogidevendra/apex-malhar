@@ -42,6 +42,7 @@ import org.apache.hadoop.classification.InterfaceStability.Evolving;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
+import com.datatorrent.api.AutoMetric;
 import com.datatorrent.api.Context;
 import com.datatorrent.api.Context.OperatorContext;
 import com.datatorrent.api.DefaultOutputPort;
@@ -68,6 +69,10 @@ public class JdbcPOJOPollInputOperator extends AbstractJdbcPollInputOperator<Obj
   protected transient Class<?> pojoClass;
   @NotNull
   private List<FieldInfo> fieldInfos = new ArrayList<>();
+
+  @AutoMetric
+  private long inputTupleCount;
+
 
   @OutputPortFieldAnnotation(schemaRequired = true)
   public final transient DefaultOutputPort<Object> outputPort = new DefaultOutputPort<Object>()
@@ -299,6 +304,7 @@ public class JdbcPOJOPollInputOperator extends AbstractJdbcPollInputOperator<Obj
   protected void emitTuple(Object obj)
   {
     outputPort.emit(obj);
+    inputTupleCount++;
   }
 
   /**
