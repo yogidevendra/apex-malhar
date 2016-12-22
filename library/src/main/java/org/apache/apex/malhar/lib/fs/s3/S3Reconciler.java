@@ -51,6 +51,10 @@ public class S3Reconciler extends AbstractReconciler<S3Reconciler.OutputMetaData
   private String secretKey;
   @NotNull
   private String bucketName;
+  /**
+   * S3 End point
+   */
+  private String endPoint;
   @NotNull
   private String directoryName;
   protected transient AmazonS3 s3client;
@@ -128,6 +132,7 @@ public class S3Reconciler extends AbstractReconciler<S3Reconciler.OutputMetaData
     }
   }
 
+  
   public String getAccessKey()
   {
     return accessKey;
@@ -161,6 +166,24 @@ public class S3Reconciler extends AbstractReconciler<S3Reconciler.OutputMetaData
   public String getDirectoryName()
   {
     return directoryName;
+  }
+
+  /**
+   * Return the S3 End point
+   * @return S3 End point
+   */
+  public String getEndPoint()
+  {
+    return endPoint;
+  }
+
+  /**
+   * Set the S3 End point
+   * @param endPoint S3 end point
+   */
+  public void setEndPoint(String endPoint)
+  {
+    this.endPoint = endPoint;
   }
 
   public void setDirectoryName(String directoryName)
