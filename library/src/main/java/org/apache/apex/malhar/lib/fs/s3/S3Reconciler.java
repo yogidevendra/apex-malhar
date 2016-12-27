@@ -77,6 +77,7 @@ public class S3Reconciler extends AbstractReconciler<S3Reconciler.OutputMetaData
   @Override
   protected void processTuple(S3Reconciler.OutputMetaData outputMetaData)
   {
+    logger.debug("enque : {}", outputMetaData);
     enqueueForProcessing(outputMetaData);
   }
 
@@ -88,7 +89,9 @@ public class S3Reconciler extends AbstractReconciler<S3Reconciler.OutputMetaData
       ObjectMetadata omd = new ObjectMetadata();
       omd.setContentLength(outputMetaData.getSize());
       String keyName = directoryName + Path.SEPARATOR + outputMetaData.getFileName();
+      logger.debug("fsinput : {}, omd: {}", fsinput, omd);
       s3client.putObject(new PutObjectRequest(bucketName, keyName, fsinput, omd));
+      logger.debug("Uploading : {}", keyName);
     } catch (IOException e) {
       logger.error("Unable to create Stream: {}", e.getMessage());
     }
@@ -132,7 +135,7 @@ public class S3Reconciler extends AbstractReconciler<S3Reconciler.OutputMetaData
     }
   }
 
-  
+
   public String getAccessKey()
   {
     return accessKey;

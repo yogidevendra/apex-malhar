@@ -118,7 +118,6 @@ public class S3StringOutputModuleTest
       Configuration conf = new Configuration(false);
       conf.set("dt.operator.lineInput.prop.directory", testMeta.baseDirectory);
       conf.set("dt.operator.s3output.prop.accessKey", accessKey);
-      conf.set("dt.operator.s3output.prop.accessKey", accessKey);
       conf.set("dt.operator.s3output.prop.secretAccessKey", secretKey);
       conf.set("dt.operator.s3output.prop.bucketName", bucketKey);
       conf.set("dt.operator.s3output.prop.outputDirectoryPath", "");
@@ -130,25 +129,25 @@ public class S3StringOutputModuleTest
 
       lc.setHeartbeatMonitoringEnabled(false);
 
-//      ((StramLocalCluster)lc).setExitCondition(new Callable<Boolean>()
-//      {
-//        @Override
-//        public Boolean call() throws Exception
-//        {
-//          if (selectedfile.exists() && rejectedfile.exists()) {
-//            return true;
-//          }
-//          return false;
-//        }
-//      });
-//
-//      lc.run(40000);
+      //      ((StramLocalCluster)lc).setExitCondition(new Callable<Boolean>()
+      //      {
+      //        @Override
+      //        public Boolean call() throws Exception
+      //        {
+      //          if (selectedfile.exists() && rejectedfile.exists()) {
+      //            return true;
+      //          }
+      //          return false;
+      //        }
+      //      });
+      //
+      //      lc.run(40000);
 
       lc.runAsync();
-      Thread.sleep(15* 60 * 1000);
+      Thread.sleep(15 * 60 * 1000);
       lc.shutdown();
 
-      System.out.println(client.listObjects(bucketKey).getObjectSummaries());
+      LOG.debug("Bucket listing: {}",client.listObjects(bucketKey).getObjectSummaries());
 
     } catch (ConstraintViolationException e) {
       Assert.fail("constraint violations: " + e.getConstraintViolations());

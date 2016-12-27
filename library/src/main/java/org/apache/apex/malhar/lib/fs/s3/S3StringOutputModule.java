@@ -61,7 +61,7 @@ public class S3StringOutputModule implements Module
    */
   @NotNull
   private String outputDirectoryPath;
-  
+
   /**
    * Max number of idle windows for which no new data is added to current part
    * file. Part file will be finalized after these many idle windows after last
