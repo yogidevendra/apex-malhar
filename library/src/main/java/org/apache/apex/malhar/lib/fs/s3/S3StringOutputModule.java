@@ -67,13 +67,15 @@ public class S3StringOutputModule implements Module
    * file. Part file will be finalized after these many idle windows after last
    * new data.
    */
-  private long maxIdleWindows = 100;
+  private long maxIdleWindows = 30;
 
   /**
-   * The maximum length in bytes of a rolling file. The default value of this is Long.MAX_VALUE
+   * The maximum length in bytes of a rolling file. The default value of this is 1MB.
    */
   @Min(1)
-  protected Long maxLength = 1 * 1000 * 1000L;
+  protected Long maxLength = 128 * 1024 * 1024L;
+
+  protected static final String S3_INTERMEDIATE_DIR = "S3_INTERMEDIATE_DIR";
 
   @Override
   public void populateDAG(DAG dag, Configuration conf)
@@ -202,6 +204,7 @@ public class S3StringOutputModule implements Module
   }
 
   /**
+   * No. of idle window after which file should be rolled over
    * @return max number of idle windows for rollover
    */
   public long getMaxIdleWindows()
@@ -210,6 +213,7 @@ public class S3StringOutputModule implements Module
   }
 
   /**
+   * No. of idle window after which file should be rolled over
    * @param maxIdleWindows
    *          max number of idle windows for rollover
    */
@@ -218,11 +222,19 @@ public class S3StringOutputModule implements Module
     this.maxIdleWindows = maxIdleWindows;
   }
 
+  /**
+   * Get max length of file after which file should be rolled over
+   * @return max length of file
+   */
   public Long getMaxLength()
   {
     return maxLength;
   }
 
+  /**
+   * Set max length of file after which file should be rolled over
+   * @param maxLength max length of file
+   */
   public void setMaxLength(Long maxLength)
   {
     this.maxLength = maxLength;

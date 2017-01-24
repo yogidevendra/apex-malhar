@@ -43,29 +43,54 @@ import com.datatorrent.lib.io.fs.AbstractReconciler;
 
 public class S3Reconciler extends AbstractReconciler<S3Reconciler.OutputMetaData, S3Reconciler.OutputMetaData>
 {
-  private static final Logger logger = LoggerFactory.getLogger(S3Reconciler.class);
-  private static final String TMP_EXTENSION = ".tmp";
+  /**
+   * Access key id for Amazon S3
+   */
   @NotNull
   private String accessKey;
+  
+  /**
+   * Secret key for Amazon S3
+   */
   @NotNull
   private String secretKey;
+  
+  /**
+   * Bucket name for data upload 
+   */
   @NotNull
   private String bucketName;
+  
   /**
    * S3 End point
    */
   private String endPoint;
+  
+  /**
+   * Directory name under S3 bucket
+   */
   @NotNull
   private String directoryName;
+  
+  /**
+   * Client instance for connecting to Amazon S3
+   */
   protected transient AmazonS3 s3client;
+  
+  /**
+   * FileSystem instance for reading intermediate directory
+   */
   protected transient FileSystem fs;
+  
   protected transient String filePath;
 
+  private static final String TMP_EXTENSION = ".tmp";
+  
   @Override
   public void setup(Context.OperatorContext context)
   {
     s3client = new AmazonS3Client(new BasicAWSCredentials(accessKey, secretKey));
-    filePath = context.getValue(DAG.APPLICATION_PATH) + Path.SEPARATOR + S3CompactionOperator.recoveryPath;
+    filePath = context.getValue(DAG.APPLICATION_PATH) + Path.SEPARATOR + S3StringOutputModule.S3_INTERMEDIATE_DIR;
     try {
       fs = FileSystem.newInstance(new Path(filePath).toUri(), new Configuration());
     } catch (IOException e) {
@@ -74,6 +99,9 @@ public class S3Reconciler extends AbstractReconciler<S3Reconciler.OutputMetaData
     super.setup(context);
   }
 
+  /**
+   * Enques the tuple for processing after committed callback
+   */
   @Override
   protected void processTuple(S3Reconciler.OutputMetaData outputMetaData)
   {
@@ -81,6 +109,9 @@ public class S3Reconciler extends AbstractReconciler<S3Reconciler.OutputMetaData
     enqueueForProcessing(outputMetaData);
   }
 
+  /**
+   * Uploads the file on Amazon S3 using putObject API from S3 client
+   */
   @Override
   protected void processCommittedData(S3Reconciler.OutputMetaData outputMetaData)
   {
@@ -89,7 +120,6 @@ public class S3Reconciler extends AbstractReconciler<S3Reconciler.OutputMetaData
       ObjectMetadata omd = new ObjectMetadata();
       omd.setContentLength(outputMetaData.getSize());
       String keyName = directoryName + Path.SEPARATOR + outputMetaData.getFileName();
-      logger.debug("fsinput : {}, omd: {}", fsinput, omd);
       s3client.putObject(new PutObjectRequest(bucketName, keyName, fsinput, omd));
       logger.debug("Uploading : {}", keyName);
     } catch (IOException e) {
@@ -97,6 +127,9 @@ public class S3Reconciler extends AbstractReconciler<S3Reconciler.OutputMetaData
     }
   }
 
+  /**
+   * Clears intermediate/temporary files if any
+   */
   @Override
   public void endWindow()
   {
@@ -135,42 +168,78 @@ public class S3Reconciler extends AbstractReconciler<S3Reconciler.OutputMetaData
     }
   }
 
-
+  /**
+   * Get access key id
+   * @return Access key id for Amazon S3
+   */
   public String getAccessKey()
   {
     return accessKey;
   }
 
+  /**
+   * Set access key id
+   * @param accessKey Access key id for Amazon S3
+   */
   public void setAccessKey(String accessKey)
   {
     this.accessKey = accessKey;
   }
 
+  /**
+   * Get secret key
+   * @return Secret key for Amazon S3
+   */
   public String getSecretKey()
   {
     return secretKey;
   }
 
+  /**
+   * Set secret key
+   * @param secretKey Secret key for Amazon S3
+   */
   public void setSecretKey(String secretKey)
   {
     this.secretKey = secretKey;
   }
 
+  /**
+   * Get bucket name
+   * @return Bucket name for data upload
+   */
   public String getBucketName()
   {
     return bucketName;
   }
 
+  /**
+   * Set bucket name
+   * @param bucketName Bucket name for data upload
+   */
   public void setBucketName(String bucketName)
   {
     this.bucketName = bucketName;
   }
 
+  /**
+   * Get directory name 
+   * @return Directory name under S3 bucket
+   */
   public String getDirectoryName()
   {
     return directoryName;
   }
 
+  /**
+   * Set directory name 
+   * @param directoryName Directory name under S3 bucket
+   */
+  public void setDirectoryName(String directoryName)
+  {
+    this.directoryName = directoryName;
+  }
+  
   /**
    * Return the S3 End point
    * @return S3 End point
@@ -189,16 +258,18 @@ public class S3Reconciler extends AbstractReconciler<S3Reconciler.OutputMetaData
     this.endPoint = endPoint;
   }
 
-  public void setDirectoryName(String directoryName)
-  {
-    this.directoryName = directoryName;
-  }
-
+  /**
+   * Set Amazon S3 client
+   * @param s3client Client for Amazon S3 
+   */
   void setS3client(AmazonS3 s3client)
   {
     this.s3client = s3client;
   }
 
+  /**
+   * Metadata for file upload to S3
+   */
   public static class OutputMetaData
   {
     private String path;
@@ -247,4 +318,7 @@ public class S3Reconciler extends AbstractReconciler<S3Reconciler.OutputMetaData
       this.size = size;
     }
   }
+  
+  private static final Logger logger = LoggerFactory.getLogger(S3Reconciler.class);
+  
 }

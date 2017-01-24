@@ -1,3 +1,22 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.apache.apex.malhar.lib.fs.s3;
 
 import java.io.File;
@@ -35,8 +54,9 @@ import com.datatorrent.api.StreamingApplication;
 public class S3StringOutputModuleTest
 {
 
-  private String accessKey = "AKIAJ7SCQBIYJIS7HVVA";
-  private String secretKey = "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";
+  
+  private String accessKey = "******";
+  private String secretKey = "******";
   public String bucketKey = "org.apache.apex.s3.test-bucket";
   private AmazonS3 client;
 
@@ -120,7 +140,7 @@ public class S3StringOutputModuleTest
       conf.set("dt.operator.s3output.prop.accessKey", accessKey);
       conf.set("dt.operator.s3output.prop.secretAccessKey", secretKey);
       conf.set("dt.operator.s3output.prop.bucketName", bucketKey);
-      conf.set("dt.operator.s3output.prop.outputDirectoryPath", "");
+      conf.set("dt.operator.s3output.prop.outputDirectoryPath", "test");
       conf.set("dt.operator.s3output.prop.maxIdleWindows", "10");
       conf.set("dt.operator.s3output.prop.maxLength", "10000");
 
@@ -144,7 +164,7 @@ public class S3StringOutputModuleTest
       //      lc.run(40000);
 
       lc.runAsync();
-      Thread.sleep(15 * 60 * 1000);
+      Thread.sleep(2 * 60 * 1000);
       lc.shutdown();
 
       LOG.debug("Bucket listing: {}",client.listObjects(bucketKey).getObjectSummaries());

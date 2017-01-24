@@ -21,7 +21,6 @@ package org.apache.apex.malhar.lib.fs.s3;
 
 import java.io.IOException;
 import java.util.Queue;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.apex.malhar.lib.fs.GenericFileOutputOperator;
@@ -33,8 +32,14 @@ import com.datatorrent.api.DefaultOutputPort;
 
 public class S3CompactionOperator<INPUT> extends GenericFileOutputOperator<INPUT>
 {
-  protected static final String recoveryPath = "S3TmpFiles";
-  public transient DefaultOutputPort output = new DefaultOutputPort();
+  /**
+   * Output port for emitting metadata for finalized files.  
+   */
+  public transient DefaultOutputPort<S3Reconciler.OutputMetaData> output = new DefaultOutputPort<S3Reconciler.OutputMetaData>();
+  
+  /**
+   * Queue for holding finalized files for emitting on output port 
+   */
   private Queue<S3Reconciler.OutputMetaData> emitQueue = new LinkedBlockingQueue<S3Reconciler.OutputMetaData>();
 
   public S3CompactionOperator()
@@ -46,7 +51,7 @@ public class S3CompactionOperator<INPUT> extends GenericFileOutputOperator<INPUT
   @Override
   public void setup(Context.OperatorContext context)
   {
-    filePath = context.getValue(DAG.APPLICATION_PATH) + Path.SEPARATOR + recoveryPath;
+    filePath = context.getValue(DAG.APPLICATION_PATH) + Path.SEPARATOR + S3StringOutputModule.S3_INTERMEDIATE_DIR;
     super.setup(context);
   }
 
@@ -54,14 +59,11 @@ public class S3CompactionOperator<INPUT> extends GenericFileOutputOperator<INPUT
   protected void finalizeFile(String fileName) throws IOException
   {
 
-    //String partFile = getPartFileNamePri(fileName);
-    //int offset = endOffsets.get(partFile).intValue();
     super.finalizeFile(fileName);
-
-    //String tmpFileName = getFileNameToTmpName().get(partFile);
+    
+    //Add finalized files to the queue
     String srcPath = filePath + Path.SEPARATOR + fileName;
-    long offset = fs.getFileStatus(new Path(filePath)).getLen();
-
+    long offset = fs.getFileStatus(new Path(srcPath)).getLen();
     S3Reconciler.OutputMetaData metaData = new S3Reconciler.OutputMetaData(srcPath, fileName, offset);
     emitQueue.add(metaData);
   }
@@ -70,19 +72,9 @@ public class S3CompactionOperator<INPUT> extends GenericFileOutputOperator<INPUT
   public void beginWindow(long windowId)
   {
     super.beginWindow(windowId);
+    //Emit finalized files from the queue
     while (!emitQueue.isEmpty()) {
       output.emit(emitQueue.poll());
     }
-  }
-
-  protected void rotate(String fileName) throws IllegalArgumentException, IOException, ExecutionException
-  {
-    super.rotate(fileName);
-//    String partFile = getPartFileNamePri(fileName);
-//    String tmpFileName = getFileNameToTmpName().get(partFile);
-//    String srcPath = filePath + Path.SEPARATOR + tmpFileName;
-//    int offset = endOffsets.get(fileName).intValue();
-//    S3Reconciler.OutputMetaData metaData = new S3Reconciler.OutputMetaData(srcPath, partFile, offset);
-//    output.emit(metaData);
   }
 }
